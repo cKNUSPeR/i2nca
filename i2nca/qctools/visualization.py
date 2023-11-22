@@ -1,6 +1,6 @@
 
-from dependencies import *
-from utils import mask_bad_image, average_cont_spectra, average_processed_spectra
+from .dependencies import *
+from .utils import mask_bad_image, average_cont_spectra, average_processed_spectra
 
 # custom colormaps with white backgrounds (via out-of-lower-bound)
 my_vir = cm.get_cmap('viridis').copy()
