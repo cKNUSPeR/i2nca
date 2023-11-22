@@ -10,3 +10,4 @@ try to pip- gitinstall the package with
 
 'pip install i2nca@git+https://github.com/cKNUSPeR/i2nca.git'
 
+until now, add to the evn\Lib\site-packages\i2nca folder the qctools folder
