@@ -1,5 +1,5 @@
 
-from dependencies import *
+from .dependencies import *
 
 
 
