@@ -1,6 +1,6 @@
-from dependencies import *
-from visualization import *
-from utils import *
+from .dependencies import *
+from .visualization import *
+from .utils import *
 
 
 def report_agnostic_qc(I,  # m2.imzMLReader (passing by ref allows faster computation)
