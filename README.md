@@ -4,7 +4,7 @@ Interactive IMS quality Control and Assesment tools
 # Installation:
 After downloading the conda recipe and using it to create a new conda env with
 
-'conda create -f path\to\file\conda_recipe.yml'
+'conda env create -f path\to\file\conda_recipe.yml'
 
 try to pip- gitinstall the package with
 
