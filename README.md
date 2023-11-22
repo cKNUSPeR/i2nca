@@ -8,5 +8,5 @@ After downloading the conda recipe and using it to create a new conda env with
 
 try to pip- gitinstall the package with
 
-'pip install git+git://github.com/cKNUSPeR/i2nca@main'
+'pip install i2nca@git+https://github.com/cKNUSPeR/i2nca.git'
 
