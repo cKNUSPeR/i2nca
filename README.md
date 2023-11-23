@@ -1,5 +1,5 @@
 # i2nca
-Interactive IMS quality Control and Assesment tools
+ ms <ins>I</ins>maging <ins>IN</ins>teractive quality <ins>C</ins>ontrol and <ins>A</ins>ssesment tools
 
 # Installation:
 After downloading the conda recipe and using it to create a new conda env with
