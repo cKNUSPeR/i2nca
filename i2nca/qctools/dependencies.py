@@ -13,3 +13,6 @@ import pandas as pd
 import warnings
 from scipy.signal import argrelextrema
 import matplotlib.backends.backend_pdf
+
+# catch of FutueWarnings (looking at you, pandas  )
+warnings.simplefilter(action='ignore', category=FutureWarning)
