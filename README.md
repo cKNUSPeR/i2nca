@@ -1,5 +1,5 @@
 # i2nca
- ms <ins>I</ins>maging <ins>IN</ins>teractive quality <ins>C</ins>ontrol and <ins>A</ins>ssesment tools
+ ms <ins>I</ins>maging <ins>IN</ins>teractive quality <ins>C</ins>ontrol and <ins>A</ins>ssesment tool bundle
 
 # Installation:
 After downloading the conda recipe and using it to create a new conda env with
