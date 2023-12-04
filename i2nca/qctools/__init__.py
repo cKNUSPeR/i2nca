@@ -1,6 +1,6 @@
 """inca - INteractive quality Control and Assesment using m2aia Quality tools distro"""
 
-from qctools import *
+#from qctools import *
 
 __author__ = "Jannik Witte"
 
