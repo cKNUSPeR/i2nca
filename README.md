@@ -8,6 +8,10 @@ conda env create -f path\to\file\conda_recipe.yml
 
 That should do the trick.
 
+Update existing envs with the recipe via
+
+conda env update --name myenv --file path\to\file\conda_recipe.yml --prune
+
 
 earlier versions used the separated github install:
 
