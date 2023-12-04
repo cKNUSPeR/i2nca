@@ -6,6 +6,9 @@ After downloading the conda recipe and using it to create a new conda env with
 
 conda env create -f path\to\file\conda_recipe.yml
 
-try to pip- gitinstall the package with
+That should do the trick.
+
+
+earlier versions used the separated github install:
 
 pip install i2nca@git+https://github.com/cKNUSPeR/i2nca.git
