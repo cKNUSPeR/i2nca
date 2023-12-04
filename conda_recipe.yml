@@ -1,4 +1,4 @@
-name: quicktest
+name: QCenv
 channels:
   - conda-forge
   - defaults
