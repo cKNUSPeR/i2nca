@@ -457,6 +457,49 @@ def plot_calibrant_spectra(cal_spectra, calibrant_df, index, format_dict, dist, 
         plot_empty_peak(calibrant_df.loc[index, "mz"], calibrant_df.loc[index, "name"], pdf)
 
 
+def color_title(labels, colors, textprops={'size': 'large'}, ax=None, y=1.013,
+                precision=10 ** -2):
+    "Creates a centered title with multiple colors. Don't change axes limits afterwards."
+
+    if ax == None:
+        ax = plt.gca()
+
+    plt.gcf().canvas.draw()
+    transform = ax.transAxes  # use axes coords
+
+    # initial params
+    xT = 0  # where the text ends in x-axis coords
+    shift = 0  # where the text starts
+
+    # for text objects
+    text = dict()
+
+    while (np.abs(shift - (1 - xT)) > precision) and (shift <= xT):
+        x_pos = shift
+
+        for label, col in zip(labels, colors):
+
+            try:
+                text[label].remove()
+            except KeyError:
+                pass
+
+            text[label] = ax.text(x_pos, y, label,
+                                  transform=transform,
+                                  ha='left',
+                                  color=col,
+                                  **textprops)
+
+            x_pos = text[label].get_window_extent() \
+                .transformed(transform.inverted()).x1
+
+        xT = x_pos  # where all text ends
+
+        shift += precision / 2  # increase for next iteration
+
+        if x_pos > 1:  # guardrail
+            break
+
 def plot_calibrant_centroid_spectra(cal_spectra,
                                     calibrants_df, index,
                                     dist, pdf):
@@ -472,71 +515,89 @@ def plot_calibrant_centroid_spectra(cal_spectra,
     mapeak = calibrants_df.loc[index, "value_map"]
     wavg = calibrants_df.loc[index, "value_wavg"]
 
-    fig, axs = plt.subplots(2, 2, figsize=[10, 10])
+    fig = plt.figure(figsize=[10, 10])  # constrained_layout=True)
+    widths = [1, 1]
+    heights = [1, 6, 6]
+    spec5 = fig.add_gridspec(ncols=2, nrows=3, width_ratios=widths,
+                             height_ratios=heights)
+    # big box for text
+    axbig = fig.add_subplot(spec5[0, 0:2])
+    axbig.xaxis.set_major_locator(ticker.NullLocator())
+    axbig.yaxis.set_major_locator(ticker.NullLocator())
+
+    axbig.text(0.5, 0.5, f'centroid spectrum of {name})', ha="center", va="bottom", size="x-large")
+
+    axbig.text(0.025, 0.1, f"Theo. m/z: {mass}", ha="left", va="bottom", size="large", color="red")
+    axbig.text(0.5, 0.1, f"most abun. signal: {mapeak}", ha="center", va="bottom", size="large", color="green")
+    axbig.text(0.975, 0.1, f"weighted avg.: {wavg}", ha="right", va="bottom", size="large", color="purple")
 
     # plot of full data as centroid spectrum --------------------------------------------------------------
-    axs[0, 0].set_title(f'centroid spectrum of {name}\n({mass})')
-    axs[0, 0].set_xlabel('m/z')
-    axs[0, 0].set_ylabel('Intensity')
+    ax1 = fig.add_subplot(spec5[1, 0])
+    ax1.set_title(f'centroid spectrum of {name}\n({mass})')
+    ax1.set_xlabel('m/z')
+    ax1.set_ylabel('Intensity')
     # set axis limits and style
-    axs[0, 0].set_xlim(mass - dist, mass + dist)
-    axs[0, 0].ticklabel_format(useOffset=False, )
-    axs[0, 0].ticklabel_format(axis="y", style='sci', scilimits=(0, 0))
+    ax1.set_xlim(mass - dist, mass + dist)
+    ax1.ticklabel_format(useOffset=False, )
+    ax1.ticklabel_format(axis="y", style='sci', scilimits=(0, 0))
 
     # draw metrics and masses
-    draw_vertical_lines(mass, mapeak, wavg, axs[0, 0])
+    draw_vertical_lines(mass, mapeak, wavg, ax1)
 
     # plot centroid spectrum
-    axs[0, 0].vlines(cal_spectra[0], 0, cal_spectra[1], color='b', linewidth=0.8, zorder=-1)
-    axs[0, 0].scatter(cal_spectra[0], cal_spectra[1], s=4, color='b', marker=".", zorder=-1)
+    ax1.vlines(cal_spectra[0], 0, cal_spectra[1], color='b', linewidth=0.8, zorder=-1)
+    ax1.scatter(cal_spectra[0], cal_spectra[1], s=4, color='b', marker=".", zorder=-1)
     # adjust y limits
-    axs[0, 0].set_ylim(bottom=0)
+    ax1.set_ylim(bottom=0)
 
     # rasterisazion for better user exerience
-    axs[0, 0].set_rasterization_zorder(0)
+    ax1.set_rasterization_zorder(0)
 
     # plot full spectra with only data points--------------------------------------------------------------
-    axs[0, 1].set_title(f'spectrum of {name}\n({mass}), only data points')
-    axs[0, 1].set_xlabel('m/z')
-    axs[0, 1].set_ylabel('Intensity')
+    ax3 = fig.add_subplot(spec5[1, 1])
+    ax2.set_title(f'spectrum of {name}\n({mass}), only data points')
+    ax2.set_xlabel('m/z')
+    ax2.set_ylabel('Intensity')
     # set the axis range and styles
-    axs[0, 1].set_xlim(mass - dist, mass + dist)
-    axs[0, 1].ticklabel_format(useOffset=False, )
-    axs[0, 1].ticklabel_format(axis="y", style='sci', scilimits=(0, 0))
+    ax2.set_xlim(mass - dist, mass + dist)
+    ax2.ticklabel_format(useOffset=False, )
+    ax2.ticklabel_format(axis="y", style='sci', scilimits=(0, 0))
 
     # draw metrics and masses
-    draw_vertical_lines(mass, mapeak, wavg, axs[0, 1])
+    draw_vertical_lines(mass, mapeak, wavg, ax2)
 
     # scatter centroid spectrum
-    axs[0, 1].scatter(cal_spectra[0], cal_spectra[1], color='k', marker="x", zorder=-1)
+    ax2.scatter(cal_spectra[0], cal_spectra[1], color='k', marker="x", zorder=-1)
     # adjust y limits
-    axs[0, 1].set_ylim(bottom=0)
+    ax2.set_ylim(bottom=0)
 
     # rasterisazion for better user exerience
-    axs[0, 1].set_rasterization_zorder(0)
+    ax2.set_rasterization_zorder(0)
 
     # plot the zoom to minimal and maximal data points --------------------------------------------------------------
-    axs[1, 0].set_title(f'centroid spectrum of {name}\n({mass}), zoomed to values')
-    axs[1, 0].set_xlabel('m/z')
-    axs[1, 0].set_ylabel('Intensity')
+    ax3 = fig.add_subplot(spec5[2, 0])
+    ax3.set_title(f'centroid spectrum of {name}\n({mass}), zoomed to values')
+    ax3.set_xlabel('m/z')
+    ax3.set_ylabel('Intensity')
     # set the axis range and styles
-    axs[1, 0].set_xlim(min(cal_spectra[0]), max(cal_spectra[0]))
-    axs[1, 0].ticklabel_format(useOffset=False, )
-    axs[1, 0].ticklabel_format(axis="y", style='sci', scilimits=(0, 0))
+    ax3.set_xlim(min(cal_spectra[0]), max(cal_spectra[0]))
+    ax3.ticklabel_format(useOffset=False, )
+    ax3.ticklabel_format(axis="y", style='sci', scilimits=(0, 0))
 
     # draw metrics and masses
-    draw_vertical_lines(mass, mapeak, wavg, axs[1, 0])
+    draw_vertical_lines(mass, mapeak, wavg, ax3)
 
     # plot centroid spectrum
-    axs[1, 0].vlines(cal_spectra[0], 0, cal_spectra[1], linewidth=0.8, zorder=-1)
-    axs[1, 0].scatter(cal_spectra[0], cal_spectra[1], s=4, color='b', marker=".", zorder=-1)
+    ax3.vlines(cal_spectra[0], 0, cal_spectra[1], linewidth=0.8, zorder=-1)
+    ax3.scatter(cal_spectra[0], cal_spectra[1], s=4, color='b', marker=".", zorder=-1)
     # adjust yaxis bottom
-    axs[1, 0].set_ylim(bottom=0)
+    ax3.set_ylim(bottom=0)
 
     # rasterisazion for better user exerience
-    axs[1, 0].set_rasterization_zorder(0)
+    ax3.set_rasterization_zorder(0)
 
     # plot zoom with all metrics  -------------------------------------------------------------------------
+    ax4 = fig.add_subplot(spec5[2, 1])
     # get closest metric
     metrics = [calibrants_df.loc[index, "distance_map"], calibrants_df.loc[index, "distance_wavg"]]
     # get the farthest bulk metric
@@ -545,25 +606,25 @@ def plot_calibrant_centroid_spectra(cal_spectra,
     # get the interval width (overscaled to 150%)
     interval = abs((mass * (closest * 1e-6 + 1) - mass)*1.5)
 
-    axs[1, 1].set_title(f'spectrum of {name}\n({mass}), zoomed to metrics')
-    axs[1, 1].set_xlabel('m/z')
-    axs[1, 1].set_ylabel('Intensity')
+    ax4.set_title(f'spectrum of {name}\n({mass}), zoomed to metrics')
+    ax4.set_xlabel('m/z')
+    ax4.set_ylabel('Intensity')
     # set the axis range and styles
-    axs[1, 1].set_xlim(mass - interval, mass + interval)
-    axs[1, 1].ticklabel_format(useOffset=False, )
-    axs[1, 1].ticklabel_format(axis="y", style='sci', scilimits=(0, 0))
+    ax4.set_xlim(mass - interval, mass + interval)
+    ax4.ticklabel_format(useOffset=False, )
+    ax4.ticklabel_format(axis="y", style='sci', scilimits=(0, 0))
 
     # draw metrics and masses
-    draw_vertical_lines(mass, mapeak, wavg, axs[1, 1])
+    draw_vertical_lines(mass, mapeak, wavg, ax4)
 
     # scatter centroid spectrum
-    axs[1, 1].vlines(cal_spectra[0], 0, cal_spectra[1], linewidth=0.8, zorder=-1)
-    axs[1, 1].scatter(cal_spectra[0], cal_spectra[1], s=4, color='b', marker=".", zorder=-1)
+    ax4.vlines(cal_spectra[0], 0, cal_spectra[1], linewidth=0.8, zorder=-1)
+    ax4.scatter(cal_spectra[0], cal_spectra[1], s=4, color='b', marker=".", zorder=-1)
     # adjust y limits
-    axs[1, 1].set_ylim(bottom=0)
+    ax4.set_ylim(bottom=0)
 
     # rasterisazion for better user exerience
-    axs[1, 1].set_rasterization_zorder(0)
+    ax4.set_rasterization_zorder(0)
 
     fig.tight_layout()
     pdf.savefig(fig)
@@ -585,70 +646,93 @@ def plot_calibrant_profile_spectra(cal_spectra,
     mapeak = calibrants_df.loc[index, "value_map"]
     wavg = calibrants_df.loc[index, "value_wavg"]
 
-    fig, axs = plt.subplots(2, 2, figsize=[10, 10])
+    # make the subplots and textbox
+
+    fig = plt.figure(figsize=[10, 10])  # constrained_layout=True)
+    widths = [1, 1]
+    heights = [1, 6, 6]
+    spec5 = fig.add_gridspec(ncols=2, nrows=3, width_ratios=widths,
+                             height_ratios=heights)
+    # big box for text
+    axbig = fig.add_subplot(spec5[0, 0:2])
+    axbig.xaxis.set_major_locator(ticker.NullLocator())
+    axbig.yaxis.set_major_locator(ticker.NullLocator())
+
+    axbig.text(0.5, 0.5, f'centroid spectrum of {name})', ha="center", va="bottom", size="x-large")
+
+    axbig.text(0.025, 0.1, f"Theo. m/z: {mass}", ha="left", va="bottom", size="large", color="red")
+    axbig.text(0.5, 0.1, f"most abun. signal: {mapeak}", ha="center", va="bottom", size="large", color="green")
+    axbig.text(0.975, 0.1, f"weighted avg.: {wavg}", ha="right", va="bottom", size="large", color="purple")
+
 
     # plot of full data as centroid spectrum --------------------------------------------------------------
-    axs[0, 0].set_title(f'centroid spectrum of {name}\n({mass})')
-    axs[0, 0].set_xlabel('m/z')
-    axs[0, 0].set_ylabel('Intensity')
+    ax1 = fig.add_subplot(spec5[1, 0])
+    ax1.set_title(f'centroid spectrum of {name}\n({mass})')
+    ax1.set_xlabel('m/z')
+    ax1.set_ylabel('Intensity')
     # set axis limits and style
-    axs[0, 0].set_xlim(mass - dist, mass + dist)
-    axs[0, 0].ticklabel_format(useOffset=False, )
-    axs[0, 0].ticklabel_format(axis="y", style='sci', scilimits=(0, 0))
+    ax1.set_xlim(mass - dist, mass + dist)
+    ax1.ticklabel_format(useOffset=False, )
+    ax1.ticklabel_format(axis="y", style='sci', scilimits=(0, 0))
 
     # draw metrics and masses
-    draw_vertical_lines(mass, mapeak, wavg, axs[0, 0])
+    draw_vertical_lines(mass, mapeak, wavg, ax1)
 
     # plot profile spectrum
-    axs[0, 0].plot(cal_spectra[0], cal_spectra[1], linewidth=0.5, zorder=-1)
+    ax1.plot(cal_spectra[0], cal_spectra[1], linewidth=0.5, zorder=-1)
     # adjust y limits
-    axs[0, 0].set_ylim(bottom=0)
+    ax1.set_ylim(bottom=0)
 
     # rasterisazion for better user exerience
-    axs[0, 0].set_rasterization_zorder(0)
+    ax1.set_rasterization_zorder(0)
 
 
     # plot full spectra with only data points --------------------------------------------------------------
-    axs[0, 1].set_title(f'spectrum of {name}\n({mass}), only data points')
-    axs[0, 1].set_xlabel('m/z')
-    axs[0, 1].set_ylabel('Intensity')
+    ax2 = fig.add_subplot(spec5[1, 1])
+    ax2.set_title(f'spectrum of {name}\n({mass}), only data points')
+    ax2.set_xlabel('m/z')
+    ax2.set_ylabel('Intensity')
     # set the axis range and styles
-    axs[0, 1].set_xlim(mass - dist, mass + dist)
-    axs[0, 1].ticklabel_format(useOffset=False, )
-    axs[0, 1].ticklabel_format(axis="y", style='sci', scilimits=(0, 0))
+    ax2.set_xlim(mass - dist, mass + dist)
+    ax2.ticklabel_format(useOffset=False, )
+    ax2.ticklabel_format(axis="y", style='sci', scilimits=(0, 0))
 
     # draw metrics and masses
-    draw_vertical_lines(mass, mapeak, wavg, axs[0, 1])
+    draw_vertical_lines(mass, mapeak, wavg, ax2)
 
     # scatter centroid spectrum
-    axs[0, 1].plot(cal_spectra[0], cal_spectra[1], linewidth=0.5, zorder=-1)
+    ax2.plot(cal_spectra[0], cal_spectra[1], linewidth=0.5, zorder=-1)
     # adjust yaxis bottom
-    axs[0, 1].set_ylim(bottom=0)
+    ax2.set_ylim(bottom=0)
 
     # rasterisazion for better user exerience
-    axs[0, 1].set_rasterization_zorder(0)
+    ax2.set_rasterization_zorder(0)
 
     # plot the zoom to minimal and maximal data points --------------------------------------------------------------
-    axs[1, 0].set_title(f'centroid spectrum of {name}\n({mass}), zoomed to values')
-    axs[1, 0].set_xlabel('m/z')
-    axs[1, 0].set_ylabel('Intensity')
+    ax3 = fig.add_subplot(spec5[2, 0])
+    ax3.set_title(f'centroid spectrum of {name}\n({mass}), zoomed to values')
+    ax3.set_xlabel('m/z')
+    ax3.set_ylabel('Intensity')
     # set the axis range and styles
-    axs[1, 0].set_xlim(min(cal_spectra[0]), max(cal_spectra[0]))
-    axs[1, 0].ticklabel_format(useOffset=False, )
-    axs[1, 0].ticklabel_format(axis="y", style='sci', scilimits=(0, 0))
+    ax3.set_xlim(min(cal_spectra[0]), max(cal_spectra[0]))
+    ax3.ticklabel_format(useOffset=False, )
+    ax3.ticklabel_format(axis="y", style='sci', scilimits=(0, 0))
 
     # draw metrics and masses
-    draw_vertical_lines(mass, mapeak, wavg, axs[1, 0])
+    draw_vertical_lines(mass, mapeak, wavg, ax3)
 
     # plot centroid spectrum
-    axs[1, 0].plot(cal_spectra[0], cal_spectra[1], linewidth=0.5, zorder=-1)
+    ax3.plot(cal_spectra[0], cal_spectra[1], linewidth=0.5, zorder=-1)
     # adjust yaxis bottom
-    axs[1, 0].set_ylim(bottom=0)
+    ax3.set_ylim(bottom=0)
 
     # rasterisazion for better user exerience
-    axs[1, 0].set_rasterization_zorder(0)
+    ax3.set_rasterization_zorder(0)
 
     # plot zoom with all metrics  ------------------------------------------------------------------------------
+
+    ax4 = fig.add_subplot(spec5[2, 1])
+
     # get closest metric
     metrics = [calibrants_df.loc[index, "distance_map"], calibrants_df.loc[index, "distance_wavg"]]
     # get the nearest bulk metric
@@ -657,24 +741,24 @@ def plot_calibrant_profile_spectra(cal_spectra,
     # get the interval width (overscaled to 150%)
     interval = abs((mass * (closest * 1e-6 + 1) - mass) * 1.5)
 
-    axs[1, 1].set_title(f'spectrum of {name}\n({mass}), zoomed to metrics')
-    axs[1, 1].set_xlabel('m/z')
-    axs[1, 1].set_ylabel('Intensity')
+    ax4.set_title(f'spectrum of {name}\n({mass}), zoomed to metrics')
+    ax4.set_xlabel('m/z')
+    ax4.set_ylabel('Intensity')
     # set the axis range and styles
-    axs[1, 1].set_xlim(mass - interval, mass + interval)
-    axs[1, 1].ticklabel_format(useOffset=False, )
-    axs[1, 1].ticklabel_format(axis="y", style='sci', scilimits=(0, 0))
+    ax4.set_xlim(mass - interval, mass + interval)
+    ax4.ticklabel_format(useOffset=False, )
+    ax4.ticklabel_format(axis="y", style='sci', scilimits=(0, 0))
 
     # draw metrics and masses
-    draw_vertical_lines(mass, mapeak, wavg, axs[1, 1])
+    draw_vertical_lines(mass, mapeak, wavg, ax4)
 
     # scatter centroid spectrum
-    axs[1, 1].plot(cal_spectra[0], cal_spectra[1], linewidth=0.5, zorder=-1)
+    ax4.plot(cal_spectra[0], cal_spectra[1], linewidth=0.5, zorder=-1)
     # adjust yaxis bottom
-    axs[1, 1].set_ylim(bottom=0)
+    ax4.set_ylim(bottom=0)
 
     # rasterisazion for better user exerience
-    axs[1, 1].set_rasterization_zorder(0)
+    ax4.set_rasterization_zorder(0)
 
     fig.tight_layout()
     pdf.savefig(fig)
