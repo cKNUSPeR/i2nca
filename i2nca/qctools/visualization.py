@@ -653,21 +653,21 @@ def draw_vertical_lines(mass, mapeak, wavg, axes):
 
 
 def plot_accuracy_barplots(calibrant_df, pdf):
-    """plots a barplot for different metrics:
+    """handler for plots of barplot for different metrics:
         currently supported: - map,
-                            -wavg
-                            """
+                             - wavg
+    """
 
     kw_list = ["distance_map", "distance_wavg"]
     color_list = ['green', "purple"]
     title_list = ["most abundant peak", "weigthed average"]
 
-    for i,key in enumerate(kw_list):
+    for i, key in enumerate(kw_list):
         # drop invalid rows
         df = calibrant_df.copy(deep=True)
         df.dropna(subset=[key])
 
-        #plot the accuracy plots
+        # plot the accuracy plots
         plot_accu_barplot(df["name"],df[key],
                           title_list[i], color_list[i],
                           pdf)
@@ -679,32 +679,31 @@ def plot_accu_barplot(names, values, metric_name, color, pdf):
 
     y_pos = np.arange(len(names))
 
-    fig = plt.figure(figsize=[7, 5])
+    fig = plt.figure(figsize=[10, 7])
     ax = plt.subplot(111)
 
     ax.set_title(f'mass accuracy of calibrants ({metric_name} vs theoretical)')
     ax.set_xlabel('Calibrant')
     ax.set_ylabel('Mass accuracy in ppm')
     ax.set_xticks(y_pos)
-    ax.set_xticklabels(names, rotation=45, fontsize=8)
+    ax.set_xticklabels(names, rotation=-45, fontsize=8)
 
     bars = ax.bar(y_pos, values, color=color)
 
     # making the bar chart on the data
     for bar in bars:
         height = bar.get_height()
-        ax.annotate(f'{height:.4f}', xy=(bar.get_x() + bar.get_width() / 2, height), xytext=(0, 3),
+        if height >= 0:
+            ax.annotate(f'{height:.4f}', xy=(bar.get_x() + bar.get_width() / 2, height), xytext=(0, -15),
                     textcoords="offset points", ha='center', va='bottom')
+        else:
+            ax.annotate(f'{height:.4f}', xy=(bar.get_x() + bar.get_width() / 2, height), xytext=(0, +3),
+                        textcoords="offset points", ha='center', va='bottom')
 
+    fig.tight_layout()
     pdf.savefig(fig)
     plt.close()
 
-
-def barplot_addlabels(pos,value, axes):
-    """writes the rounded value in a barplot above their respecitve position"""
-    for i in range(len(pos)):
-        axes.text(i, value[i]+0.5, np.round(value[i],5),
-                ha='center', fontsize=8)
 
 
 def plot_accuracy_images(Image, accuracy_images, calibrants_df, index_nr, accuracy_cutoff, x_limits, y_limits, pdf):
