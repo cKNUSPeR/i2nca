@@ -70,7 +70,7 @@ def report_agnostic_qc(I,  # m2.imzMLReader (passing by ref allows faster comput
 
     # visualize the mean spectra
     if format_flags["centroid"]:
-        plot_centroid_spectrum(I.GetXAxis(), I.GetMeanSpectrum(), pdf_pages)
+        plot_centroid_spectrum(I.GetXAxis(), I.GetMeanSpectrum(), "Averaged centroid mass spectrum", pdf_pages)
     elif format_flags["profile"]:
         plot_profile_spectrum(I.GetXAxis(), I.GetMeanSpectrum(), pdf_pages)
 
@@ -184,7 +184,7 @@ def report_regions_qc(I,  # m2.imzMLReader (passing by ref allows faster computa
     # Plot the regions as colored blobs
     # 0 as non-recorded pixels, 1 as non-annotated pixels, 2-> end for
     # add numbers written on the pixel centra (with black border and their resp. color fill0)
-    image_regions(I.GetMaskArray()[0], region_image,
+    image_regions(I.GetMaskArray()[0], region_image, nr_regions,
                   pdf_pages, x_lims, y_lims)
 
     # intensity boxplot analysis
@@ -197,8 +197,13 @@ def report_regions_qc(I,  # m2.imzMLReader (passing by ref allows faster computa
     # plot the grouped data in a boxplot
     plot_boxplots(names_tic_bp, tic_bp, pdf_pages)
 
+    # collect average spectra per region
+    region_spectra = collect_region_averages(I, format_flags, region_image, nr_regions)
+
     # plot the averaged spectra of each region
-    plot_regions_average(I, format_flags, region_image, nr_regions, pdf_pages)
+    plot_regions_averages(region_spectra, format_flags, nr_regions, pdf_pages)
+
+    # show spectral coveraage per mean spectrum
 
     pdf_pages.close()
     print("QC sussefully generated at: ",  outfile_path+"_region_QC.pdf")

@@ -19,9 +19,18 @@ my_cw.set_under('purple')  # Color for values less than vmin
 my_cw.set_over('darkorange')
 my_cw.set_bad(color='white', alpha=1.0)
 
-# dictionary to keep formatting consistency
 
+def discrete_cmap(N, base_cmap=None):
+    """Create an N-bin discrete colormap from the specified input map"""
 
+    # Note that if base_cmap is a string or None, you can simply do
+    #    return plt.cm.get_cmap(base_cmap, N)
+    # The following works for string, None, or a colormap instance:
+
+    base = plt.cm.get_cmap(base_cmap)
+    color_list = base(np.linspace(0, 1, N))
+    cmap_name = base.name + str(N)
+    return base.from_list(cmap_name, color_list, N)
 
 def make_pdf_backend(report_path, title):
     pdf_file_path = report_path + title + ".pdf"
@@ -89,7 +98,7 @@ def image_pixel_index(Image, pdf, x_limits, y_limits):
     plt.close()
 
 
-def image_regions(Image, regionarray, pdf, x_limits, y_limits):
+def image_regions(Image, regionarray, max_nr_region, pdf, x_limits, y_limits):
     """Images the annotated regions image as colorful blops-"""
     fig = plt.figure(figsize=[7, 5])
     ax = plt.subplot(111)
@@ -98,7 +107,8 @@ def image_regions(Image, regionarray, pdf, x_limits, y_limits):
     ax.set_xlabel('x axis')
     ax.set_ylabel('y axis')
 
-    im = ax.imshow(regionarray, cmap=my_rbw, vmin=0.1, interpolation='none', origin='lower')
+    im = ax.imshow(regionarray, cmap=discrete_cmap(max_nr_region, my_rbw),
+                   vmin=0.1, interpolation='none', origin='lower')
     # extent=[x_limits[0], x_limits[1], y_limits[0], y_limits[1]])
 
     fig.colorbar(im, extend='min', format=lambda x, _: f"{int(x)}", label="Index of group")
@@ -299,11 +309,11 @@ def image_min_mz_number(image_stats, index_image, pdf, x_limits, y_limits):
                         pdf, x_limits, y_limits)
 
 
-def plot_centroid_spectrum(mz_axis, spectrum_data, pdf):
+def plot_centroid_spectrum(mz_axis, spectrum_data, title, pdf):
     fig = plt.figure(figsize=[10, 6])
     ax = plt.subplot(111)
 
-    ax.set_title('Averaged centroid mass spectrum')
+    ax.set_title(title)
     ax.set_xlabel('m/z')
     ax.set_ylabel('Intensity')
     ax.set_xlim(min(mz_axis).round(0), max(mz_axis).round(0))
@@ -407,9 +417,22 @@ def plot_boxplots(name_boxplot, stat_boxplot, pdf):
     pdf.savefig(fig)
     plt.close()
 
+def plot_regions_averages(regional_spectra, format_dict, region_number, pdf):
+    """case handler to address coccrect plottig of averaged spectra."""
 
-def plot_regions_average(Image, format_dict, regions_image, region_number, pdf):
-    """plot the average spectrum of each region of the regioned image as a spectrum plot.
+    for i in range(region_number):
+        avg_mz, avg_ints = regional_spectra[i]
+        if format_dict["centroid"]:
+            plot_centroid_spectrum(avg_mz, avg_ints,
+                                   f"Averaged centroid mass spectrum of group {i+1}", pdf)
+        elif format_dict["profile"]:
+            plot_profile_spectrum(avg_mz, avg_ints, pdf)
+
+
+def old_plot_regions_average(Image, format_dict, regions_image, region_number, pdf):
+    """
+    decrepatated
+    plot the average spectrum of each region of the regioned image as a spectrum plot.
     
     Input: 
         - image
@@ -433,7 +456,7 @@ def plot_regions_average(Image, format_dict, regions_image, region_number, pdf):
             avg_mz, avg_ints = average_cont_spectra(Image, pindex)
 
             if format_dict["centroid"]:
-                plot_centroid_spectrum(avg_mz, avg_ints, pdf)
+                plot_centroid_spectrum(avg_mz, avg_ints,"", pdf)
             elif format_dict["profile"]:
                 plot_profile_spectrum(avg_mz, avg_ints, pdf)
 
@@ -441,7 +464,7 @@ def plot_regions_average(Image, format_dict, regions_image, region_number, pdf):
             avg_mz, avg_ints = average_processed_spectra(Image, pindex)
 
             if format_dict["centroid"]:
-                plot_centroid_spectrum(avg_mz, avg_ints, pdf)
+                plot_centroid_spectrum(avg_mz, avg_ints,"", pdf)
             elif format_dict["profile"]:
                 plot_profile_spectrum(avg_mz, avg_ints, pdf)
 
