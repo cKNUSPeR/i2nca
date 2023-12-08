@@ -15,7 +15,8 @@ if __name__ == "__main__":
                         r"C:\Users\Jannik\Documents\Uni\Master_Biochem\4_Semester\M2aia\data\exmpl_cont\calibrants_9AA.csv",
                         0.025, 50, 0.3)
 
-    #report_regions_qc(I,
-    #                  r"C:\Users\Jannik\Documents\Uni\Master_Biochem\4_Semester\M2aia\data\exmpl_cont\kidney_w_regions",
-    #                  r"C:\Users\Jannik\Documents\Uni\Master_Biochem\4_Semester\M2aia\data\exmpl_cont\kidney_annotated_regions.tsv")
+    report_regions_qc(I,
+                      r"C:\Users\Jannik\Documents\Uni\Master_Biochem\4_Semester\QCdev\testfiles\metabolomics_small_mz_continuous_profile")
+
+
 

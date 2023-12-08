@@ -493,24 +493,28 @@ def collect_accuracy_stats(Image, calibrants_df, dist, format_dict):
 def collect_calibrant_converage(accuracy_images, calibrants_df, accuracy_cutoff):
     """Evalualtes how many pixels within a accuracy image fall outsde of the defined accuracy cutoff.
     saves these into the calibrant_df as converage, normed on the amount of pixels."""
+
+    #2DO change so that coverage gets dynamically calculated
     # deep-copy the df
     calibrant_df = calibrants_df.copy(deep=True)
 
 
     # loop over the calibrants
     for i, mass in enumerate(calibrant_df["mz"]):
-        #count how many values are smaller than specified cutoff:
-        low_dist = np.sum(accuracy_images[i] < accuracy_cutoff)
-        high_dist = np.sum(accuracy_images[i] > accuracy_cutoff)
+        #count how many values are larger than higher cutoff cutoff:
+        high_dist = np.sum(accuracy_images[i] > +accuracy_cutoff)
+        # count how many values are lower  than lowest cutoff value:
+        low_dist = np.sum(accuracy_images[i] < -accuracy_cutoff)
 
         # add to calibrants_df
         calibrant_df.loc[i, "coverage"] = (low_dist+high_dist)
 
     # divide over number of pixels
     pixel_nr = len(accuracy_images[0])
-    # normalize over pixel number
+    # normalize over pixel number and
     calibrant_df["coverage"] = calibrant_df["coverage"]/pixel_nr
-
+    # take difference of 1 to get actual coverage
+    calibrant_df["coverage"] = 1 - calibrant_df["coverage"]
     return calibrant_df
 
 
