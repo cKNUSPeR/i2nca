@@ -101,7 +101,7 @@ def image_regions(Image, regionarray, pdf, x_limits, y_limits):
     im = ax.imshow(regionarray, cmap=my_rbw, vmin=0.1, interpolation='none', origin='lower')
     # extent=[x_limits[0], x_limits[1], y_limits[0], y_limits[1]])
 
-    fig.colorbar(im, extend='min', format=lambda x, _: f"{int(x)}")
+    fig.colorbar(im, extend='min', format=lambda x, _: f"{int(x)}", label="Index of group")
 
     pdf.savefig(fig)
     plt.close()
@@ -341,8 +341,8 @@ def write_summary_table(table, pdf):
                      loc="center", cellLoc="left")
 
     # Style the table
-    table.auto_set_font_size(False)
-    table.set_fontsize(14)
+    table.auto_set_font_size(True)
+    #table.set_fontsize(14)
     table.scale(1.2, 1.2)  # Adjust table scale for better layout
     # weird error, where some text is not getting passed
 
@@ -385,23 +385,23 @@ def plot_boxplots(name_boxplot, stat_boxplot, pdf):
     # plotting functions based on single-line or multi-line plotting:
     if len_b20 > 1:
         fig, ax = plt.subplots(len_b20, figsize=(10, len_b20 * 4))
-        fig.suptitle('Boxplots of Pixelwise TIC per Segment')
+        fig.suptitle('Boxplots of TIC per pixel by segmented group')
 
         for j in range(1, len_b20 + 1):  # change to 1-base index
             ax[j - 1].boxplot(stat_boxplot[(j - 1) * 20:20 * j],
                               labels=name_boxplot[(j - 1) * 20:20 * j])
-            ax[j - 1].set_xlabel('Segmented Group')
-            ax[j - 1].set_ylabel('log10 of Pixel TIC')
+            ax[j - 1].set_xlabel('Index of group')
+            ax[j - 1].set_ylabel('log10 of TIC intensity per pixel')
 
     else:
         fig = plt.figure(figsize=[10, len_b20 * 4])
         ax = plt.subplot(111)
-        ax.set_title('Boxplots of Pixelwise TIC per Segment')
+        ax.set_title('Boxplots of TIC per pixel by segmented group')
 
         ax.boxplot(stat_boxplot[:],
                    labels=name_boxplot)
-        ax.set_xlabel('Segmented Group')
-        ax.set_ylabel('log10 of Pixel TIC')
+        ax.set_xlabel('Index of group')
+        ax.set_ylabel('log10 of TIC intensity per pixel')
 
     plt.tight_layout()
     pdf.savefig(fig)
@@ -491,10 +491,10 @@ def plot_calibrant_spectra_panel(cal_spectra,
     axbig.xaxis.set_major_locator(ticker.NullLocator())
     axbig.yaxis.set_major_locator(ticker.NullLocator())
 
-    axbig.text(0.5, 0.5, f'calibrant spectra for {name}', ha="center", va="bottom", size="x-large")
+    axbig.text(0.5, 0.5, f'Calibrant spectra for {name}', ha="center", va="bottom", size="x-large")
     axbig.text(0.025, 0.1, f"Theo. m/z: {mass:.6f}", ha="left", va="bottom", size="large", color="red")
-    axbig.text(0.5, 0.1, f"most abun. signal: {mapeak:.6f}", ha="center", va="bottom", size="large", color="green")
-    axbig.text(0.975, 0.1, f"weighted avg.: {wavg:.6f}", ha="right", va="bottom", size="large", color="purple")
+    axbig.text(0.5, 0.1, f"Most abundant signal: {mapeak:.6f}", ha="center", va="bottom", size="large", color="green")
+    axbig.text(0.975, 0.1, f"Weighted average: {wavg:.6f}", ha="right", va="bottom", size="large", color="purple")
 
     # plot of full data as  spectrum --------------------------------------------------------------
     ax1 = fig.add_subplot(spec5[1, 0])
@@ -697,13 +697,14 @@ def plot_accu_barplot(names, values, metric_name, color, pdf):
     ax.set_ylabel('Mass accuracy in ppm')
     ax.set_xticks(y_pos)
     ax.set_xticklabels(names, rotation=-45, fontsize=8)
+    # add a zero line
+    ax.axhline(0, c='k', ls='--')
 
     bars = ax.bar(y_pos, values, color=color)
-
-    # making the bar chart on the data
+    # annotate the bar chart data on the data
     for bar in bars:
         height = bar.get_height()
-        if height >= 0:
+        if height >= 5:
             ax.annotate(f'{height:.4f}', xy=(bar.get_x() + bar.get_width() / 2, height), xytext=(0, -15),
                     textcoords="offset points", ha='center', va='bottom')
         else:
@@ -725,9 +726,9 @@ def plot_accuracy_images(Image, accuracy_images, calibrants_df, index_nr, accura
         # plot each image
         fig = plt.figure(figsize=[7, 5])
         ax = plt.subplot(111)
-        ax.set_title(f'Mass Accuracy of {calibrants_df.loc[i, "name"]}, {calibrants_df.loc[i, "mz"]}')
-        ax.set_xlabel('x')
-        ax.set_ylabel('y')
+        ax.set_title(f'Mass accuracy of {calibrants_df.loc[i, "mz"]}, ({calibrants_df.loc[i, "name"]})')
+        ax.set_xlabel('x axis')
+        ax.set_ylabel('y axis')
 
         ax.set_xlim(x_limits[0], x_limits[1])
         ax.set_ylim(y_limits[0], y_limits[1])
