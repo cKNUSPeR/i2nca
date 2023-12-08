@@ -88,6 +88,8 @@ def report_agnostic_qc(I,  # m2.imzMLReader (passing by ref allows faster comput
 
     pdf_pages.close()
     print("QC sussefully generated at: ", outfile_path+"_agnostic_QC.pdf")
+    return outfile_path+"_agnostic_QC.pdf"
+
 
 def report_calibrant_qc(I, # m2.imzMLReader (passing by ref allows faster computation)
                         outfile_path: str,  # path for output file
@@ -146,6 +148,7 @@ def report_calibrant_qc(I, # m2.imzMLReader (passing by ref allows faster comput
 
     pdf_pages.close()
     print("QC sussefully generated at: ", outfile_path+"_calibrant_QC.pdf")
+    return outfile_path+"_calibrant_QC.pdf"
 
 
 def report_regions_qc(I,  # m2.imzMLReader (passing by ref allows faster computation)
@@ -199,3 +202,4 @@ def report_regions_qc(I,  # m2.imzMLReader (passing by ref allows faster computa
 
     pdf_pages.close()
     print("QC sussefully generated at: ",  outfile_path+"_region_QC.pdf")
+    return outfile_path+"_region_QC.pdf"

@@ -39,12 +39,13 @@ def evaluate_formats(file_format  # metadata_string
 def evaluate_image_corners(ndarray):
     """Givel the values of the corners of the pixel-filled ndarray """
     pix_pos = np.argwhere(ndarray)
+    offset = 0.5
 
     # get the corners of data entry, is useful to set limits of plotting
-    x_min = pix_pos[np.argmin(pix_pos[:, 1])][1]
-    x_max = pix_pos[np.argmax(pix_pos[:, 1])][1]
-    y_min = pix_pos[np.argmin(pix_pos[:, 0])][0]
-    y_max = pix_pos[np.argmax(pix_pos[:, 0])][0]
+    x_min = pix_pos[np.argmin(pix_pos[:, 1])][1] - offset
+    x_max = pix_pos[np.argmax(pix_pos[:, 1])][1] + offset
+    y_min = pix_pos[np.argmin(pix_pos[:, 0])][0] - offset
+    y_max = pix_pos[np.argmax(pix_pos[:, 0])][0] + offset
 
     return (x_min, x_max), (y_min, y_max)
 
