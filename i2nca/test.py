@@ -23,6 +23,13 @@ axbig.text(0.975, 0.1, "weighted avg.: value", ha="right", va="bottom", size="la
 
 
 ax1 = fig5.add_subplot(spec5[1,0])
+# make a line of theoretical mass
+ax1.axvline(0.5, c='r', ls=(0, (1, 3)))
+# make a line for most abundant peak
+ax1.axvline(0.6, color='green', ls=(0, (2, 4)))
+
+ax1.axvline(0.7, color='purple', ls=(0, (3, 4, 1, 4, 1, 4)))
+
 
 ax2 = fig5.add_subplot(spec5[1,1])
 ax3 = fig5.add_subplot(spec5[2,0])

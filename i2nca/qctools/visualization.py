@@ -460,8 +460,8 @@ def plot_calibrant_spectra_panel(cal_spectra,
             # differentiante the plotting :
         # 1) with profile or centriod  map&wavg
         # 2) only data points + map&wavg
-        # 2.2) zoom of 150% around both metrics with only data points
-        # 3) zoom on minimal and maximal data points ()"""
+        # 3) zoom on minimal and maximal data points ()
+        # 4) zoom of 150% around both metrics with only data points"""
 
     name = calibrants_df.loc[index, "name"]
     mass = calibrants_df.loc[index, "mz"]
@@ -488,7 +488,7 @@ def plot_calibrant_spectra_panel(cal_spectra,
 
     # plot of full data as  spectrum --------------------------------------------------------------
     ax1 = fig.add_subplot(spec5[1, 0])
-    ax1.set_title(f'full spectrum around calibrant\n')
+    ax1.set_title(f'full spectrum\n around calibrant')
     ax1.set_xlabel('m/z')
     ax1.set_ylabel('Intensity')
     # set axis limits
@@ -509,7 +509,7 @@ def plot_calibrant_spectra_panel(cal_spectra,
 
     elif format_dict["profile"]:
         # plot profile spectrum
-        ax1.plot(cal_spectra[0], cal_spectra[1], linewidth=0.5, zorder=-1)
+        ax1.plot(cal_spectra[0], cal_spectra[1], color='k', linewidth=0.5, zorder=-1)
 
     # adjust y limits
     ax1.set_ylim(bottom=0)
@@ -539,7 +539,8 @@ def plot_calibrant_spectra_panel(cal_spectra,
 
     elif format_dict["profile"]:
         # plot profile spectrum
-        ax2.plot(cal_spectra[0], cal_spectra[1], linewidth=0.5, zorder=-1)
+        ax2.plot(cal_spectra[0], cal_spectra[1], color='k', linewidth=0.5, zorder=-1)
+        ax2.scatter(cal_spectra[0], cal_spectra[1], color='k', marker="x", zorder=-1)
 
     # adjust y limits
     ax2.set_ylim(bottom=0)
@@ -548,12 +549,13 @@ def plot_calibrant_spectra_panel(cal_spectra,
     ax2.set_rasterization_zorder(0)
 
     # plot the zoom to minimal and maximal data points --------------------------------------------------------------
+    offset = 0.001
     ax3 = fig.add_subplot(spec5[2, 0])
     ax3.set_title(f'calibrant spectrum,\n zoomed to value range')
     ax3.set_xlabel('m/z')
     ax3.set_ylabel('Intensity')
     # set the axis range and styles
-    ax3.set_xlim(min(cal_spectra[0]), max(cal_spectra[0]))
+    ax3.set_xlim(min(cal_spectra[0])-offset, max(cal_spectra[0])+offset)
     ax3.ticklabel_format(useOffset=False, )
     ax3.ticklabel_format(axis="y", style='sci', scilimits=(0, 0))
     # set x-axis style
@@ -565,12 +567,13 @@ def plot_calibrant_spectra_panel(cal_spectra,
     # control block for profile/centroid case
     if format_dict["centroid"]:
         # plot centroid spectrum
-        ax3.vlines(cal_spectra[0], 0, cal_spectra[1], linewidth=0.8, zorder=-1)
-        ax3.scatter(cal_spectra[0], cal_spectra[1], s=4, color='k', marker="o", zorder=-1)
+        ax3.vlines(cal_spectra[0], 0, cal_spectra[1], color='k', linewidth=0.8, zorder=-1)
+        ax3.scatter(cal_spectra[0], cal_spectra[1], s=6, color='k', marker="o", zorder=-1)
 
     elif format_dict["profile"]:
         # plot profile spectrum
-        ax3.plot(cal_spectra[0], cal_spectra[1], linewidth=0.5, zorder=-1)
+        ax3.plot(cal_spectra[0], cal_spectra[1], color='k', linewidth=0.5, zorder=-1)
+        ax3.scatter(cal_spectra[0], cal_spectra[1], s=6, color='k', marker="o", zorder=-1)
 
     # adjust yaxis bottom
     ax3.set_ylim(bottom=0)
@@ -604,12 +607,14 @@ def plot_calibrant_spectra_panel(cal_spectra,
     #control block for profile/centroid case
     if format_dict["centroid"]:
         # scatter centroid spectrum
-        ax4.vlines(cal_spectra[0], 0, cal_spectra[1], linewidth=0.8, zorder=-1)
-        ax4.scatter(cal_spectra[0], cal_spectra[1], s=4, color='k', marker="o", zorder=-1)
+        ax4.vlines(cal_spectra[0], 0, cal_spectra[1],  color='k', linewidth=0.8, zorder=-1)
+        ax4.scatter(cal_spectra[0], cal_spectra[1], s=6, color='k', marker="o", zorder=-1)
 
     elif format_dict["profile"]:
         # plot profile spectrum
-        ax4.plot(cal_spectra[0], cal_spectra[1], linewidth=0.5, zorder=-1)
+        ax4.plot(cal_spectra[0], cal_spectra[1], color='k', linewidth=0.5, zorder=-1)
+        ax4.scatter(cal_spectra[0], cal_spectra[1], s=6, color='k', marker="o", zorder=-1)
+
 
     # adjust y limits
     ax4.set_ylim(bottom=0)
@@ -642,9 +647,9 @@ def draw_vertical_lines(mass, mapeak, wavg, axes):
     # make a line of theoretical mass
     axes.axvline(mass, c='r', ls=(0, (1, 3)))
     # make a line for most abundant peak
-    axes.axvline(mapeak, color='green', ls="--")
+    axes.axvline(mapeak, color='green', ls=(0, (2, 4)))
     # make a line for weighted average
-    axes.axvline(wavg, c='purple', ls="-.")
+    axes.axvline(wavg, c='purple', ls=(0, (3, 4, 1, 4, 1, 4)))
 
 
 def plot_accuracy_barplots(calibrant_df, pdf):
@@ -717,7 +722,6 @@ def plot_accuracy_images(Image, accuracy_images, calibrants_df, index_nr, accura
 
         ax.set_xlim(x_limits[0], x_limits[1])
         ax.set_ylim(y_limits[0], y_limits[1])
-        print()
         im = ax.imshow(img, cmap=my_cw, vmin=-accuracy_cutoff, vmax=accuracy_cutoff)
         fig.colorbar(im, extend='both', label="ppm")
 
