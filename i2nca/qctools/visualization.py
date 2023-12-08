@@ -457,48 +457,6 @@ def plot_calibrant_spectra(cal_spectra, calibrant_df, index, format_dict, dist, 
         plot_empty_peak(calibrant_df.loc[index, "mz"], calibrant_df.loc[index, "name"], pdf)
 
 
-def color_title(labels, colors, textprops={'size': 'large'}, ax=None, y=1.013,
-                precision=10 ** -2):
-    "Creates a centered title with multiple colors. Don't change axes limits afterwards."
-
-    if ax == None:
-        ax = plt.gca()
-
-    plt.gcf().canvas.draw()
-    transform = ax.transAxes  # use axes coords
-
-    # initial params
-    xT = 0  # where the text ends in x-axis coords
-    shift = 0  # where the text starts
-
-    # for text objects
-    text = dict()
-
-    while (np.abs(shift - (1 - xT)) > precision) and (shift <= xT):
-        x_pos = shift
-
-        for label, col in zip(labels, colors):
-
-            try:
-                text[label].remove()
-            except KeyError:
-                pass
-
-            text[label] = ax.text(x_pos, y, label,
-                                  transform=transform,
-                                  ha='left',
-                                  color=col,
-                                  **textprops)
-
-            x_pos = text[label].get_window_extent() \
-                .transformed(transform.inverted()).x1
-
-        xT = x_pos  # where all text ends
-
-        shift += precision / 2  # increase for next iteration
-
-        if x_pos > 1:  # guardrail
-            break
 
 def plot_calibrant_centroid_spectra(cal_spectra,
                                     calibrants_df, index,
@@ -546,7 +504,7 @@ def plot_calibrant_centroid_spectra(cal_spectra,
 
     # plot centroid spectrum
     ax1.vlines(cal_spectra[0], 0, cal_spectra[1], color='b', linewidth=0.8, zorder=-1)
-    ax1.scatter(cal_spectra[0], cal_spectra[1], s=4, color='b', marker=".", zorder=-1)
+    ax1.scatter(cal_spectra[0], cal_spectra[1], s=4, color='b', marker="o", zorder=-1)
     # adjust y limits
     ax1.set_ylim(bottom=0)
 
@@ -554,7 +512,7 @@ def plot_calibrant_centroid_spectra(cal_spectra,
     ax1.set_rasterization_zorder(0)
 
     # plot full spectra with only data points--------------------------------------------------------------
-    ax3 = fig.add_subplot(spec5[1, 1])
+    ax2 = fig.add_subplot(spec5[1, 1])
     ax2.set_title(f'spectrum of {name}\n({mass}), only data points')
     ax2.set_xlabel('m/z')
     ax2.set_ylabel('Intensity')
@@ -589,7 +547,7 @@ def plot_calibrant_centroid_spectra(cal_spectra,
 
     # plot centroid spectrum
     ax3.vlines(cal_spectra[0], 0, cal_spectra[1], linewidth=0.8, zorder=-1)
-    ax3.scatter(cal_spectra[0], cal_spectra[1], s=4, color='b', marker=".", zorder=-1)
+    ax3.scatter(cal_spectra[0], cal_spectra[1], s=4, color='b', marker="x", zorder=-1)
     # adjust yaxis bottom
     ax3.set_ylim(bottom=0)
 
@@ -619,7 +577,7 @@ def plot_calibrant_centroid_spectra(cal_spectra,
 
     # scatter centroid spectrum
     ax4.vlines(cal_spectra[0], 0, cal_spectra[1], linewidth=0.8, zorder=-1)
-    ax4.scatter(cal_spectra[0], cal_spectra[1], s=4, color='b', marker=".", zorder=-1)
+    ax4.scatter(cal_spectra[0], cal_spectra[1], s=4, color='b', marker="x", zorder=-1)
     # adjust y limits
     ax4.set_ylim(bottom=0)
 
@@ -730,7 +688,6 @@ def plot_calibrant_profile_spectra(cal_spectra,
     ax3.set_rasterization_zorder(0)
 
     # plot zoom with all metrics  ------------------------------------------------------------------------------
-
     ax4 = fig.add_subplot(spec5[2, 1])
 
     # get closest metric
