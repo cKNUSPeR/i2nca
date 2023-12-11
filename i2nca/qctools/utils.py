@@ -228,7 +228,7 @@ def average_cont_spectra(Image, pixels):
     return mz, ints
 
 
-def average_processed_spectra(Image, pixels):
+def average_processed_spectra(Image, pixels, bin_nr = 0):
     """Averages processed spectra by their pixels.
     Calculates a mz window with start, end and stepsize and bins the data into this.
     the amount of bins is equal to 10 times the highest number of datapoints recorded.
@@ -236,6 +236,8 @@ def average_processed_spectra(Image, pixels):
     Input:
         - Image: an m2aia imzML reader
         - pixels: a sequence of pixel indices
+        - bins: a predetermined number of bins,
+            if =0 then this gets dynamically assumed to be 10 times the size of the most data point occurence
     returns:
         mzs, ints
         two arrays with mz values and intensity values of the respective average
@@ -243,43 +245,45 @@ def average_processed_spectra(Image, pixels):
     # get the normalization numbers
     n = len(pixels)
 
-    # get the mz value range
-    mz_start, mz_end = min(Image.GetXAxis()) - 0.0001, max(Image.GetXAxis())  # minimum is reduced by a bit.
+    # get the mz value range, floored and ceiled to fix the edge values
+    mz_start, mz_end = np.floor(min(Image.GetXAxis())), np.ceil(max(Image.GetXAxis()))  # minimum is reduced by a bit.
 
-    # get the number of bins (estimation by getting the largest number of spectra in the file)
-    bin_nr = 1  # the left index of each mass bin
-    for ids in pixels:
-        cbin_nr = Image.GetSpectrumDepth(ids)
-        if cbin_nr > bin_nr:
-            bin_nr = cbin_nr
 
-    # binning is enhanced by factor of 10, to counteract spectral pixelation
-    bin_nr = bin_nr * 10
+    if bin_nr == 0:
+        # get the number of bins (estimation by getting the largest number of spectra in the file)
+        for ids in pixels:
+            cbin_nr = Image.GetSpectrumDepth(ids)
+            if cbin_nr > bin_nr:
+                bin_nr = cbin_nr
+        # binning is enhanced by factor of 10, to counteract spectral pixelation
+        bin_nr = bin_nr * 10
 
     # set up the collection df for the binned ranges:
-    bins = np.linspace(mz_start, mz_end, bin_nr)
+    bins = np.linspace(mz_start, mz_end, num=bin_nr, endpoint=False)
 
-    full_df = pd.DataFrame({'mz_bins': bins})
-    full_df["collect"] = np.nan
+    # array for collection of intensity values
+    collector_array = np.full(bin_nr, np.nan)
 
     # make a loop:
     for idx in pixels:
         # mzs and ints of the pixel
         mz, ints = Image.GetSpectrum(idx)
 
-        # make andbin the dat in a dataframe
-        little_df = pd.DataFrame({'mz': mz, "intensity": ints})
-        little_df['binned'] = pd.cut(mz, bins)
+        # Digitize the data into bins
+        bin_indices = np.digitize(mz, bins) - 1
+        # needs to be recuced by 1
+
+        # Calculate the sum of intensities within each bin
+        bin_sums = np.bincount(bin_indices, weights=ints, minlength=bin_nr)
 
         # means of grouped bins and normalized to pixels
-        full_df["single"] = little_df.groupby(['binned'])['intensity'].mean() / n
-        full_df["collect"] = full_df[['collect', 'single']].sum(axis=1, min_count=1)
+        collector_array[bin_indices] = np.nansum([bin_sums[bin_indices], collector_array[bin_indices]], axis=0)
 
-    # filter out NaN values:
-    full_df = full_df.dropna(subset=['collect'])
+    # filter out NaN values and normalize over n
+    bins = bins[~np.isnan(collector_array)]
+    collector_array = collector_array[~np.isnan(collector_array)] / n
 
-    # return as arrays
-    return full_df['mz_bins'].to_numpy(), full_df["collect"].to_numpy()
+    return bins, collector_array
 
 def calculate_spectral_coverage(mz_values, intensities):
     """

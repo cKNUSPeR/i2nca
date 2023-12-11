@@ -25,4 +25,5 @@ if __name__ == "__main__":
     #J = m2.ImzMLReader(file_name_2)
 
     #webbrowser.open(pdf1, new=2)
+    #webbrowser.open(pdf2, new=2)
     webbrowser.open(pdf3, new=2)
