@@ -39,7 +39,7 @@ def evaluate_formats(file_format  # metadata_string
 def evaluate_image_corners(ndarray):
     """Givel the values of the corners of the pixel-filled ndarray """
     pix_pos = np.argwhere(ndarray)
-    offset = 0
+    offset = 0.5 # 0.5 makes plt plots better as it offsets the pixel centering
 
     # get the corners of data entry, is useful to set limits of plotting
     x_min = pix_pos[np.argmin(pix_pos[:, 1])][1] - offset
@@ -49,7 +49,13 @@ def evaluate_image_corners(ndarray):
 
     return (x_min, x_max), (y_min, y_max)
 
+def make_index_image(Image):
+    """handler for creating a valid index image in which invalid pixels get set to -1 to allow better display.
+    return only x-y dimension."""
 
+    index_array = np.subtract(Image.GetMaskArray().astype(np.int_),1)
+    index_array = index_array + Image.GetIndexArray()
+    return index_array[0]
 
 
 def mask_bad_image(key_list,  # an iterable of valid pixel indices,
@@ -60,8 +66,8 @@ def mask_bad_image(key_list,  # an iterable of valid pixel indices,
     It transfers pixels from 0 (in binary image input ) to NaN, which allows them to be set to bad"""
     # set up a translational dictionary
     trans_dict = dict(zip(key_list, val_list))
-    # Important zero-index conversion, otherwise rounding gives error
-    trans_dict[0] = np.nan
+    # was once Important zero-index conversion, otherwise rounding gives error
+    # trans_dict[-1] = np.nan  # changed for now, lets see what new undefined pixels look like
 
     # defines the callable function (juhu, we love functional programming
     translate = np.vectorize(lambda ele: trans_dict.get(ele, ele))
@@ -106,7 +112,7 @@ def label_connected_region(Image):
     return df, labeled_image, max_regions
 
 
-def parse_regionfile(file, annotation_group, x_lims, y_lims):
+def parse_regionfile(file, annotation_group, image):
     """parses the regions tsv file. Assumes that the regions are annotated
     within the coordinates of the imaging file (the point of origin is at (0,0))."""
 
@@ -119,8 +125,12 @@ def parse_regionfile(file, annotation_group, x_lims, y_lims):
     # the maximum number of regions (counting starts at 1)
     max_regions = df['annotation_values'].max()
 
+    # get the shape
+    x_lims = (0, image.GetShape()[0])
+    y_lims = (0, image.GetShape()[1])
+
     # set up empty array with xlims any ylims ranges
-    labeled_image = np.zeros((1 + y_lims[1] - y_lims[0], 1 + x_lims[1] - x_lims[0]))  # 1-indexed for inclusiveness
+    labeled_image = np.zeros((y_lims[1] - y_lims[0], x_lims[1] - x_lims[0]))  # 0-indexed
 
     # fill the labeled image with the annotations:
     for index, row in df.iterrows():
@@ -501,7 +511,7 @@ def collect_accuracy_stats(Image, calibrants_df, dist, format_dict):
              # get nearest elements
              accuracies_ar[ind] =[find_nearest(mass, calmass) for calmass in calibrants_df["mz"]]
              # collect image index in order of iteration
-             index_nr = index_nr + (ind + 1,)  # pixel order is 0 for not-recorded pixels
+             index_nr = index_nr + (ind,)  # pixel order is 0 in new m2aia version
 
 
     elif format_dict["profile"]:
@@ -509,7 +519,7 @@ def collect_accuracy_stats(Image, calibrants_df, dist, format_dict):
             # get nearest loc, max
             accuracies_ar[ind] = [find_nearest_loc_max(mass,inten, calmass, dist) for calmass in calibrants_df["mz"]]
             # collect image index in order of iteration
-            index_nr = index_nr + (ind + 1,)  # pixel order is 0 for not-recorded pixels
+            index_nr = index_nr + (ind ,)  # pixel order is 0 from m2aia 0.5.0 onw
 
     # transpose to match  ppm calcs form
     accuracies_ar = accuracies_ar.T
@@ -566,7 +576,7 @@ def collect_image_stats(Image, statistic_keywords):
     for ind, mass, inten in Image.SpectrumIterator():  # loop to run over the full imzML dataset
         for keyword in statistic_keywords:
             if keyword == 'index_nr':
-                statistics_result[keyword] += (ind + 1,)
+                statistics_result[keyword] += (ind, )  # index of spectrum is now zero-based
             elif keyword == 'peak_nr':
                 statistics_result[keyword] += (len(inten),)
             elif keyword == 'tic_nr':

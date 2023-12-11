@@ -30,7 +30,7 @@ def report_agnostic_qc(I,  # m2.imzMLReader (passing by ref allows faster comput
 
     # visualize the feature numbers
     plot_feature_number(image_stats, pdf_pages)
-    image_feature_number(image_stats, I.GetIndexArray()[0],
+    image_feature_number(image_stats, I,
                          pdf_pages, x_lims, y_lims)
 
     # vis the tic metrics
@@ -165,7 +165,7 @@ def report_regions_qc(I,  # m2.imzMLReader (passing by ref allows faster computa
     # parse the regionAnnotations:
     if regionfile_path:
         # readable to get dataFrame, col=0 x , col1= y, clo2= name
-        region_table, region_image, nr_regions = parse_regionfile(regionfile_path, "annotation", x_lims, y_lims)
+        region_table, region_image, nr_regions = parse_regionfile(regionfile_path, "annotation", I)
     else:
         region_table, region_image, nr_regions = label_connected_region(
             I)  # in nothing provides, make the conCompAnalysis

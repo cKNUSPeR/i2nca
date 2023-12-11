@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 
 from .dependencies import *
-from .utils import mask_bad_image, average_cont_spectra, average_processed_spectra, calculate_spectral_coverage
+from .utils import mask_bad_image, average_cont_spectra, average_processed_spectra, calculate_spectral_coverage, make_index_image
 
 # custom colormaps with white backgrounds (via out-of-lower-bound)
 my_vir = cm.get_cmap('viridis').copy()
@@ -91,7 +91,7 @@ def image_pixel_index(Image, pdf, x_limits, y_limits):
     ax.set_ylim(y_limits[0], y_limits[1])
 
     im = ax.imshow(Image,
-                   cmap=my_rbw, vmin=0.1, interpolation='none')
+                   cmap=my_rbw, vmin=-0.1, interpolation='none')
     fig.colorbar(im, extend='min')
 
     pdf.savefig(fig)
@@ -150,7 +150,7 @@ def image_basic_heatmap(Image,
     ax.set_xlim(x_limits[0], x_limits[1])
     ax.set_ylim(y_limits[0], y_limits[1])
 
-    im = ax.imshow(Image, cmap=my_vir, vmin=0.1)
+    im = ax.imshow(Image, cmap=my_vir, vmin=-0.1)
     fig.colorbar(im, ax=ax, extend='min')
 
     pdf.savefig(fig)
@@ -166,10 +166,10 @@ def plot_feature_number(image_stats, pdf):
                        pdf)
 
 
-def image_feature_number(image_stats, index_image, pdf, x_limits, y_limits):
+def image_feature_number(image_stats, Image, pdf, x_limits, y_limits):
     """Images a heatmap of the number of features. Image cropped to size.
         Saves the plot to a pdf"""
-    image_basic_heatmap(mask_bad_image(image_stats["index_nr"], image_stats["peak_nr"], index_image),
+    image_basic_heatmap(mask_bad_image(image_stats["index_nr"], image_stats["peak_nr"], make_index_image(Image)),
                         'Number of data points per pixel projection',
                         "x axis",
                         "y axis",
