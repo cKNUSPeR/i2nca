@@ -77,10 +77,8 @@ def report_agnostic_qc(I,  # m2.imzMLReader (passing by ref allows faster comput
     # get spectral coverage data:
     mean_bin, mean_coverage = calculate_spectral_coverage(I.GetXAxis(), I.GetMeanSpectrum())
 
-
-
     # plot spectral coverage data
-    plot_coverage_barplot(mean_bin, mean_coverage, pdf_pages)
+    plot_coverage_barplot(mean_bin, mean_coverage, f'Spectral coverage of mean spectrum',pdf_pages)
 
 
     write_summary_table(generate_table_data(I, x_lims, y_lims, image_stats),
@@ -204,6 +202,7 @@ def report_regions_qc(I,  # m2.imzMLReader (passing by ref allows faster computa
     plot_regions_averages(region_spectra, format_flags, nr_regions, pdf_pages)
 
     # show spectral coveraage per mean spectrum
+    plot_spectral_coverages(region_spectra, format_flags, nr_regions, pdf_pages)
 
     pdf_pages.close()
     print("QC sussefully generated at: ",  outfile_path+"_region_QC.pdf")

@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 
 from .dependencies import *
-from .utils import mask_bad_image, average_cont_spectra, average_processed_spectra
+from .utils import mask_bad_image, average_cont_spectra, average_processed_spectra, calculate_spectral_coverage
 
 # custom colormaps with white backgrounds (via out-of-lower-bound)
 my_vir = cm.get_cmap('viridis').copy()
@@ -761,9 +761,16 @@ def plot_accuracy_images(Image, accuracy_images, calibrants_df, index_nr, accura
         pdf.savefig(fig)
         plt.close()
 
+def plot_spectral_coverages(region_spectra, format_flags, nr_regions, pdf):
+    """handler for spectral coverage of each mean spectrum """
+    for i in range(nr_regions):
+        avg_mzs, avg_ints = region_spectra[i]
+        mean_bin, mean_coverage = calculate_spectral_coverage(avg_mzs,avg_ints)
+        plot_coverage_barplot(mean_bin, mean_coverage,
+                              f'Spectral coverage of mean spectrum in group {i+1}', pdf)
 
 
-def plot_coverage_barplot(names, data, pdf):
+def plot_coverage_barplot(names, data, title, pdf):
     """Makes a bar plot of a given spectral coverage.
     """
 
@@ -772,7 +779,7 @@ def plot_coverage_barplot(names, data, pdf):
     fig = plt.figure(figsize=[7, 5])
     ax = plt.subplot(111)
 
-    ax.set_title(f'Spectral coverage of mean spectrum')
+    ax.set_title(title)
     ax.set_xlabel('m/z bin')
     ax.set_ylabel('Contribution to TIC')
     ax.set_xticks(y_pos)
