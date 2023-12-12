@@ -20,9 +20,9 @@ if __name__ == "__main__":
     #webbrowser.open(pdf2, new=2)
 
     pdf3 = report_regions_qc(I,
-                      r"C:\Users\Jannik\Documents\Uni\Master_Biochem\4_Semester\QCdev\testfiles\metabolomics_small_mz_processed_centroid") #,
+                      file_name[:-6],
                       #r"C:\Users\Jannik\Documents\Uni\Master_Biochem\4_Semester\QCdev\testfiles\metabolomics_small_mz_annotated_regions.tsv")
-                      #r"C:\Users\Jannik\Documents\Uni\Master_Biochem\4_Semester\M2aia\data\exmpl_cont\kidney_annotated_regions.tsv")
+                      r"C:\Users\Jannik\Documents\Uni\Master_Biochem\4_Semester\M2aia\data\exmpl_cont\kidney_annotated_regions.tsv")
     webbrowser.open(pdf3, new=2)
 
 

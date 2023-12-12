@@ -183,9 +183,7 @@ def report_regions_qc(I,  # m2.imzMLReader (passing by ref allows faster computa
                          pdf_pages, x_lims, y_lims)
 
     # Plot the regions as colored blobs
-    # 0 as non-recorded pixels, 1 as non-annotated pixels, 2-> end for
-    # add numbers written on the pixel centra (with black border and their resp. color fill0)
-    image_regions(I.GetMaskArray()[0], region_image, nr_regions,
+    image_regions(region_image, I.GetMaskArray()[0], nr_regions,
                   pdf_pages, x_lims, y_lims)
 
     # intensity boxplot analysis

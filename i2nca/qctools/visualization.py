@@ -22,7 +22,7 @@ my_cw.set_over('darkorange')
 my_cw.set_bad(color='white', alpha=1.0)
 
 
-def discrete_cmap(N, base_cmap=None):
+def discrete_cmap(N, base_cmap=None, nan_color="white"):
     """Create an N-bin discrete colormap from the specified input map"""
 
     # Note that if base_cmap is a string or None, you can simply do
@@ -31,8 +31,15 @@ def discrete_cmap(N, base_cmap=None):
 
     base = plt.cm.get_cmap(base_cmap)
     color_list = base(np.linspace(0, 1, N))
+
+    # Set the color for np.nan values
+    nan_color_value = plt.cm.colors.to_rgba(nan_color)
+    nan_color_list = [nan_color_value] * int(np.isnan(N).sum())
+
+    color_list = np.concatenate((color_list, nan_color_list))
+
     cmap_name = base.name + str(N)
-    return base.from_list(cmap_name, color_list, N)
+    return base.from_list(cmap_name, color_list, N + len(nan_color_list))
 
 def make_pdf_backend(report_path, title):
     pdf_file_path = report_path + title + ".pdf"
@@ -105,8 +112,10 @@ def image_pixel_index(image, binary_mask, pdf, x_limits, y_limits):
     plt.close()
 
 
-def image_regions(Image, regionarray, max_nr_region, pdf, x_limits, y_limits):
-    """Images the annotated regions image as colorful blops-"""
+def image_regions(regionarray, binary_mask, max_nr_region, pdf, x_limits, y_limits):
+    """Images the annotated regions image as colorful blops-
+    # 0 as non-recorded pixels, 1 as non-annotated pixels, 2-> end for
+    # add numbers written on the pixel centra (with black border and their resp. color fill0)"""
     fig = plt.figure(figsize=[7, 5])
     ax = plt.subplot(111)
 
@@ -114,8 +123,11 @@ def image_regions(Image, regionarray, max_nr_region, pdf, x_limits, y_limits):
     ax.set_xlabel('x axis')
     ax.set_ylabel('y axis')
 
-    im = ax.imshow(regionarray, cmap=discrete_cmap(max_nr_region, my_rbw),
-                   vmin=0.1, interpolation='none', origin='lower')
+    image_masked = np.ma.masked_where(binary_mask == 0, regionarray)
+
+    im = ax.imshow(image_masked, #cmap=discrete_cmap(max_nr_region, my_rbw, "white"),
+                   cmap=my_rbw,
+                   vmin=-0.1, interpolation='none', origin='lower')
     # extent=[x_limits[0], x_limits[1], y_limits[0], y_limits[1]])
 
     fig.colorbar(im, extend='min', format=lambda x, _: f"{int(x)}", label="Index of group")
