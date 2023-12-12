@@ -740,7 +740,7 @@ def plot_accu_barplot(names, values, metric_name, color, pdf):
 
 
 
-def plot_accuracy_images(Image, accuracy_images, calibrants_df, index_nr, accuracy_cutoff, x_limits, y_limits, pdf):
+def plot_accuracy_images(Image, accuracy_images, calibrants_df, index_nr, x_limits, y_limits, pdf):
     """Makes accuracy heatmaps per pixel ofthe found calibrant accuracy."""
     # loop over the calibrants
     for i, mass in enumerate(calibrants_df["mz"]):
@@ -755,7 +755,9 @@ def plot_accuracy_images(Image, accuracy_images, calibrants_df, index_nr, accura
 
         ax.set_xlim(x_limits[0], x_limits[1])
         ax.set_ylim(y_limits[0], y_limits[1])
-        im = ax.imshow(img, cmap=my_cw, vmin=-accuracy_cutoff, vmax=accuracy_cutoff)
+        im = ax.imshow(img, cmap=my_cw,
+                       vmin=calibrants_df.loc[i,"accuracy_llimits"],
+                       vmax=calibrants_df.loc[i,"accuracy_ulimits"])
         fig.colorbar(im, extend='both', label="ppm")
 
         pdf.savefig(fig)

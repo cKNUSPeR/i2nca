@@ -138,8 +138,11 @@ def report_calibrant_qc(I, # m2.imzMLReader (passing by ref allows faster comput
     # calculate coverage from accuracy images
     calibrants = collect_calibrant_converage(accuracy_images, calibrants, ppm)
 
+    # calculate the DBSCAN clustering for dynamic coloring
+    calibrants = collect_dynamic_cmaps(accuracy_images, calibrants, ppm)
+
     # make accuracy images
-    plot_accuracy_images(I, accuracy_images, calibrants, pixel_order, ppm, x_lims, y_lims, pdf_pages)
+    plot_accuracy_images(I, accuracy_images, calibrants, pixel_order, x_lims, y_lims, pdf_pages)
 
     # sumamary with coverage and avg. accuracy in non-zero pixels
     write_calibrant_summary_table(calibrants, pdf_pages)

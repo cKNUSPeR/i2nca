@@ -353,6 +353,8 @@ def read_calibrants(filepath: str):
     cal["value_map"] = np.NaN
     cal["distance_map"] = np.NaN
     cal["coverage"] = np.NaN
+    cal["accuracy_llimits"] = np.NaN
+    cal["accuracy_ulimits"] = np.NaN
     return cal
 
 
@@ -498,7 +500,7 @@ def collect_accuracy_stats(Image, calibrants_df, dist, format_dict):
         - format_dict: dict of imzML formats to handle signal evaluation
 
     :returns  accuracies_ar, index_nr
-    accuracies_ar: the array for the data of accurasies per pixels, linearized images
+    accuracies_ar: the array for the data of accurasies per pixels, linearized images, index by calibrants as dim1 and pixel by dim2
     index_nr: tuple of pixel indix sorted to match the shape of accuracies_ar
 
     """
@@ -557,6 +559,57 @@ def collect_calibrant_converage(accuracy_images, calibrants_df, accuracy_cutoff)
     calibrant_df["coverage"] = 1 - calibrant_df["coverage"]
     return calibrant_df
 
+def collect_dynamic_cmaps(accuracy_images, calibrants_df, accuracy_cutoff):
+    """Dynamically calculates range of interest for cmapping for each calibrant.
+    This is achieved by using DBSCAN to cluster the data, and then get the cluster nearest to 0 ppm.
+    The color range is adapted to include 0 for ease of readablility"""
+
+    # copy df for
+    calibrant_df = calibrants_df.copy(deep=True)
+
+    # Access an accuracy image as linear dataset for DBSCAN
+    for i, mass in enumerate(calibrant_df["mz"]):
+        # 'linearization of image
+        dataset = accuracy_images[i].reshape(-1, 1)
+
+        # 'evaluate DBSCAN parameters
+        min_samples = 2  # 2*dim with dim = 1 for lineraized data
+        eps = accuracy_cutoff * 2  # twice the accuracy cutoff for full window
+
+        # 'perform clustering
+        db = DBSCAN(eps=eps, min_samples=min_samples).fit(dataset)
+        unique_labels = set(db.labels_)
+
+        # 'acess unique labes
+        cluster_mean = []
+        cluster_limits = []
+
+        for label in unique_labels:
+            if label != -1:  # noise points labeled as -1
+
+            # ''get the mean, minimal and maximal points of the cluster
+                cluster_points = dataset[db.labels_ == label]
+                cluster_mean.append(np.mean(cluster_points, axis=0))
+                cluster_limits.append((min(cluster_points), max(cluster_points)))
+
+        # 'calc the distance of mean to 0 and get index of minimal distane
+        idx = (np.abs(np.asarray(cluster_mean) - 0)).argmin()
+
+        # 'get the (min,max) cluster limits
+        i_min, i_max = cluster_limits[idx]
+
+        # 'check if 0-offsetting is needed and return them to df
+        if i_min < 0 and i_max < 0:
+            # if both below 0
+            i_max = 0
+        elif i_min > 0 and i_max > 0:
+            i_min = 0
+
+        # 'enter them them to df
+        calibrant_df.loc[i, 'accuracy_llimits'] = i_min
+        calibrant_df.loc[i, 'accuracy_ulimits'] = i_max
+
+    return calibrant_df
 
 
 def collect_image_stats(Image, statistic_keywords):

@@ -14,6 +14,7 @@ import matplotlib.ticker as ticker
 import warnings
 from scipy.signal import argrelextrema
 import matplotlib.backends.backend_pdf
+from sklearn.cluster import DBSCAN
 
 # catch of FutueWarnings (looking at you, pandas  )
 warnings.simplefilter(action='ignore', category=FutureWarning)
