@@ -21,6 +21,12 @@ my_cw.set_under('purple')  # Color for values less than vmin
 my_cw.set_over('darkorange')
 my_cw.set_bad(color='white', alpha=1.0)
 
+my_plasma = cm.get_cmap('plasma').copy()
+my_plasma.set_under('grey')  # Color for values less than vmin
+my_plasma.set_over('grey')
+my_plasma.set_bad(color='white', alpha=1.0)
+
+
 
 def discrete_cmap(N, base_cmap=None, nan_color="white"):
     """Create an N-bin discrete colormap from the specified input map"""
@@ -774,7 +780,7 @@ def plot_accuracy_images(Image, accuracy_images, calibrants_df, index_nr, x_limi
 
         ax.set_xlim(x_limits[0], x_limits[1])
         ax.set_ylim(y_limits[0], y_limits[1])
-        im = ax.imshow(img, cmap=my_cw,
+        im = ax.imshow(img, cmap=my_plasma,
                        vmin=calibrants_df.loc[i,"accuracy_llimits"],
                        vmax=calibrants_df.loc[i,"accuracy_ulimits"])
         fig.colorbar(im, extend='both', label="ppm")
