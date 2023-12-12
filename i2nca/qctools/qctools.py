@@ -21,7 +21,7 @@ def report_agnostic_qc(I,  # m2.imzMLReader (passing by ref allows faster comput
     image_cropped_binary(I.GetMaskArray()[0],
                          pdf_pages, x_lims, y_lims)
 
-    image_pixel_index(I.GetIndexArray()[0],
+    image_pixel_index(I.GetIndexArray()[0], I.GetMaskArray()[0],
                       pdf_pages, x_lims, y_lims)
 
     image_stats = collect_image_stats(I,
@@ -35,37 +35,37 @@ def report_agnostic_qc(I,  # m2.imzMLReader (passing by ref allows faster comput
 
     # vis the tic metrics
     plot_tic_number(image_stats, pdf_pages)
-    image_tic_number(image_stats, I.GetIndexArray()[0],
+    image_tic_number(image_stats, I,
                      pdf_pages, x_lims, y_lims)
 
     # vis the mab metrics
     plot_max_abun_number(image_stats, pdf_pages)
-    image_max_abun_number(image_stats, I.GetIndexArray()[0],
+    image_max_abun_number(image_stats, I,
                           pdf_pages, x_lims, y_lims)
 
     # vis the median metrics
     plot_median_number(image_stats, pdf_pages)
-    image_median_number(image_stats, I.GetIndexArray()[0],
+    image_median_number(image_stats, I,
                         pdf_pages, x_lims, y_lims)
 
     # vis the max intensitsy metrics
     plot_max_int_number(image_stats, pdf_pages)
-    image_max_int_number(image_stats, I.GetIndexArray()[0],
+    image_max_int_number(image_stats, I,
                          pdf_pages, x_lims, y_lims)
 
     # vis the  min intensitsy metrics
     plot_min_int_number(image_stats, pdf_pages)
-    image_min_int_number(image_stats, I.GetIndexArray()[0],
+    image_min_int_number(image_stats, I,
                          pdf_pages, x_lims, y_lims)
 
     # vis the max intensitsy metrics
     plot_max_mz_number(image_stats, pdf_pages)
-    image_max_mz_number(image_stats, I.GetIndexArray()[0],
+    image_max_mz_number(image_stats, I,
                         pdf_pages, x_lims, y_lims)
 
     # vis the  min intensitsy metrics
     plot_min_mz_number(image_stats, pdf_pages)
-    image_min_mz_number(image_stats, I.GetIndexArray()[0],
+    image_min_mz_number(image_stats, I,
                         pdf_pages, x_lims, y_lims)
 
     # visualize the mean spectra

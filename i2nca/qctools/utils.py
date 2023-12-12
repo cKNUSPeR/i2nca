@@ -53,7 +53,7 @@ def make_index_image(Image):
     """handler for creating a valid index image in which invalid pixels get set to -1 to allow better display.
     return only x-y dimension."""
 
-    index_array = np.subtract(Image.GetMaskArray().astype(np.int_),1)
+    index_array = np.subtract(Image.GetMaskArray().astype(np.int_), 1)
     index_array = index_array + Image.GetIndexArray()
     return index_array[0]
 
@@ -67,7 +67,7 @@ def mask_bad_image(key_list,  # an iterable of valid pixel indices,
     # set up a translational dictionary
     trans_dict = dict(zip(key_list, val_list))
     # was once Important zero-index conversion, otherwise rounding gives error
-    # trans_dict[-1] = np.nan  # changed for now, lets see what new undefined pixels look like
+    trans_dict[-1] = np.nan  # changed for now, lets see what new undefined pixels look like
 
     # defines the callable function (juhu, we love functional programming
     translate = np.vectorize(lambda ele: trans_dict.get(ele, ele))

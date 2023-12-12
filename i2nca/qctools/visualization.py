@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import numpy as np
 
 from .dependencies import *
 from .utils import mask_bad_image, average_cont_spectra, average_processed_spectra, calculate_spectral_coverage, make_index_image
@@ -9,6 +10,7 @@ my_vir.set_under('white')  # Color for values less than vmin
 
 my_rbw = cm.get_cmap('gist_rainbow').copy()
 my_rbw.set_under('white')  # Color for values less than vmin
+my_rbw.set_bad('white')
 
 my_coolwarm = cm.get_cmap('coolwarm').copy()
 my_coolwarm.set_under('white')  # Color for values less than vmin
@@ -77,7 +79,7 @@ def image_cropped_binary(Image, pdf, x_limits, y_limits):
     plt.close()
 
 
-def image_pixel_index(Image, pdf, x_limits, y_limits):
+def image_pixel_index(image, binary_mask, pdf, x_limits, y_limits):
     """generates a plot of the index of each pixel. Image cropped to size.
         Saves the plot to a pdf"""
 
@@ -90,9 +92,14 @@ def image_pixel_index(Image, pdf, x_limits, y_limits):
     ax.set_xlim(x_limits[0], x_limits[1])
     ax.set_ylim(y_limits[0], y_limits[1])
 
-    im = ax.imshow(Image,
+    # cleanup with binary mask
+    image_masked = np.ma.masked_where(binary_mask == 0, image)
+
+    im = ax.imshow(image_masked,
                    cmap=my_rbw, vmin=-0.1, interpolation='none')
+
     fig.colorbar(im, extend='min')
+
 
     pdf.savefig(fig)
     plt.close()
@@ -185,10 +192,10 @@ def plot_tic_number(image_stats, pdf):
                        pdf)
 
 
-def image_tic_number(image_stats, index_image, pdf, x_limits, y_limits):
+def image_tic_number(image_stats, Image, pdf, x_limits, y_limits):
     """Images a heatmap of the TIC. Image cropped to size.
         Saves the plot to a pdf"""
-    image_basic_heatmap(mask_bad_image(image_stats["index_nr"], image_stats["tic_nr"], index_image),
+    image_basic_heatmap(mask_bad_image(image_stats["index_nr"], image_stats["tic_nr"], make_index_image(Image)),
                         'TIC per pixel projection',
                         "x axis",
                         "y axis",
@@ -204,10 +211,10 @@ def plot_max_abun_number(image_stats, pdf):
                        pdf)
 
 
-def image_max_abun_number(image_stats, index_image, pdf, x_limits, y_limits):
+def image_max_abun_number(image_stats, Image, pdf, x_limits, y_limits):
     """Images a heatmap of the Highest abundance mz  value. Image cropped to size.
         Saves the plot to a pdf"""
-    image_basic_heatmap(mask_bad_image(image_stats["index_nr"], image_stats["max_abun_nr"], index_image),
+    image_basic_heatmap(mask_bad_image(image_stats["index_nr"], image_stats["max_abun_nr"], make_index_image(Image)),
                         'Most abundand mz value per pixel projection',
                         "x axis",
                         "y axis",
@@ -223,10 +230,10 @@ def plot_median_number(image_stats, pdf):
                        pdf)
 
 
-def image_median_number(image_stats, index_image, pdf, x_limits, y_limits):
+def image_median_number(image_stats, Image, pdf, x_limits, y_limits):
     """Images a heatmap of the median intensity. Image cropped to size.
         Saves the plot to a pdf"""
-    image_basic_heatmap(mask_bad_image(image_stats["index_nr"], image_stats["median_nr"], index_image),
+    image_basic_heatmap(mask_bad_image(image_stats["index_nr"], image_stats["median_nr"], make_index_image(Image)),
                         'Median intensity per pixel projection',
                         "x axis",
                         "y axis",
@@ -242,10 +249,10 @@ def plot_max_int_number(image_stats, pdf):
                        pdf)
 
 
-def image_max_int_number(image_stats, index_image, pdf, x_limits, y_limits):
+def image_max_int_number(image_stats, Image, pdf, x_limits, y_limits):
     """Images a heatmap of the maximal intensity. Image cropped to size.
         Saves the plot to a pdf"""
-    image_basic_heatmap(mask_bad_image(image_stats["index_nr"], image_stats["max_int_nr"], index_image),
+    image_basic_heatmap(mask_bad_image(image_stats["index_nr"], image_stats["max_int_nr"], make_index_image(Image)),
                         'Maximal intensity per pixel projection',
                         "x axis",
                         "y axis",
@@ -261,10 +268,10 @@ def plot_min_int_number(image_stats, pdf):
                        pdf)
 
 
-def image_min_int_number(image_stats, index_image, pdf, x_limits, y_limits):
+def image_min_int_number(image_stats, Image, pdf, x_limits, y_limits):
     """Images a heatmap of the minimal intensity. Image cropped to size.
         Saves the plot to a pdf"""
-    image_basic_heatmap(mask_bad_image(image_stats["index_nr"], image_stats["min_int_nr"], index_image),
+    image_basic_heatmap(mask_bad_image(image_stats["index_nr"], image_stats["min_int_nr"], make_index_image(Image)),
                         'Minimal intensity per pixel projection',
                         "x axis",
                         "y axis",
@@ -280,10 +287,10 @@ def plot_max_mz_number(image_stats, pdf):
                        pdf)
 
 
-def image_max_mz_number(image_stats, index_image, pdf, x_limits, y_limits):
+def image_max_mz_number(image_stats, Image, pdf, x_limits, y_limits):
     """Images a heatmap of the largest mz value. Image cropped to size.
         Saves the plot to a pdf"""
-    image_basic_heatmap(mask_bad_image(image_stats["index_nr"], image_stats["max_mz_nr"], index_image),
+    image_basic_heatmap(mask_bad_image(image_stats["index_nr"], image_stats["max_mz_nr"], make_index_image(Image)),
                         'Maximal m/z value per pixel projection',
                         "x axis",
                         "y axis",
@@ -299,10 +306,10 @@ def plot_min_mz_number(image_stats, pdf):
                        pdf)
 
 
-def image_min_mz_number(image_stats, index_image, pdf, x_limits, y_limits):
+def image_min_mz_number(image_stats, Image, pdf, x_limits, y_limits):
     """Images a heatmap of the smallest mz value. Image cropped to size.
         Saves the plot to a pdf"""
-    image_basic_heatmap(mask_bad_image(image_stats["index_nr"], image_stats["min_mz_nr"], index_image),
+    image_basic_heatmap(mask_bad_image(image_stats["index_nr"], image_stats["min_mz_nr"], make_index_image(Image)),
                         'Minimal m/z value per pixel projection',
                         "x axis",
                         "y axis",
@@ -744,7 +751,7 @@ def plot_accuracy_images(Image, accuracy_images, calibrants_df, index_nr, x_limi
     """Makes accuracy heatmaps per pixel ofthe found calibrant accuracy."""
     # loop over the calibrants
     for i, mass in enumerate(calibrants_df["mz"]):
-        img = mask_bad_image(index_nr, accuracy_images[i] , Image.GetIndexArray()[0])
+        img = mask_bad_image(index_nr, accuracy_images[i], make_index_image(Image))
 
         # plot each image
         fig = plt.figure(figsize=[7, 5])
