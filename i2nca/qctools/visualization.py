@@ -407,7 +407,9 @@ def write_calibrant_summary_table(data_frame, pdf):
     pdf.savefig(fig, bbox_inches="tight")
     plt.close()
 
-def plot_boxplots(name_boxplot, stat_boxplot, pdf):
+def plot_boxplots(name_boxplot, stat_boxplot,
+                  title, xlabel, ylabel,
+                  pdf):
     # 2DO: scaling adjusted to 20, also parametrized with titles, and mabe make a subfunction for plotting
     len_b20 = len(name_boxplot) // 20
     if (len(name_boxplot) % 20) > 0:
@@ -416,27 +418,41 @@ def plot_boxplots(name_boxplot, stat_boxplot, pdf):
     # plotting functions based on single-line or multi-line plotting:
     if len_b20 > 1:
         fig, ax = plt.subplots(len_b20, figsize=(10, len_b20 * 4))
-        fig.suptitle('Boxplots of TIC per pixel by segmented group')
+        fig.suptitle(title)
 
         for j in range(1, len_b20 + 1):  # change to 1-base index
             ax[j - 1].boxplot(stat_boxplot[(j - 1) * 20:20 * j],
                               labels=name_boxplot[(j - 1) * 20:20 * j])
-            ax[j - 1].set_xlabel('Index of group')
-            ax[j - 1].set_ylabel('log10 of TIC intensity per pixel')
+            ax[j - 1].set_xlabel(xlabel)
+            ax[j - 1].set_ylabel(ylabel)
 
     else:
         fig = plt.figure(figsize=[10, len_b20 * 4])
         ax = plt.subplot(111)
-        ax.set_title('Boxplots of TIC per pixel by segmented group')
+        ax.set_title(title)
 
-        ax.boxplot(stat_boxplot[:],
+        ax.boxplot(stat_boxplot,
                    labels=name_boxplot)
-        ax.set_xlabel('Index of group')
-        ax.set_ylabel('log10 of TIC intensity per pixel')
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel(ylabel)
 
     plt.tight_layout()
     pdf.savefig(fig)
     plt.close()
+
+def plot_accuracy_boxplots(accuracy_images, calibrants_df, ppm_cutoff, pdf):
+
+    names = calibrants_df["name"].to_list()
+
+    # lambda magic to make a list of the accuracy values inside the ppm_cutoff range
+    cleanup_row = lambda row: list(np.array(row)[(row >= -ppm_cutoff) & (row <= +ppm_cutoff)])
+
+    accuracies = list(map(cleanup_row,accuracy_images))  # plt takes multi-dim data as list of vectors
+
+    plot_boxplots(names, accuracies,
+                  "Boxplot of mass accuracies within ppm interval by calibrant",
+                  "Calibrant","Accuracy in ppm",pdf)
+
 
 def plot_regions_averages(regional_spectra, format_dict, region_number, pdf):
     """case handler to address coccrect plottig of averaged spectra."""
@@ -762,7 +778,7 @@ def plot_accu_barplot(names, values, metric_name, color, pdf):
 
 
 
-def plot_accuracy_images(Image, accuracy_images, calibrants_df, index_nr, x_limits, y_limits, pdf):
+def plot_accuracy_images(Image, accuracy_images, calibrants_df, ppm, index_nr, x_limits, y_limits, pdf):
     """Makes accuracy heatmaps per pixel ofthe found calibrant accuracy."""
     # loop over the calibrants
     for i, mass in enumerate(calibrants_df["mz"]):
@@ -778,8 +794,8 @@ def plot_accuracy_images(Image, accuracy_images, calibrants_df, index_nr, x_limi
         ax.set_xlim(x_limits[0], x_limits[1])
         ax.set_ylim(y_limits[0], y_limits[1])
         im = ax.imshow(img, cmap=my_cw,
-                       vmin=calibrants_df.loc[i,"accuracy_llimits"],
-                       vmax=calibrants_df.loc[i,"accuracy_ulimits"])
+                       vmin=-ppm,
+                       vmax=+ppm)
         fig.colorbar(im, extend='both', label="ppm")
 
         pdf.savefig(fig)

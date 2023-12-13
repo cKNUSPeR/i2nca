@@ -371,10 +371,27 @@ def make_subsample(samplenumber: int, percent_sample:float) -> list:
     # get random numbers according to the batch size
     return rnd.sample(range(0, samplenumber), batch_size)
 
-def find_nearest(array, value):
-    array = np.asarray(array)
-    idx = (np.abs(array - value)).argmin()
-    return array[idx]
+
+def find_nearest_centroid(mzs, value, distance=0):
+    """search in distance interval and return the mz of the value nearest to the specified value"""
+
+    if distance != False:
+        try:
+            lindex = min(np.where(mzs > (value - distance))[0])
+            hindex = min(np.where(mzs > (value + distance))[0])
+        except:
+            return value + 2 * distance  # invalid pixels get defaulted to be twice the distance
+    else:
+        lindex = 0
+        hindex = len(mzs)
+
+    mzs = np.asarray(mzs)[lindex:hindex]
+
+    if len(mzs) == 0:  # stop caculation and return out-of-distacne value
+        return value + 2 * distance  # invalid pixels get defaulted to be +1
+
+    idx = (np.abs(mzs - value)).argmin()
+    return mzs[idx]
 
 def find_nearest_loc_max(mzs, intensites, value, distance=0):
     """Finds the nearest local maxima of a profile line to a certain mass.
@@ -383,9 +400,11 @@ def find_nearest_loc_max(mzs, intensites, value, distance=0):
 
     """
 
-    if distance == False:
+    try:
         lindex = min(np.where(mzs > (value - distance))[0])
         hindex = min(np.where(mzs > (value + distance))[0])
+    except:
+        return value + 2 * distance  # invalid pixels get defaulted to be +1
     else:
         lindex = 0
         hindex = len(mzs)
@@ -393,6 +412,9 @@ def find_nearest_loc_max(mzs, intensites, value, distance=0):
     # ensure arrayztion for mapping and slice array for shorter calc time
     intensites = np.asarray(intensites)[lindex:hindex]
     mzs = np.asarray(mzs)[lindex:hindex]
+
+    if len(mzs) == 0:  # stop caculation and return out-of-distacne value
+        return value + 2 * distance  # invalid pixels get defaulted to be +1
 
     # get local maxima indices
     max_index = SSI.argrelextrema(intensites, np.greater)
@@ -407,6 +429,7 @@ def find_nearest_loc_max(mzs, intensites, value, distance=0):
     max_index = max_index[np.where(locmax_ints >= max_intensity*0.01)]
 
     # get values of those local maxima
+
     mzs = mzs[max_index]
     idx = (np.abs(mzs - value)).argmin()
     return mzs[idx]
@@ -522,7 +545,7 @@ def collect_accuracy_stats(Image, calibrants_df, format_dict):
     if format_dict["centroid"]:
          for ind, mass, inten in Image.SpectrumIterator():  # loop to run over full imzML dataset
              # get nearest elements
-             accuracies_ar[ind] =[find_nearest(mass, calmass) for calmass, dist in zip(calibrants_df["mz"], calibrants_df["interval"])]
+             accuracies_ar[ind] =[find_nearest_centroid(mass, calmass, dist) for calmass, dist in zip(calibrants_df["mz"], calibrants_df["interval"])]
              # collect image index in order of iteration
              index_nr = index_nr + (ind,)  # pixel order is 0 in new m2aia version
 
@@ -571,6 +594,7 @@ def collect_calibrant_converage(accuracy_images, calibrants_df, accuracy_cutoff)
     return calibrant_df
 
 def collect_dynamic_cmaps(accuracy_images, calibrants_df, accuracy_cutoff):
+    # cool but sadly decrep.
     """Dynamically calculates range of interest for cmapping for each calibrant.
     This is achieved by using DBSCAN to cluster the data, and then get the cluster nearest to 0 ppm.
     The color range is adapted to include 0 for ease of readablility"""

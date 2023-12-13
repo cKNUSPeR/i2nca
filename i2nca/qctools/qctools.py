@@ -139,10 +139,13 @@ def report_calibrant_qc(I, # m2.imzMLReader (passing by ref allows faster comput
     calibrants = collect_calibrant_converage(accuracy_images, calibrants, ppm)
 
     # calculate the DBSCAN clustering for dynamic coloring
-    calibrants = collect_dynamic_cmaps(accuracy_images, calibrants, ppm)
+    # calibrants = collect_dynamic_cmaps(accuracy_images, calibrants, ppm)
 
     # make accuracy images
-    plot_accuracy_images(I, accuracy_images, calibrants, pixel_order, x_lims, y_lims, pdf_pages)
+    plot_accuracy_images(I, accuracy_images, calibrants, ppm, pixel_order, x_lims, y_lims, pdf_pages)
+
+    # plot the accuracy boxplots.
+    plot_accuracy_boxplots(accuracy_images, calibrants, ppm, pdf_pages)
 
     # sumamary with coverage and avg. accuracy in non-zero pixels
     write_calibrant_summary_table(calibrants, pdf_pages)
@@ -194,7 +197,11 @@ def report_regions_qc(I,  # m2.imzMLReader (passing by ref allows faster computa
     names_tic_bp, tic_bp = group_region_stat(region_image, I.GetIndexArray()[0], nr_regions, image_stats, "tic_nr")
 
     # plot the grouped data in a boxplot
-    plot_boxplots(names_tic_bp, tic_bp, pdf_pages)
+    plot_boxplots(names_tic_bp, tic_bp,
+                  'Boxplots of TIC per pixel by segmented group',
+                  'Index of group',
+                  'log10 of TIC intensity per pixel',
+                  pdf_pages)
 
     # collect average spectra per region
     region_spectra = collect_region_averages(I, format_flags, region_image, nr_regions)
