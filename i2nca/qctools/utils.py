@@ -39,16 +39,23 @@ def evaluate_formats(file_format  # metadata_string
 def evaluate_image_corners(ndarray):
     """Givel the values of the corners of the pixel-filled ndarray """
     pix_pos = np.argwhere(ndarray)
+    offset = 0.5 # 0.5 makes plt plots better as it offsets the pixel centering
 
     # get the corners of data entry, is useful to set limits of plotting
-    x_min = pix_pos[np.argmin(pix_pos[:, 1])][1]
-    x_max = pix_pos[np.argmax(pix_pos[:, 1])][1]
-    y_min = pix_pos[np.argmin(pix_pos[:, 0])][0]
-    y_max = pix_pos[np.argmax(pix_pos[:, 0])][0]
+    x_min = pix_pos[np.argmin(pix_pos[:, 1])][1] - offset
+    x_max = pix_pos[np.argmax(pix_pos[:, 1])][1] + offset
+    y_min = pix_pos[np.argmin(pix_pos[:, 0])][0] - offset
+    y_max = pix_pos[np.argmax(pix_pos[:, 0])][0] + offset
 
     return (x_min, x_max), (y_min, y_max)
 
+def make_index_image(Image):
+    """handler for creating a valid index image in which invalid pixels get set to -1 to allow better display.
+    return only x-y dimension."""
 
+    index_array = np.subtract(Image.GetMaskArray().astype(np.int_), 1)
+    index_array = index_array + Image.GetIndexArray()
+    return index_array[0]
 
 
 def mask_bad_image(key_list,  # an iterable of valid pixel indices,
@@ -59,8 +66,8 @@ def mask_bad_image(key_list,  # an iterable of valid pixel indices,
     It transfers pixels from 0 (in binary image input ) to NaN, which allows them to be set to bad"""
     # set up a translational dictionary
     trans_dict = dict(zip(key_list, val_list))
-    # Important zero-index conversion, otherwise rounding gives error
-    trans_dict[0] = np.nan
+    # was once Important zero-index conversion, otherwise rounding gives error
+    trans_dict[-1] = np.nan  # changed for now, lets see what new undefined pixels look like
 
     # defines the callable function (juhu, we love functional programming
     translate = np.vectorize(lambda ele: trans_dict.get(ele, ele))
@@ -105,7 +112,7 @@ def label_connected_region(Image):
     return df, labeled_image, max_regions
 
 
-def parse_regionfile(file, annotation_group, x_lims, y_lims):
+def parse_regionfile(file, annotation_group, image):
     """parses the regions tsv file. Assumes that the regions are annotated
     within the coordinates of the imaging file (the point of origin is at (0,0))."""
 
@@ -118,8 +125,12 @@ def parse_regionfile(file, annotation_group, x_lims, y_lims):
     # the maximum number of regions (counting starts at 1)
     max_regions = df['annotation_values'].max()
 
+    # get the shape
+    x_lims = (0, image.GetShape()[0])
+    y_lims = (0, image.GetShape()[1])
+
     # set up empty array with xlims any ylims ranges
-    labeled_image = np.zeros((1 + y_lims[1] - y_lims[0], 1 + x_lims[1] - x_lims[0]))  # 1-indexed for inclusiveness
+    labeled_image = np.zeros((y_lims[1] - y_lims[0], x_lims[1] - x_lims[0]))  # 0-indexed
 
     # fill the labeled image with the annotations:
     for index, row in df.iterrows():
@@ -178,6 +189,32 @@ def group_region_stat(labeled_image, index_image, label_nr, image_stats, keyword
     return name_coll_boxplot, stat_coll_boxplot
 
 
+def collect_region_averages(Image, format_dict, regions_image, region_number):
+    """handler for collection of mean spectra of different regions"""
+    lab_ar = np.reshape(regions_image, -1)
+    ind_ar = np.reshape(Image.GetIndexArray()[0], -1)
+
+    averaged_spectra = []
+
+    for index in range(1, region_number + 1):
+        # get the index per segment
+        pindex = ind_ar[np.where(lab_ar == index)]  # extracion of pixel indices per segment
+
+        # make averages
+        if format_dict["continuous"]:
+            avg_mz, avg_ints = average_cont_spectra(Image, pindex)
+        elif format_dict["processed"]:
+            avg_mz, avg_ints = average_processed_spectra(Image, pindex)
+
+        # collect averaged spectra
+        averaged_spectra.append((avg_mz,avg_ints))
+
+    return averaged_spectra
+
+
+
+
+
 def average_cont_spectra(Image, pixels):
     """
     Input:
@@ -201,7 +238,7 @@ def average_cont_spectra(Image, pixels):
     return mz, ints
 
 
-def average_processed_spectra(Image, pixels):
+def average_processed_spectra(Image, pixels, bin_nr = 0):
     """Averages processed spectra by their pixels.
     Calculates a mz window with start, end and stepsize and bins the data into this.
     the amount of bins is equal to 10 times the highest number of datapoints recorded.
@@ -209,6 +246,8 @@ def average_processed_spectra(Image, pixels):
     Input:
         - Image: an m2aia imzML reader
         - pixels: a sequence of pixel indices
+        - bins: a predetermined number of bins,
+            if =0 then this gets dynamically assumed to be 10 times the size of the most data point occurence
     returns:
         mzs, ints
         two arrays with mz values and intensity values of the respective average
@@ -216,43 +255,45 @@ def average_processed_spectra(Image, pixels):
     # get the normalization numbers
     n = len(pixels)
 
-    # get the mz value range
-    mz_start, mz_end = min(Image.GetXAxis()) - 0.0001, max(Image.GetXAxis())  # minimum is reduced by a bit.
+    # get the mz value range, floored and ceiled to fix the edge values
+    mz_start, mz_end = np.floor(min(Image.GetXAxis())), np.ceil(max(Image.GetXAxis()))  # minimum is reduced by a bit.
 
-    # get the number of bins (estimation by getting the largest number of spectra in the file)
-    bin_nr = 1  # the left index of each mass bin
-    for ids in pixels:
-        cbin_nr = Image.GetSpectrumDepth(ids)
-        if cbin_nr > bin_nr:
-            bin_nr = cbin_nr
 
-    # binning is enhanced by factor of 10, to counteract spectral pixelation
-    bin_nr = bin_nr * 10
+    if bin_nr == 0:
+        # get the number of bins (estimation by getting the largest number of spectra in the file)
+        for ids in pixels:
+            cbin_nr = Image.GetSpectrumDepth(ids)
+            if cbin_nr > bin_nr:
+                bin_nr = cbin_nr
+        # binning is enhanced by factor of 10, to counteract spectral pixelation
+        bin_nr = bin_nr * 10
 
     # set up the collection df for the binned ranges:
-    bins = np.linspace(mz_start, mz_end, bin_nr)
+    bins = np.linspace(mz_start, mz_end, num=bin_nr, endpoint=False)
 
-    full_df = pd.DataFrame({'mz_bins': bins})
-    full_df["collect"] = np.nan
+    # array for collection of intensity values
+    collector_array = np.full(bin_nr, np.nan)
 
     # make a loop:
     for idx in pixels:
         # mzs and ints of the pixel
         mz, ints = Image.GetSpectrum(idx)
 
-        # make andbin the dat in a dataframe
-        little_df = pd.DataFrame({'mz': mz, "intensity": ints})
-        little_df['binned'] = pd.cut(mz, bins)
+        # Digitize the data into bins
+        bin_indices = np.digitize(mz, bins) - 1
+        # needs to be recuced by 1
+
+        # Calculate the sum of intensities within each bin
+        bin_sums = np.bincount(bin_indices, weights=ints, minlength=bin_nr)
 
         # means of grouped bins and normalized to pixels
-        full_df["single"] = little_df.groupby(['binned'])['intensity'].mean() / n
-        full_df["collect"] = full_df[['collect', 'single']].sum(axis=1, min_count=1)
+        collector_array[bin_indices] = np.nansum([bin_sums[bin_indices], collector_array[bin_indices]], axis=0)
 
-    # filter out NaN values:
-    full_df = full_df.dropna(subset=['collect'])
+    # filter out NaN values and normalize over n
+    bins = bins[~np.isnan(collector_array)]
+    collector_array = collector_array[~np.isnan(collector_array)] / n
 
-    # return as arrays
-    return full_df['mz_bins'].to_numpy(), full_df["collect"].to_numpy()
+    return bins, collector_array
 
 def calculate_spectral_coverage(mz_values, intensities):
     """
@@ -302,7 +343,7 @@ def calculate_spectral_coverage(mz_values, intensities):
     return bins, coverage
 
 
-def read_calibrants(filepath: str):
+def read_calibrants(filepath: str, ppm_cutoff: float):
     """Reads calibrant files and gives a list of name and thr. mz values
     INVARIANTS: Needs a header column with 'name' and a col with 'mz'."""
     cal = pd.read_csv(filepath, sep=';', header=0)
@@ -312,6 +353,13 @@ def read_calibrants(filepath: str):
     cal["value_map"] = np.NaN
     cal["distance_map"] = np.NaN
     cal["coverage"] = np.NaN
+    #cal["accuracy_llimits"] = np.NaN
+    #cal["accuracy_ulimits"] = np.NaN
+
+    # some oneliner magic to ease applying a function to a df
+    calc_dist_ivl = lambda x: x * ppm_cutoff / 1e6
+
+    cal["interval"] = cal["mz"].apply(calc_dist_ivl)
     return cal
 
 
@@ -322,10 +370,27 @@ def make_subsample(samplenumber: int, percent_sample:float) -> list:
     # get random numbers according to the batch size
     return rnd.sample(range(0, samplenumber), batch_size)
 
-def find_nearest(array, value):
-    array = np.asarray(array)
-    idx = (np.abs(array - value)).argmin()
-    return array[idx]
+
+def find_nearest_centroid(mzs, value, distance=0):
+    """search in distance interval and return the mz of the value nearest to the specified value"""
+
+    if distance != False:
+        try:
+            lindex = min(np.where(mzs > (value - distance))[0])
+            hindex = min(np.where(mzs > (value + distance))[0])
+        except:
+            return value + 2 * distance  # invalid pixels get defaulted to be twice the distance
+    else:
+        lindex = 0
+        hindex = len(mzs)
+
+    mzs = np.asarray(mzs)[lindex:hindex]
+
+    if len(mzs) == 0:  # stop caculation and return out-of-distacne value
+        return value + 2 * distance  # invalid pixels get defaulted to be +1
+
+    idx = (np.abs(mzs - value)).argmin()
+    return mzs[idx]
 
 def find_nearest_loc_max(mzs, intensites, value, distance=0):
     """Finds the nearest local maxima of a profile line to a certain mass.
@@ -334,9 +399,11 @@ def find_nearest_loc_max(mzs, intensites, value, distance=0):
 
     """
 
-    if distance == False:
+    try:
         lindex = min(np.where(mzs > (value - distance))[0])
         hindex = min(np.where(mzs > (value + distance))[0])
+    except:
+        return value + 2 * distance  # invalid pixels get defaulted to be +1
     else:
         lindex = 0
         hindex = len(mzs)
@@ -344,6 +411,9 @@ def find_nearest_loc_max(mzs, intensites, value, distance=0):
     # ensure arrayztion for mapping and slice array for shorter calc time
     intensites = np.asarray(intensites)[lindex:hindex]
     mzs = np.asarray(mzs)[lindex:hindex]
+
+    if len(mzs) == 0:  # stop caculation and return out-of-distacne value
+        return value + 2 * distance  # invalid pixels get defaulted to be +1
 
     # get local maxima indices
     max_index = SSI.argrelextrema(intensites, np.greater)
@@ -358,6 +428,7 @@ def find_nearest_loc_max(mzs, intensites, value, distance=0):
     max_index = max_index[np.where(locmax_ints >= max_intensity*0.01)]
 
     # get values of those local maxima
+
     mzs = mzs[max_index]
     idx = (np.abs(mzs - value)).argmin()
     return mzs[idx]
@@ -437,6 +508,11 @@ def collect_calibrant_stats(cal_spectra, calibrant_df, index):
 
     return calibrant_df
 
+def calculate_disance(theo_mass,
+                      ppm_cutoff: float):
+    """calcualtes the distance in delmz for a given mass and ppm"""
+    return theo_mass * ppm_cutoff / 1e6
+
 def calculate_ppm(exp_mass,
                   theo_mass: float):
     """Calulates ppm of na experimental mass againt a theoretical mass.
@@ -449,7 +525,7 @@ def calculate_ppm(exp_mass,
     return ((exp_mass - theo_mass) / theo_mass)*1e6
 
 
-def collect_accuracy_stats(Image, calibrants_df, dist, format_dict):
+def collect_accuracy_stats(Image, calibrants_df, format_dict):
     """ Finds and collects the nearest signals around all provided calibrant masses.
     Input:
         - Image: ImzMLReader object
@@ -457,7 +533,7 @@ def collect_accuracy_stats(Image, calibrants_df, dist, format_dict):
         - format_dict: dict of imzML formats to handle signal evaluation
 
     :returns  accuracies_ar, index_nr
-    accuracies_ar: the array for the data of accurasies per pixels, linearized images
+    accuracies_ar: the array for the data of accurasies per pixels, linearized images, index by calibrants as dim1 and pixel by dim2
     index_nr: tuple of pixel indix sorted to match the shape of accuracies_ar
 
     """
@@ -468,17 +544,17 @@ def collect_accuracy_stats(Image, calibrants_df, dist, format_dict):
     if format_dict["centroid"]:
          for ind, mass, inten in Image.SpectrumIterator():  # loop to run over full imzML dataset
              # get nearest elements
-             accuracies_ar[ind] =[find_nearest(mass, calmass) for calmass in calibrants_df["mz"]]
+             accuracies_ar[ind] =[find_nearest_centroid(mass, calmass, dist) for calmass, dist in zip(calibrants_df["mz"], calibrants_df["interval"])]
              # collect image index in order of iteration
-             index_nr = index_nr + (ind + 1,)  # pixel order is 0 for not-recorded pixels
+             index_nr = index_nr + (ind,)  # pixel order is 0 in new m2aia version
 
 
     elif format_dict["profile"]:
         for ind, mass, inten in Image.SpectrumIterator():  # loop to run over full imzML dataset
             # get nearest loc, max
-            accuracies_ar[ind] = [find_nearest_loc_max(mass,inten, calmass, dist) for calmass in calibrants_df["mz"]]
+            accuracies_ar[ind] = [find_nearest_loc_max(mass,inten, calmass, dist) for calmass, dist in zip(calibrants_df["mz"], calibrants_df["interval"])]
             # collect image index in order of iteration
-            index_nr = index_nr + (ind + 1,)  # pixel order is 0 for not-recorded pixels
+            index_nr = index_nr + (ind ,)  # pixel order is 0 from m2aia 0.5.0 onw
 
     # transpose to match  ppm calcs form
     accuracies_ar = accuracies_ar.T
@@ -492,26 +568,82 @@ def collect_accuracy_stats(Image, calibrants_df, dist, format_dict):
 def collect_calibrant_converage(accuracy_images, calibrants_df, accuracy_cutoff):
     """Evalualtes how many pixels within a accuracy image fall outsde of the defined accuracy cutoff.
     saves these into the calibrant_df as converage, normed on the amount of pixels."""
+
+    #2DO change so that coverage gets dynamically calculated
     # deep-copy the df
     calibrant_df = calibrants_df.copy(deep=True)
 
 
     # loop over the calibrants
     for i, mass in enumerate(calibrant_df["mz"]):
-        #count how many values are smaller than specified cutoff:
-        low_dist = np.sum(accuracy_images[i] < accuracy_cutoff)
-        high_dist = np.sum(accuracy_images[i] > accuracy_cutoff)
+        #count how many values are larger than higher cutoff cutoff:
+        high_dist = np.sum(accuracy_images[i] > +accuracy_cutoff)
+        # count how many values are lower  than lowest cutoff value:
+        low_dist = np.sum(accuracy_images[i] < -accuracy_cutoff)
 
         # add to calibrants_df
         calibrant_df.loc[i, "coverage"] = (low_dist+high_dist)
 
     # divide over number of pixels
     pixel_nr = len(accuracy_images[0])
-    # normalize over pixel number
+    # normalize over pixel number and
     calibrant_df["coverage"] = calibrant_df["coverage"]/pixel_nr
-
+    # take difference of 1 to get actual coverage
+    calibrant_df["coverage"] = 1 - calibrant_df["coverage"]
     return calibrant_df
 
+def collect_dynamic_cmaps(accuracy_images, calibrants_df, accuracy_cutoff):
+    # cool but sadly decrep.
+    """Dynamically calculates range of interest for cmapping for each calibrant.
+    This is achieved by using DBSCAN to cluster the data, and then get the cluster nearest to 0 ppm.
+    The color range is adapted to include 0 for ease of readablility"""
+
+    # copy df for
+    calibrant_df = calibrants_df.copy(deep=True)
+
+    # Access an accuracy image as linear dataset for DBSCAN
+    for i, mass in enumerate(calibrant_df["mz"]):
+        # 'linearization of image
+        dataset = accuracy_images[i].reshape(-1, 1)
+
+        # 'evaluate DBSCAN parameters
+        min_samples = 2  # 2*dim with dim = 1 for lineraized data
+        eps = accuracy_cutoff * 2  # twice the accuracy cutoff for full window
+
+        # 'perform clustering
+        db = DBSCAN(eps=eps, min_samples=min_samples).fit(dataset)
+        unique_labels = set(db.labels_)
+
+        # 'acess unique labes
+        cluster_mean = []
+        cluster_limits = []
+
+        for label in unique_labels:
+            if label != -1:  # noise points labeled as -1
+
+            # ''get the mean, minimal and maximal points of the cluster
+                cluster_points = dataset[db.labels_ == label]
+                cluster_mean.append(np.mean(cluster_points, axis=0))
+                cluster_limits.append((min(cluster_points), max(cluster_points)))
+
+        # 'calc the distance of mean to 0 and get index of minimal distane
+        idx = (np.abs(np.asarray(cluster_mean) - 0)).argmin()
+
+        # 'get the (min,max) cluster limits
+        i_min, i_max = cluster_limits[idx]
+
+        # 'check if 0-offsetting is needed and return them to df
+        if i_min < 0 and i_max < 0:
+            # if both below 0
+            i_max = 0
+        elif i_min > 0 and i_max > 0:
+            i_min = 0
+
+        # 'enter them them to df
+        calibrant_df.loc[i, 'accuracy_llimits'] = i_min
+        calibrant_df.loc[i, 'accuracy_ulimits'] = i_max
+
+    return calibrant_df
 
 
 def collect_image_stats(Image, statistic_keywords):
@@ -531,7 +663,7 @@ def collect_image_stats(Image, statistic_keywords):
     for ind, mass, inten in Image.SpectrumIterator():  # loop to run over the full imzML dataset
         for keyword in statistic_keywords:
             if keyword == 'index_nr':
-                statistics_result[keyword] += (ind + 1,)
+                statistics_result[keyword] += (ind, )  # index of spectrum is now zero-based
             elif keyword == 'peak_nr':
                 statistics_result[keyword] += (len(inten),)
             elif keyword == 'tic_nr':
@@ -553,44 +685,6 @@ def collect_image_stats(Image, statistic_keywords):
     return statistics_result
 
 
-#decrepateted
-def old_collect_image_stats(Image # m2aia-ImzML Reader object
-                        ):
-    """ Expensive function to call. iterates over full spectrum and returns the following metrics:
-    0) the index of each pixel, useful for plotting
-    1) the number of data points present in each pixel
-    2) the TIC of each pixel
-    3) the median intensity of each pixel
-    4) the maximum intensity that was recorded in the pixel
-    5) the minimum intesity that was recorded in the pixel
-    6) the highest mz value present
-    7) the smallest mz value present
-    8) the most abundant mz value in each pixel (Base Peak)"""
-    index_nr = tuple()  # container for pixel index, corrected for 0-index
-    peak_nr = tuple()  # container for number of features loaded in a single pixel
-    tic_nr = tuple()  # container of TIC for each single pixel
-    median_nr = tuple()  # Container for the median intnsity in each pixel
-    max_int_nr = tuple()  # Container for the max intnsity in each pixel
-    min_int_nr = tuple()  # Container for the min intnsity in each pixel
-    max_mz_nr = tuple()  # Container for the maximal mz value in each pixel
-    min_mz_nr = tuple()  # Container for the minimal mz  value in each pixel
-    max_abun_nr = tuple()  # Container for the most abundant mz in each pixel
-
-    for ind, mass, inten in Image.SpectrumIterator():  # loop to run over full imzML dataset
-        # values for a single pixel are recorded in their specific tuples
-        index_nr = index_nr + (ind + 1,)  # pixel order is 0 for not-recorded pixels
-        peak_nr = peak_nr + (len(inten),)
-        tic_nr = tic_nr + (sum(inten),)
-        median_nr += (stat.median(inten),)
-        max_int_nr += (max(inten),)
-        min_int_nr += (min(inten),)
-        max_mz_nr += (max(mass),)
-        min_mz_nr += (min(mass),)
-        max_abun_nr += (mass[np.where(inten == max(inten))[0][0]],)
-
-    return (index_nr, peak_nr, tic_nr, median_nr, max_int_nr, min_int_nr, max_mz_nr, min_mz_nr, max_abun_nr)
-
-
 
 def generate_table_data(Image, x_limits, y_limits, im_stats):
         table = [
@@ -598,19 +692,106 @@ def generate_table_data(Image, x_limits, y_limits, im_stats):
         ["Numeric shape of Image (x, y, z):", str(Image.GetShape())],
         ["Number of recorded Pixels:", str(Image.GetNumberOfSpectra())],
         ["Number of unrecorded Pixels:", str(np.abs(np.product(Image.GetShape()) - Image.GetNumberOfSpectra()))],
-        ["Recorded x-range:", str(x_limits)],
-        ["Recorded y-range:", str(y_limits)],
-        ["Number of individual mz features:", str(np.sum(im_stats['peak_nr']))],
-        ["Mean TIC ± sd:", str(f"{int(stat.mean(im_stats['tic_nr']))} ± {int(stat.stdev(im_stats['tic_nr']))}")],
-        ["Median TIC ± MAD:", str(f"{int(stat.median(im_stats['tic_nr']))} ± {int(SST.median_abs_deviation(im_stats['tic_nr']))}")],
-        ["Mean number of mz features per spectrum ± sd:", str(f"{int(stat.mean(im_stats['peak_nr']))} ± {int(stat.stdev(im_stats['peak_nr']))}")],
-        ["Median number of mz features per spectrum ± MAD:", str(f"{int(stat.median(im_stats['peak_nr']))} ± {int(SST.median_abs_deviation(im_stats['peak_nr']))}")],
-        ["Range of median intensities per pixel:", str((min(im_stats['median_nr']), max(im_stats['median_nr'])))],
-        ["Range of Maximal Intensity per pixel:", str((min(im_stats['max_int_nr']), max(im_stats['max_int_nr'])))],
-        ["Range of most abundant mz per pixel:", str((min(im_stats['max_abun_nr']), max(im_stats['max_abun_nr'])))],
         ["mz range:", str((min(im_stats['min_mz_nr']), max(im_stats['max_mz_nr'])))],
         ["Spacing:", str(Image.GetSpacing())],
-        ["m/z Bins:", str(Image.GetXAxisDepth())],
+        # ["m/z Bins:", str(Image.GetXAxisDepth())],
         ["Intensity range:", str((min(im_stats['min_int_nr']), max(im_stats['max_int_nr'])))],
+        ["Number of individual data points:", str(np.sum(im_stats['peak_nr']))],
+        ["Mean number of data points per pixel ± sd:",
+         str(f"{int(stat.mean(im_stats['peak_nr']))} ± {int(stat.stdev(im_stats['peak_nr']))}")],
+        ["Median number of data points per pixel ± MAD:",
+         str(f"{int(stat.median(im_stats['peak_nr']))} ± {int(SST.median_abs_deviation(im_stats['peak_nr']))}")],
+        ["Mean TIC ± sd:", str(f"{int(stat.mean(im_stats['tic_nr']))} ± {int(stat.stdev(im_stats['tic_nr']))}")],
+        ["Median TIC ± MAD:",
+         str(f"{int(stat.median(im_stats['tic_nr']))} ± {int(SST.median_abs_deviation(im_stats['tic_nr']))}")],
+        ["Range of median intensities per pixel:", str((min(im_stats['median_nr']), max(im_stats['median_nr'])))],
+        ["Range of maximal intensity per pixel:", str((min(im_stats['max_int_nr']), max(im_stats['max_int_nr'])))],
+        ["Range of most abundant mz per pixel:", str((min(im_stats['max_abun_nr']), max(im_stats['max_abun_nr'])))],
+
         ]
         return table
+
+
+def collect_noise(mz_vals, int_vals, mz_window_halfsize, theta_threshold=0.001, alpha=1):
+    """Noise estimation with simga-clipping function.
+    PErforms noise estimation in int steps along the provided mz axis.
+
+     Output:
+     - median of estimated noise
+     - std-dev of noise median
+     - mz steps, useful for plotting
+     """
+    mz_start = np.floor(min(mz_vals))
+    mz_end = np.ceil(max(mz_vals))
+
+    #
+    mz_steps = np.arange(mz_start, mz_end + 1)
+    medians = np.zeros(len(mz_steps))
+    stds = np.zeros(len(mz_steps))
+    # get window
+    for i, mass in enumerate(mz_steps):
+        lower_lim = mass - mz_window_halfsize
+        upper_lim = mass + mz_window_halfsize
+
+        # bitwise addition for final mask
+        mask = np.bitwise_and(mz_vals > lower_lim, mz_vals < upper_lim)
+
+        # cut the windows
+        mz_window = mz_vals[mask]
+        int_window = int_vals[mask]
+
+        # test here if mz_window actually contains n>1 elements, else everything is 0
+        if len(mz_window) < 2:
+            medians[i] = 0
+            stds[i] = 0
+            continue  # continue with next iteration
+
+        # get median and std.dev
+        median_old = stat.median(int_window)
+        std_dev_old = stat.stdev(int_window)
+
+        # instance sigma_threshold
+        theta = 1
+
+        # sigma-clip in action
+        while theta > theta_threshold:
+            # get the interval
+            l_lim = median_old - alpha * std_dev_old
+            u_lim = median_old + alpha * std_dev_old
+
+            # bitwise addition for final mask
+            mask = np.bitwise_and(int_window > l_lim, int_window < u_lim)
+
+            # keep only values in interval
+            mz_window = mz_window[mask]
+            int_window = int_window[mask]
+
+            # stop recursion for either one or zero value case
+            if len(int_window) == 1:
+                # one value remains, it gets returned with +- 0
+                median_old = int_window[0]
+                std_dev_old = 0
+                break
+
+            elif len(mz_window) == 0:
+                # no values remain, last value gets returned
+                break
+
+            median_new = stat.median(int_window)
+            std_dev_new = stat.stdev(int_window)
+
+            # recursion stop when std_dev_new is 0
+            if std_dev_new == 0:
+                median_old = median_new
+                std_dev_old = std_dev_new
+                break
+
+            theta = (std_dev_old - std_dev_new) / std_dev_new
+            median_old = median_new
+            std_dev_old = std_dev_new
+
+        # get the old_values
+        medians[i] = median_old
+        stds[i] = std_dev_old
+
+    return medians, stds, mz_steps
