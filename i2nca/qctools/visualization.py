@@ -1,8 +1,6 @@
-import matplotlib.pyplot as plt
-import numpy as np
-
 from .dependencies import *
-from .utils import mask_bad_image, average_cont_spectra, average_processed_spectra, calculate_spectral_coverage, make_index_image, collect_noise
+from .utils import mask_bad_image, average_cont_spectra, average_processed_spectra, calculate_spectral_coverage, \
+    make_index_image, collect_noise
 
 # custom colormaps with white backgrounds (via out-of-lower-bound)
 my_vir = cm.get_cmap('viridis').copy()
@@ -22,7 +20,7 @@ my_cw.set_over('dimgrey')
 my_cw.set_bad(color='white', alpha=1.0)
 
 
-def discrete_cmap(N, base_cmap=None, nan_color="white"):
+def discrete_cmap(n, base_cmap=None, nan_color="white"):
     """Create an N-bin discrete colormap from the specified input map"""
 
     # Note that if base_cmap is a string or None, you can simply do
@@ -30,16 +28,17 @@ def discrete_cmap(N, base_cmap=None, nan_color="white"):
     # The following works for string, None, or a colormap instance:
 
     base = plt.cm.get_cmap(base_cmap)
-    color_list = base(np.linspace(0, 1, N))
+    color_list = base(np.linspace(0, 1, n))
 
     # Set the color for np.nan values
     nan_color_value = plt.cm.colors.to_rgba(nan_color)
-    nan_color_list = [nan_color_value] * int(np.isnan(N).sum())
+    nan_color_list = [nan_color_value] * int(np.isnan(n).sum())
 
     color_list = np.concatenate((color_list, nan_color_list))
 
-    cmap_name = base.name + str(N)
-    return base.from_list(cmap_name, color_list, N + len(nan_color_list))
+    cmap_name = base.name + str(n)
+    return base.from_list(cmap_name, color_list, n + len(nan_color_list))
+
 
 def make_pdf_backend(report_path, title):
     pdf_file_path = report_path + title + ".pdf"
@@ -107,7 +106,6 @@ def image_pixel_index(image, binary_mask, pdf, x_limits, y_limits):
 
     fig.colorbar(im, extend='min')
 
-
     pdf.savefig(fig)
     plt.close()
 
@@ -125,7 +123,7 @@ def image_regions(regionarray, binary_mask, max_nr_region, pdf, x_limits, y_limi
 
     image_masked = np.ma.masked_where(binary_mask == 0, regionarray)
 
-    im = ax.imshow(image_masked, #cmap=discrete_cmap(max_nr_region, my_rbw, "white"),
+    im = ax.imshow(image_masked,  # cmap=discrete_cmap(max_nr_region, my_rbw, "white"),
                    cmap=my_rbw,
                    vmin=-0.1, interpolation='none', origin='lower')
     # extent=[x_limits[0], x_limits[1], y_limits[0], y_limits[1]])
@@ -134,7 +132,6 @@ def image_regions(regionarray, binary_mask, max_nr_region, pdf, x_limits, y_limi
 
     pdf.savefig(fig)
     plt.close()
-
 
 
 def plot_basic_scatter(x, y,
@@ -360,7 +357,7 @@ def plot_profile_spectrum(mz_axis, spectrum_data, pdf):
     plt.close()
 
 
-def plot_noise_spectrum(mz_axis, spectral_data,title, pdf):
+def plot_noise_spectrum(mz_axis, spectral_data, title, pdf):
     fig = plt.figure(figsize=[10, 6])
     ax = plt.subplot(111)
 
@@ -387,7 +384,7 @@ def write_summary_table(table, pdf):
 
     # Style the table
     table.auto_set_font_size(True)
-    #table.set_fontsize(14)
+    # table.set_fontsize(14)
     table.scale(1.2, 1.2)  # Adjust table scale for better layout
     # weird error, where some text is not getting passed
 
@@ -395,14 +392,13 @@ def write_summary_table(table, pdf):
     plt.close()
 
 
-
 def write_calibrant_summary_table(data_frame, pdf):
-    data_frame = data_frame.round({'mz':6,
-                        'value_wavg': 6,
-                        'distance_wavg':4,
-                        'value_map':6,
-                        'distance_map':4,
-                        'coverage': 2})
+    data_frame = data_frame.round({'mz': 6,
+                                   'value_wavg': 6,
+                                   'distance_wavg': 4,
+                                   'value_map': 6,
+                                   'distance_map': 4,
+                                   'coverage': 2})
 
     # Create a figure and add the table
     fig = plt.figure(figsize=[10, 10])
@@ -414,12 +410,13 @@ def write_calibrant_summary_table(data_frame, pdf):
 
     # Style the table
     table.auto_set_font_size(True)
-    #table.set_fontsize(12)
+    # table.set_fontsize(12)
     table.scale(1.2, 1.2)  # Adjust table scale for better layout
     # weird error, where some text is not getting passed
 
     pdf.savefig(fig, bbox_inches="tight")
     plt.close()
+
 
 def plot_boxplots(name_boxplot, stat_boxplot,
                   title, xlabel, ylabel,
@@ -454,18 +451,18 @@ def plot_boxplots(name_boxplot, stat_boxplot,
     pdf.savefig(fig)
     plt.close()
 
-def plot_accuracy_boxplots(accuracy_images, calibrants_df, ppm_cutoff, pdf):
 
+def plot_accuracy_boxplots(accuracy_images, calibrants_df, ppm_cutoff, pdf):
     names = calibrants_df["name"].to_list()
 
     # lambda magic to make a list of the accuracy values inside the ppm_cutoff range
     cleanup_row = lambda row: list(np.array(row)[(row >= -ppm_cutoff) & (row <= +ppm_cutoff)])
 
-    accuracies = list(map(cleanup_row,accuracy_images))  # plt takes multi-dim data as list of vectors
+    accuracies = list(map(cleanup_row, accuracy_images))  # plt takes multi-dim data as list of vectors
 
     plot_boxplots(names, accuracies,
                   "Boxplot of mass accuracies within ppm interval by calibrant",
-                  "Calibrant","Accuracy in ppm",pdf)
+                  "Calibrant", "Accuracy in ppm", pdf)
 
 
 def plot_regions_averages(regional_spectra, format_dict, region_number, pdf):
@@ -475,7 +472,7 @@ def plot_regions_averages(regional_spectra, format_dict, region_number, pdf):
         avg_mz, avg_ints = regional_spectra[i]
         if format_dict["centroid"]:
             plot_centroid_spectrum(avg_mz, avg_ints,
-                                   f"Averaged centroid mass spectrum of group {i+1}", pdf)
+                                   f"Averaged centroid mass spectrum of group {i + 1}", pdf)
         elif format_dict["profile"]:
             plot_profile_spectrum(avg_mz, avg_ints, pdf)
 
@@ -507,7 +504,7 @@ def old_plot_regions_average(Image, format_dict, regions_image, region_number, p
             avg_mz, avg_ints = average_cont_spectra(Image, pindex)
 
             if format_dict["centroid"]:
-                plot_centroid_spectrum(avg_mz, avg_ints,"", pdf)
+                plot_centroid_spectrum(avg_mz, avg_ints, "", pdf)
             elif format_dict["profile"]:
                 plot_profile_spectrum(avg_mz, avg_ints, pdf)
 
@@ -515,7 +512,7 @@ def old_plot_regions_average(Image, format_dict, regions_image, region_number, p
             avg_mz, avg_ints = average_processed_spectra(Image, pindex)
 
             if format_dict["centroid"]:
-                plot_centroid_spectrum(avg_mz, avg_ints,"", pdf)
+                plot_centroid_spectrum(avg_mz, avg_ints, "", pdf)
             elif format_dict["profile"]:
                 plot_profile_spectrum(avg_mz, avg_ints, pdf)
 
@@ -523,7 +520,7 @@ def old_plot_regions_average(Image, format_dict, regions_image, region_number, p
 # plot functions for calibrant QC
 
 
-def plot_calibrant_spectra(cal_spectra, calibrant_df, index, format_dict,pdf):
+def plot_calibrant_spectra(cal_spectra, calibrant_df, index, format_dict, pdf):
     """case handler for empty spectra"""
 
     if calibrant_df.loc[index, "found"]:
@@ -535,11 +532,9 @@ def plot_calibrant_spectra(cal_spectra, calibrant_df, index, format_dict,pdf):
         plot_empty_peak(calibrant_df.loc[index, "mz"], calibrant_df.loc[index, "name"], pdf)
 
 
-
 def plot_calibrant_spectra_panel(cal_spectra,
-                           calibrants_df,format_dict, index,
-                           pdf):
-
+                                 calibrants_df, format_dict, index,
+                                 pdf):
     """ Cal spectrum is the sliced variable of cal_spectra[i]
             # differentiante the plotting :
         # 1) with profile or centriod  map&wavg
@@ -640,7 +635,7 @@ def plot_calibrant_spectra_panel(cal_spectra,
     ax3.set_xlabel('m/z')
     ax3.set_ylabel('Intensity')
     # set the axis range and styles
-    ax3.set_xlim(min(cal_spectra[0])-offset, max(cal_spectra[0])+offset)
+    ax3.set_xlim(min(cal_spectra[0]) - offset, max(cal_spectra[0]) + offset)
     ax3.ticklabel_format(useOffset=False, )
     ax3.ticklabel_format(axis="y", style='sci', scilimits=(0, 0))
     # set x-axis style
@@ -689,17 +684,16 @@ def plot_calibrant_spectra_panel(cal_spectra,
     # draw metrics and masses
     draw_vertical_lines(mass, mapeak, wavg, ax4)
 
-    #control block for profile/centroid case
+    # control block for profile/centroid case
     if format_dict["centroid"]:
         # scatter centroid spectrum
-        ax4.vlines(cal_spectra[0], 0, cal_spectra[1],  color='k', linewidth=0.8, zorder=-1)
+        ax4.vlines(cal_spectra[0], 0, cal_spectra[1], color='k', linewidth=0.8, zorder=-1)
         ax4.scatter(cal_spectra[0], cal_spectra[1], s=6, color='k', marker="o", zorder=-1)
 
     elif format_dict["profile"]:
         # plot profile spectrum
         ax4.plot(cal_spectra[0], cal_spectra[1], color='k', linewidth=0.5, zorder=-1)
         ax4.scatter(cal_spectra[0], cal_spectra[1], s=6, color='k', marker="o", zorder=-1)
-
 
     # adjust y limits
     ax4.set_ylim(bottom=0)
@@ -716,8 +710,8 @@ def plot_empty_peak(cal_mass, cal_name, pdf):
     fig = plt.figure(figsize=[10, 10])
     ax = plt.subplot(111)
     # offset for text annotations
-    ax.set_xlim(0,2)
-    ax.set_ylim(0,2)
+    ax.set_xlim(0, 2)
+    ax.set_ylim(0, 2)
     ax.set_xticks([])
     ax.set_yticks([])
 
@@ -753,7 +747,7 @@ def plot_accuracy_barplots(calibrant_df, pdf):
         df.dropna(subset=[key])
 
         # plot the accuracy plots
-        plot_accu_barplot(df["name"],df[key],
+        plot_accu_barplot(df["name"], df[key],
                           title_list[i], color_list[i],
                           pdf)
 
@@ -781,7 +775,7 @@ def plot_accu_barplot(names, values, metric_name, color, pdf):
         height = bar.get_height()
         if height >= 5:
             ax.annotate(f'{height:.4f}', xy=(bar.get_x() + bar.get_width() / 2, height), xytext=(0, -15),
-                    textcoords="offset points", ha='center', va='bottom')
+                        textcoords="offset points", ha='center', va='bottom')
         else:
             ax.annotate(f'{height:.4f}', xy=(bar.get_x() + bar.get_width() / 2, height), xytext=(0, +3),
                         textcoords="offset points", ha='center', va='bottom')
@@ -789,7 +783,6 @@ def plot_accu_barplot(names, values, metric_name, color, pdf):
     fig.tight_layout()
     pdf.savefig(fig)
     plt.close()
-
 
 
 def plot_accuracy_images(Image, accuracy_images, calibrants_df, ppm, index_nr, x_limits, y_limits, pdf):
@@ -815,21 +808,23 @@ def plot_accuracy_images(Image, accuracy_images, calibrants_df, ppm, index_nr, x
         pdf.savefig(fig)
         plt.close()
 
+
 def plot_region_noise(region_spectra, format_flags, nr_regions, noise_ivl, pdf):
     " handler for noise estiamtion per regional mean spectrum"
     for i in range(nr_regions):
         avg_mzs, avg_ints = region_spectra[i]
         noise_medain, _, noise_axis = collect_noise(avg_mzs, avg_ints, noise_ivl)
         plot_noise_spectrum(noise_axis, noise_medain,
-                            f'Noise estimation within interval of {2*noise_ivl} in group {i+1}', pdf)
+                            f'Noise estimation within interval of {2 * noise_ivl} in group {i + 1}', pdf)
+
 
 def plot_spectral_coverages(region_spectra, format_flags, nr_regions, pdf):
     """handler for spectral coverage of each mean spectrum """
     for i in range(nr_regions):
         avg_mzs, avg_ints = region_spectra[i]
-        mean_bin, mean_coverage = calculate_spectral_coverage(avg_mzs,avg_ints)
+        mean_bin, mean_coverage = calculate_spectral_coverage(avg_mzs, avg_ints)
         plot_coverage_barplot(mean_bin, mean_coverage,
-                              f'Spectral coverage of mean spectrum in group {i+1}', pdf)
+                              f'Spectral coverage of mean spectrum in group {i + 1}', pdf)
 
 
 def plot_coverage_barplot(names, data, title, pdf):

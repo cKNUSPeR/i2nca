@@ -1,6 +1,5 @@
-from .dependencies import *
-from .visualization import *
 from .utils import *
+from .visualization import *
 
 
 def report_agnostic_qc(I,  # m2.imzMLReader (passing by ref allows faster computation)
@@ -81,37 +80,36 @@ def report_agnostic_qc(I,  # m2.imzMLReader (passing by ref allows faster comput
 
     # PLOT NOISES'
     plot_noise_spectrum(noise_axis, noise_medain,
-                        f'Noise estimation within interval of {2*noise_interval}', pdf_pages)
+                        f'Noise estimation within interval of {2 * noise_interval}', pdf_pages)
 
     # get spectral coverage data:
     mean_bin, mean_coverage = calculate_spectral_coverage(I.GetXAxis(), I.GetMeanSpectrum())
 
     # plot spectral coverage data
-    plot_coverage_barplot(mean_bin, mean_coverage, f'Spectral coverage of mean spectrum',pdf_pages)
+    plot_coverage_barplot(mean_bin, mean_coverage, f'Spectral coverage of mean spectrum', pdf_pages)
 
     write_summary_table(generate_table_data(I, x_lims, y_lims, image_stats),
                         pdf_pages)
 
     pdf_pages.close()
-    print("QC sussefully generated at: ", outfile_path+"_agnostic_QC.pdf")
-    return outfile_path+"_agnostic_QC.pdf"
+    print("QC sussefully generated at: ", outfile_path + "_agnostic_QC.pdf")
+    return outfile_path + "_agnostic_QC.pdf"
 
 
-def report_calibrant_qc(I, # m2.imzMLReader (passing by ref allows faster computation)
+def report_calibrant_qc(I,  # m2.imzMLReader (passing by ref allows faster computation)
                         outfile_path: str,  # path for output file
                         calfile_path: str,  # path to tsv file for calibrants
-                       # dist: float, # allowed distance to check for bulk metrics around theo. masses
-                        ppm: float, # +- ppm cutoff for accuracy determination
-                        sample_size: float = 1 # coverage of sample to be used for bulk calc, between 0 and 1
+                        # dist: float, # allowed distance to check for bulk metrics around theo. masses
+                        ppm: float,  # +- ppm cutoff for accuracy determination
+                        sample_size: float = 1  # coverage of sample to be used for bulk calc, between 0 and 1
                         ):
-
     #  read in the calibrants
     calibrants = read_calibrants(calfile_path, ppm)
 
     # Create a PDF file to save the figures
     pdf_pages = make_pdf_backend(outfile_path, "_calibrant_QC")
 
-    #Make a subsample to test accuracies on
+    # Make a subsample to test accuracies on
     randomlist = make_subsample(I.GetNumberOfSpectra(), sample_size)
 
     # create format flag dict to check formatting of imzML file
@@ -136,7 +134,6 @@ def report_calibrant_qc(I, # m2.imzMLReader (passing by ref allows faster comput
                                format_flags,
                                pdf_pages)
 
-
     # barplot of the accuracies
     plot_accuracy_barplots(calibrants, pdf_pages)
 
@@ -159,8 +156,8 @@ def report_calibrant_qc(I, # m2.imzMLReader (passing by ref allows faster comput
     write_calibrant_summary_table(calibrants, pdf_pages)
 
     pdf_pages.close()
-    print("QC sussefully generated at: ", outfile_path+"_calibrant_QC.pdf")
-    return outfile_path+"_calibrant_QC.pdf"
+    print("QC sussefully generated at: ", outfile_path + "_calibrant_QC.pdf")
+    return outfile_path + "_calibrant_QC.pdf"
 
 
 def report_regions_qc(I,  # m2.imzMLReader (passing by ref allows faster computation)
@@ -223,5 +220,5 @@ def report_regions_qc(I,  # m2.imzMLReader (passing by ref allows faster computa
     plot_region_noise(region_spectra, format_flags, nr_regions, noise_ivl=2, pdf=pdf_pages)
 
     pdf_pages.close()
-    print("QC sussefully generated at: ",  outfile_path+"_region_QC.pdf")
-    return outfile_path+"_region_QC.pdf"
+    print("QC sussefully generated at: ", outfile_path + "_region_QC.pdf")
+    return outfile_path + "_region_QC.pdf"

@@ -3,7 +3,7 @@
 import matplotlib.backends as mpb
 import m2aia as m2
 import numpy as np
-import matplotlib.pyplot as plt # best to shoot for 3.5 to resolve userwarings
+import matplotlib.pyplot as plt # best to shoot for 3.5.3 to resolve userwarings
 import matplotlib.cm as cm
 import random as rnd
 import statistics as stat
