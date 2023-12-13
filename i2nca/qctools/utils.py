@@ -353,14 +353,13 @@ def read_calibrants(filepath: str, ppm_cutoff: float):
     cal["value_map"] = np.NaN
     cal["distance_map"] = np.NaN
     cal["coverage"] = np.NaN
-    cal["accuracy_llimits"] = np.NaN
-    cal["accuracy_ulimits"] = np.NaN
+    #cal["accuracy_llimits"] = np.NaN
+    #cal["accuracy_ulimits"] = np.NaN
 
     # some oneliner magic to ease applying a function to a df
-    calc_dist_ivl = lambda ppm: (lambda x: x * ppm / 1e6)
-    calc_dist = calc_dist_ivl(ppm_cutoff)
+    calc_dist_ivl = lambda x: x * ppm_cutoff / 1e6
 
-    cal["interval"] = cal["mz"].apply(calc_dist)
+    cal["interval"] = cal["mz"].apply(calc_dist_ivl)
     return cal
 
 
