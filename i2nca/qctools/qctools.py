@@ -74,6 +74,15 @@ def report_agnostic_qc(I,  # m2.imzMLReader (passing by ref allows faster comput
     elif format_flags["profile"]:
         plot_profile_spectrum(I.GetXAxis(), I.GetMeanSpectrum(), pdf_pages)
 
+    # equates to interval of plus/minus noise_interval
+    noise_interval = 2
+    # get noise data on mean spectrum
+    noise_medain, _, noise_axis = collect_noise(I.GetXAxis(), I.GetMeanSpectrum(), noise_interval)
+
+    # PLOT NOISES'
+    plot_noise_spectrum(noise_axis, noise_medain,
+                        f'Noise estimation within interval of {2*noise_interval}', pdf_pages)
+
     # get spectral coverage data:
     mean_bin, mean_coverage = calculate_spectral_coverage(I.GetXAxis(), I.GetMeanSpectrum())
 
@@ -211,6 +220,8 @@ def report_regions_qc(I,  # m2.imzMLReader (passing by ref allows faster computa
 
     # show spectral coveraage per mean spectrum
     plot_spectral_coverages(region_spectra, format_flags, nr_regions, pdf_pages)
+
+    plot_region_noise(region_spectra, format_flags, nr_regions, noise_ivl=2, pdf=pdf_pages)
 
     pdf_pages.close()
     print("QC sussefully generated at: ",  outfile_path+"_region_QC.pdf")

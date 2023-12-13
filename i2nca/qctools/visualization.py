@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from .dependencies import *
-from .utils import mask_bad_image, average_cont_spectra, average_processed_spectra, calculate_spectral_coverage, make_index_image
+from .utils import mask_bad_image, average_cont_spectra, average_processed_spectra, calculate_spectral_coverage, make_index_image, collect_noise
 
 # custom colormaps with white backgrounds (via out-of-lower-bound)
 my_vir = cm.get_cmap('viridis').copy()
@@ -356,6 +356,22 @@ def plot_profile_spectrum(mz_axis, spectrum_data, pdf):
     ax.set_xlim(min(mz_axis).round(0), max(mz_axis).round(0))
 
     ax.plot(mz_axis, spectrum_data, linewidth=0.8)
+    ax.set_ylim(bottom=0)
+
+    pdf.savefig(fig)
+    plt.close()
+
+
+def plot_noise_spectrum(mz_axis, spectral_data,title, pdf):
+    fig = plt.figure(figsize=[10, 6])
+    ax = plt.subplot(111)
+
+    ax.set_title(title)
+    ax.set_xlabel('m/z')
+    ax.set_ylabel('Intensity of noise level')
+    ax.set_xlim(min(mz_axis).round(0), max(mz_axis).round(0))
+
+    ax.plot(mz_axis, spectral_data, linewidth=0.8)
     ax.set_ylim(bottom=0)
 
     pdf.savefig(fig)
@@ -800,6 +816,14 @@ def plot_accuracy_images(Image, accuracy_images, calibrants_df, ppm, index_nr, x
 
         pdf.savefig(fig)
         plt.close()
+
+def plot_region_noise(region_spectra, format_flags, nr_regions, noise_ivl, pdf):
+    " handler for noise estiamtion per regional mean spectrum"
+    for i in range(nr_regions):
+        avg_mzs, avg_ints = region_spectra[i]
+        noise_medain, _, noise_axis = collect_noise(avg_mzs, avg_ints, noise_ivl)
+        plot_noise_spectrum(noise_axis, noise_medain,
+                            f'Noise estimation within interval of {2*noise_ivl} in group {i+1}', pdf)
 
 def plot_spectral_coverages(region_spectra, format_flags, nr_regions, pdf):
     """handler for spectral coverage of each mean spectrum """

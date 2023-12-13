@@ -710,3 +710,88 @@ def generate_table_data(Image, x_limits, y_limits, im_stats):
 
         ]
         return table
+
+
+def collect_noise(mz_vals, int_vals, mz_window_halfsize, theta_threshold=0.001, alpha=1):
+    """Noise estimation by simga-clipping function.
+    PErforms noise estimation in int steps along the provided mz axis.
+
+     Output:
+     - median of estimated noise
+     - std-dev of noise median
+     - mz steps, useful for plotting
+     """
+    mz_start = np.floor(min(mz_vals))
+    mz_end = np.ceil(max(mz_vals))
+
+    #
+    mz_steps = np.arange(mz_start, mz_end + 1)
+    medians = np.zeros(len(mz_steps))
+    stds = np.zeros(len(mz_steps))
+    # get window
+    for i, mass in enumerate(mz_steps):
+        lower_lim = mass - mz_window_halfsize
+        upper_lim = mass + mz_window_halfsize
+
+        # bitwise addition for final mask
+        mask = np.bitwise_and(mz_vals > lower_lim, mz_vals < upper_lim)
+
+        # cut the windows
+        mz_window = mz_vals[mask]
+        int_window = int_vals[mask]
+
+        # test here if mz_window actually contains n>1 elements, else everything is 0
+        if len(mz_window) < 2:
+            medians[i] = 0
+            stds[i] = 0
+            continue  # continue with next iteration
+
+        # get median and std.dev
+        median_old = stat.median(int_window)
+        std_dev_old = stat.stdev(int_window)
+
+        # instance sigma_threshold
+        theta = 1
+
+        # sigma-clip in action
+        while theta > theta_threshold:
+            # get the interval
+            l_lim = median_old - alpha * std_dev_old
+            u_lim = median_old + alpha * std_dev_old
+
+            # bitwise addition for final mask
+            mask = np.bitwise_and(int_window > l_lim, int_window < u_lim)
+
+            # keep only values in interval
+            mz_window = mz_window[mask]
+            int_window = int_window[mask]
+
+            # stop recursion for either one or zero value case
+            if len(int_window) == 1:
+                # one value remains, it gets returned with +- 0
+                median_old = int_window[0]
+                std_dev_old = 0
+                break
+
+            elif len(mz_window) == 0:
+                # no values remain, last value gets returned
+                break
+
+            median_new = stat.median(int_window)
+            std_dev_new = stat.stdev(int_window)
+
+            # recursion stop when std_dev_new is 0
+            if std_dev_new == 0:
+                median_old = median_new
+                std_dev_old = std_dev_new
+                break
+
+            theta = (std_dev_old - std_dev_new) / std_dev_new
+            median_old = median_new
+            std_dev_old = std_dev_new
+
+        # get the old_values
+        medians[i] = median_old
+        stds[i] = std_dev_old
+
+    return medians, stds, mz_steps
