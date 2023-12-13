@@ -343,7 +343,7 @@ def calculate_spectral_coverage(mz_values, intensities):
     return bins, coverage
 
 
-def read_calibrants(filepath: str):
+def read_calibrants(filepath: str, ppm_cutoff: float):
     """Reads calibrant files and gives a list of name and thr. mz values
     INVARIANTS: Needs a header column with 'name' and a col with 'mz'."""
     cal = pd.read_csv(filepath, sep=';', header=0)
@@ -355,6 +355,12 @@ def read_calibrants(filepath: str):
     cal["coverage"] = np.NaN
     cal["accuracy_llimits"] = np.NaN
     cal["accuracy_ulimits"] = np.NaN
+
+    # some oneliner magic to ease applying a function to a df
+    calc_dist_ivl = lambda ppm: (lambda x: x * ppm / 1e6)
+    calc_dist = calc_dist_ivl(ppm_cutoff)
+
+    cal["interval"] = cal["mz"].apply(calc_dist)
     return cal
 
 
@@ -480,6 +486,11 @@ def collect_calibrant_stats(cal_spectra, calibrant_df, index):
 
     return calibrant_df
 
+def calculate_disance(theo_mass,
+                      ppm_cutoff: float):
+    """calcualtes the distance in delmz for a given mass and ppm"""
+    return theo_mass * ppm_cutoff / 1e6
+
 def calculate_ppm(exp_mass,
                   theo_mass: float):
     """Calulates ppm of na experimental mass againt a theoretical mass.
@@ -492,7 +503,7 @@ def calculate_ppm(exp_mass,
     return ((exp_mass - theo_mass) / theo_mass)*1e6
 
 
-def collect_accuracy_stats(Image, calibrants_df, dist, format_dict):
+def collect_accuracy_stats(Image, calibrants_df, format_dict):
     """ Finds and collects the nearest signals around all provided calibrant masses.
     Input:
         - Image: ImzMLReader object
@@ -511,7 +522,7 @@ def collect_accuracy_stats(Image, calibrants_df, dist, format_dict):
     if format_dict["centroid"]:
          for ind, mass, inten in Image.SpectrumIterator():  # loop to run over full imzML dataset
              # get nearest elements
-             accuracies_ar[ind] =[find_nearest(mass, calmass) for calmass in calibrants_df["mz"]]
+             accuracies_ar[ind] =[find_nearest(mass, calmass) for calmass, dist in zip(calibrants_df["mz"], calibrants_df["interval"])]
              # collect image index in order of iteration
              index_nr = index_nr + (ind,)  # pixel order is 0 in new m2aia version
 
@@ -519,7 +530,7 @@ def collect_accuracy_stats(Image, calibrants_df, dist, format_dict):
     elif format_dict["profile"]:
         for ind, mass, inten in Image.SpectrumIterator():  # loop to run over full imzML dataset
             # get nearest loc, max
-            accuracies_ar[ind] = [find_nearest_loc_max(mass,inten, calmass, dist) for calmass in calibrants_df["mz"]]
+            accuracies_ar[ind] = [find_nearest_loc_max(mass,inten, calmass, dist) for calmass, dist in zip(calibrants_df["mz"], calibrants_df["interval"])]
             # collect image index in order of iteration
             index_nr = index_nr + (ind ,)  # pixel order is 0 from m2aia 0.5.0 onw
 

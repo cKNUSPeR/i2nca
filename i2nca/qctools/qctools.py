@@ -92,13 +92,13 @@ def report_agnostic_qc(I,  # m2.imzMLReader (passing by ref allows faster comput
 def report_calibrant_qc(I, # m2.imzMLReader (passing by ref allows faster computation)
                         outfile_path: str,  # path for output file
                         calfile_path: str,  # path to tsv file for calibrants
-                        dist: float, # allowed distance to check for bulk metrics around theo. masses
+                       # dist: float, # allowed distance to check for bulk metrics around theo. masses
                         ppm: float, # +- ppm cutoff for accuracy determination
                         sample_size: float = 1 # coverage of sample to be used for bulk calc, between 0 and 1
                         ):
 
     #  read in the calibrants
-    calibrants = read_calibrants(calfile_path)
+    calibrants = read_calibrants(calfile_path, ppm)
 
     # Create a PDF file to save the figures
     pdf_pages = make_pdf_backend(outfile_path, "_calibrant_QC")
@@ -117,7 +117,7 @@ def report_calibrant_qc(I, # m2.imzMLReader (passing by ref allows faster comput
         # adressing the field in df: calibrants.loc[i, "name"]
 
         # Create the data points for calibrant bulk accuracy cals
-        cal_spectra = extract_calibrant_spectra(I, calibrants.loc[i, "mz"], randomlist, dist)
+        cal_spectra = extract_calibrant_spectra(I, calibrants.loc[i, "mz"], randomlist, calibrants.loc[i, "interval"])
 
         # compute the metrics for bulk calibrant accuracies
         calibrants = collect_calibrant_stats(cal_spectra, calibrants, i)
@@ -126,14 +126,14 @@ def report_calibrant_qc(I, # m2.imzMLReader (passing by ref allows faster comput
         plot_calibrant_spectra(cal_spectra,
                                calibrants, i,
                                format_flags,
-                               dist, pdf_pages)
+                               pdf_pages)
 
 
     # barplot of the accuracies
     plot_accuracy_barplots(calibrants, pdf_pages)
 
     # calculate per pixel for nearest loc-max the accuracy
-    accuracy_images, pixel_order = collect_accuracy_stats(I, calibrants, dist, format_flags)
+    accuracy_images, pixel_order = collect_accuracy_stats(I, calibrants, format_flags)
 
     # calculate coverage from accuracy images
     calibrants = collect_calibrant_converage(accuracy_images, calibrants, ppm)

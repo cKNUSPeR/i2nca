@@ -16,7 +16,7 @@ if __name__ == "__main__":
     pdf2 = report_calibrant_qc(I,
                         file_name[:-6] + "_plasma",
                        r"C:\Users\Jannik\Documents\Uni\Master_Biochem\4_Semester\M2aia\data\exmpl_cont\calibrants_9AA.csv",
-                        0.025, 50, 0.3)
+                        50, 0.3)
     webbrowser.open(pdf2, new=2)
 
     #pdf3 = report_regions_qc(I,

@@ -497,12 +497,12 @@ def old_plot_regions_average(Image, format_dict, regions_image, region_number, p
 # plot functions for calibrant QC
 
 
-def plot_calibrant_spectra(cal_spectra, calibrant_df, index, format_dict, dist, pdf):
+def plot_calibrant_spectra(cal_spectra, calibrant_df, index, format_dict,pdf):
     """case handler for empty spectra"""
 
     if calibrant_df.loc[index, "found"]:
         # plot the calibrant spectra panel
-        plot_calibrant_spectra_panel(cal_spectra, calibrant_df, format_dict, index, dist, pdf)
+        plot_calibrant_spectra_panel(cal_spectra, calibrant_df, format_dict, index, pdf)
 
     else:
         # plot an empty box
@@ -512,7 +512,7 @@ def plot_calibrant_spectra(cal_spectra, calibrant_df, index, format_dict, dist, 
 
 def plot_calibrant_spectra_panel(cal_spectra,
                            calibrants_df,format_dict, index,
-                           dist, pdf):
+                           pdf):
 
     """ Cal spectrum is the sliced variable of cal_spectra[i]
             # differentiante the plotting :
@@ -525,6 +525,7 @@ def plot_calibrant_spectra_panel(cal_spectra,
     mass = calibrants_df.loc[index, "mz"]
     mapeak = calibrants_df.loc[index, "value_map"]
     wavg = calibrants_df.loc[index, "value_wavg"]
+    dist = calibrants_df.loc[index, "interval"]
 
     fig = plt.figure(figsize=[10, 10])  # constrained_layout=True)
 
