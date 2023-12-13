@@ -89,7 +89,6 @@ def report_agnostic_qc(I,  # m2.imzMLReader (passing by ref allows faster comput
     # plot spectral coverage data
     plot_coverage_barplot(mean_bin, mean_coverage, f'Spectral coverage of mean spectrum',pdf_pages)
 
-
     write_summary_table(generate_table_data(I, x_lims, y_lims, image_stats),
                         pdf_pages)
 

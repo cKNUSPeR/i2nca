@@ -713,7 +713,7 @@ def generate_table_data(Image, x_limits, y_limits, im_stats):
 
 
 def collect_noise(mz_vals, int_vals, mz_window_halfsize, theta_threshold=0.001, alpha=1):
-    """Noise estimation by simga-clipping function.
+    """Noise estimation with simga-clipping function.
     PErforms noise estimation in int steps along the provided mz axis.
 
      Output:

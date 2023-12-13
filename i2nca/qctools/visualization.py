@@ -22,8 +22,6 @@ my_cw.set_over('dimgrey')
 my_cw.set_bad(color='white', alpha=1.0)
 
 
-
-
 def discrete_cmap(N, base_cmap=None, nan_color="white"):
     """Create an N-bin discrete colormap from the specified input map"""
 
