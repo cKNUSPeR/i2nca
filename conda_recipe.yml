@@ -232,5 +232,5 @@ dependencies:
     - tzdata==2023.3
     - wget==3.2
     - wheezy-template==3.2.1
-      - -e git+https://github.com/cKNUSPeR/i2nca.git#egg=i2nca
+    - -e git+https://github.com/cKNUSPeR/i2nca.git#egg=i2nca
 prefix: C:\Users\wittej\.conda\envs\QCenv
