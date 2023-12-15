@@ -1,6 +1,6 @@
 
 import m2aia as m2
-from qctools.qctools import report_agnostic_qc, report_calibrant_qc, report_regions_qc
+from i2nca import report_agnostic_qc, report_calibrant_qc, report_regions_qc
 import webbrowser
 
 
