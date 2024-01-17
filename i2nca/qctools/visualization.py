@@ -153,6 +153,7 @@ def plot_basic_scatter(x, y,
     plt.close()
 
 
+
 def image_basic_heatmap(Image,
                         title, x_lab, y_lab,
                         pdf, x_limits, y_limits):
@@ -853,3 +854,27 @@ def plot_coverage_barplot(names, data, title, pdf):
     plt.tight_layout()
     pdf.savefig(fig)
     plt.close()
+
+
+def plot_bin_spreads(mean_bins, intrabin_spread, interbin_spread, pdf):
+
+    fig = plt.figure(figsize=[7, 5])
+    ax = plt.subplot(111)
+
+    ax.set_title('Comparison of aquisition-based binning')
+    ax.set_xlabel('mz of each pseudo-bin')
+    ax.set_ylabel('mz deviation')
+
+    ax.grid(visible=True, c='lightgray', ls="--")
+
+    ax.plot(mean_bins[:-1], interbin_spread, color='g', zorder=-1,
+            label=f"Stepsize between \neach pseudo-bin \n(median: {np.median(interbin_spread):.6f})")
+
+    ax.plot(mean_bins, intrabin_spread, color='r', zorder=-1,
+            label=f"standard deviation \nwithin each pseudo-bin \n(median: {np.median(intrabin_spread):.6f})")
+
+    ax.legend()
+
+    pdf.savefig(fig)
+    plt.close()
+

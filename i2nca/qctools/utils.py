@@ -788,3 +788,49 @@ def collect_noise(mz_vals, int_vals, mz_window_halfsize, theta_threshold=0.001, 
         stds[i] = std_dev_old
 
     return medians, stds, mz_steps
+
+def test_formats(form_dict, keywords):
+    """Tests is keywords are True in the provided flag dictionary.
+    Alowe dkeywords are: profile, centroid, processed, continuous"""
+    for key in keywords:
+        if form_dict[key] is False:
+            raise ValueError(
+                f"The provided file does not match the provided keywords: {keywords}. "
+                f" Check the accensions in the imzML file to ensure the correct file type."
+                "}"
+            )
+
+def check_uniform_length(I, randomlist):
+    """check the lenght (datapoints in spectrum) of a list with ids and returns only those with maxim"""
+    lenght_collector = []
+
+    # get length of each element:
+    for id in randomlist:
+        lenght_collector.append(len(I.GetSpectrum(id)[0]))
+
+    # get max element
+    max_lenght = max(lenght_collector)
+
+    # zip through lists to only the datapoints with maximal length
+    result = [idx for idx, length in zip(randomlist, lenght_collector) if length == max_lenght]
+
+    return result
+
+
+def evaluate_group_spacing(I, randomlist):
+    """checks how the spacing of each pseudo-bin looks.
+    return the mean bin, the spread inside that bin and the spread to the right neighbouring bin"""
+
+    # spectra are assumed to be of equal length
+
+    # collection via list comprehension
+    processed_collector = np.vstack([I.GetSpectrum(id)[0] for id in randomlist])
+
+    processed_collector = processed_collector.T  # transpose to easily access each group of masses
+
+    dpoint_mean = np.mean(processed_collector, axis=1)
+    dpoint_spread = np.std(processed_collector, axis=1)
+    dbin_spread = np.diff(dpoint_mean)  # calculation of inter-bin step size
+
+    return dpoint_mean, dpoint_spread, dbin_spread
+

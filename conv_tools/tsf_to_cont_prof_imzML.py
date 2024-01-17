@@ -287,7 +287,7 @@ def convert_imzML_to_cont_prof_imzml(imzML_filename: str,
             mz, intensities = I.GetSpectrum(id)
             length = len(intensities)
             xyz_pos = I.GetSpectrumPosition(id)
-            pos = (xyz_pos[0],xyz_pos[1])
+            pos = (xyz_pos[0], xyz_pos[1]) # extendable with z-dim
 
             # writing with pyimzML
             if length == len_aligned_mass:
@@ -308,16 +308,15 @@ if __name__ == "__main__":
     print(datetime.now())
 
 
-def imzML_check_spacing(imzML_filename: str) -> np.ndarray:
- # setting up of  reader
-    I = m.ImzMLReader(imzML_filename)
-    I.Execute()
+def imzML_check_spacing(I, batch_size: int = 100) -> np.ndarray:
+    # setting up of  reader
+    #I = m.ImzMLReader(imzML_filename)
+    #I.Execute()
     
     # Get total spectrum count:
     n = I.GetNumberOfSpectra()
 
     # create the small sample list (100 pixels)
-    batch_size = 100
     randomlist = rnd.sample(range(0, n), batch_size)
 
     # instance and collect mass values from the small batch
@@ -355,10 +354,10 @@ def imzML_check_spacing(imzML_filename: str) -> np.ndarray:
     ax.grid(visible=True, c='lightgray', ls="--")
 
     ax.plot(dpoint_mean[:-1], dbin_spread, color='g',zorder=-1, 
-            label=f"Stepsize between \neach pseudo-bin \nmedian: {stat.median(dbin_spread):.6f}")
+            label=f"Stepsize between \neach pseudo-bin \n(median: {stat.median(dbin_spread):.6f})")
     
     ax.plot(dpoint_mean, dpoint_spread, color='r',zorder=-1, 
-            label=f"standard deviation \nwithin each pseudo-bin \nmedian: {stat.median(dpoint_spread):.6f}")
+            label=f"standard deviation \nwithin each pseudo-bin \n(median: {stat.median(dpoint_spread):.6f})")
     
 
     ax.legend()
