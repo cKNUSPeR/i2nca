@@ -224,7 +224,6 @@ dependencies:
     - networkx==3.1
     - numpy==1.24.4
     - pandas==2.1.0
-    - pyimzml==1.5.3
     - pywavelets==1.4.1
     - scikit-image==0.21.0
     - simpleitk==2.2.1
@@ -233,4 +232,5 @@ dependencies:
     - wget==3.2
     - wheezy-template==3.2.1
     - -e git+https://github.com/cKNUSPeR/i2nca.git#egg=i2nca
+    - -e git+https://github.com/cKNUSPeR/pyimzml.git#egg=pyimzml
 prefix: C:\Users\wittej\.conda\envs\QCenv
