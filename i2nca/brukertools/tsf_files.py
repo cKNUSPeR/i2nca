@@ -191,9 +191,10 @@ def write_tsf_to_pp_imzml(TsfReader,
             #    print(f"pixels {id}/{n} written.")
     return output_file
 
-# parse imzml file
-file_path = r"C:\Users\Jannik\Documents\Uni\Master_Biochem\4_Semester\mzWonderland\data"
 
-output_path = r"C:\Users\Jannik\Documents\Uni\Master_Biochem\4_Semester\mzWonderland\data\output_i2nca_pp"
+if __name__ == "__main__":
+    file_path = r"C:\Users\Jannik\Documents\Uni\Master_Biochem\4_Semester\mzWonderland\data"
 
-convert_tsf_to_pp_imzml(file_path, output_path)
+    output_path = r"C:\Users\Jannik\Documents\Uni\Master_Biochem\4_Semester\mzWonderland\data\output_i2nca_pp"
+
+    convert_tsf_to_pp_imzml(file_path, output_path)
