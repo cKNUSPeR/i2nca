@@ -8,6 +8,87 @@ import m2aia as m2
 import random as rnd
 from pyimzml.ImzMLWriter import ImzMLWriter
 
+# tools for processed profile
+
+
+def convert_pp_to_pp_imzml(file_path, output_path=None):
+    """ top-level converter for pp imzml to cp imzml"""
+    if output_path is None:
+        output_path = file_path[:-6]
+
+    # parse imzml file
+    Image = m2.ImzMLReader(file_path)
+
+    # write the continous file
+    write_pp_to_pp_imzml(Image, output_path)
+
+
+def write_pp_to_pp_imzml(Image,
+                         output_dir: str,
+                         polarity: str = "positive",
+                         pixel_size: str = "20",
+                         ) -> str:
+    """
+        Writer for processed profile imzml files within m2aia.
+
+
+        Parameters:
+            I: parsed izML file (by m2aia or equvalent object that emulates the methods)
+            polarity  : Polarity, either "positive" or "negative", not accessible in pym2aia
+            pixel_size (Opt): pixel size of imaging run, currently not accessible in pym2aia
+            output_dir (Opt): File path for output. in same folder as tsf if not specified.
+
+
+        Returns:
+           (str): imzML File path,
+           additionally, imzML file is written there
+
+        """
+    # specification of output imzML file location and file extension
+    output_file = output_dir + "_conv_output_proc_profile.imzML"
+
+    # setting up of  reader
+
+    # Get total spectrum count:
+    n = Image.GetNumberOfSpectra()
+
+    # writing of the imzML file, based on pyimzML
+    with ImzMLWriter(output_file,
+                     # TODO get polarity from file
+                     polarity=polarity,
+                     mz_dtype=np.float32,
+                     # intensity_dtype=np.uintc,
+                     mode='processed',
+                     spec_type='profile',
+                     # the laser movement param are taken from scilslab export for ttf
+                     scan_direction='top_down',
+                     line_scan_direction='line_right_left',
+                     scan_pattern='meandering',
+                     scan_type='horizontal_line',
+                     # preinstalled pixel sizes TODO get correct ones
+                     pixel_size_x=pixel_size,
+                     pixel_size_y=pixel_size,
+                     ) as w:
+        # m2aia is 0-indexed
+        for id in range(0, n):
+            #
+            mz, intensities = Image.GetSpectrum(id)
+
+            xyz_pos = Image.GetSpectrumPosition(id)
+            pos = (xyz_pos[0], xyz_pos[1])
+
+            # writing with pyimzML
+
+            w.addSpectrum(mz, intensities, pos)
+
+            # progress print statement
+            # if (id % 100) == 0:
+            #    print(f"pixels {id}/{n} written.")
+    return output_file
+
+# tools for continous profile
+
+
 def convert_pp_to_cp_imzml(file_path, output_path = None, pixel_nr = 100):
     """ top-level converter for pp imzml to cp imzml"""
     if output_path is None:
@@ -21,6 +102,7 @@ def convert_pp_to_cp_imzml(file_path, output_path = None, pixel_nr = 100):
 
     # write the continous file
     write_pp_to_cp_imzml(Image, ref_mz, output_path)
+
 
 
 def report_pp_to_cp_imzml(file_path, output_path=None, coverage=0.25):
@@ -93,7 +175,6 @@ def report_pp_to_cp(Image, outfile_path, coverage):
     print("report generated at: ", outfile_path + "control_report_pp_to_cp.pdf")
 
     return mean_bin
-
 
 def write_pp_to_cp_imzml(Image,
                            ref_mz: np.ndarray,
