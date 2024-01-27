@@ -17,7 +17,7 @@ import scipy.signal as SSI
 from scipy.signal import argrelextrema
 
 import skimage.measure as skim
-from sklearn.cluster import DBSCAN
+#from sklearn.cluster import DBSCAN
 
 
 import warnings
