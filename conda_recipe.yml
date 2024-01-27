@@ -1,4 +1,4 @@
-name: QCdev
+name: QCenv
 channels:
   - conda-forge
   - bioconda
