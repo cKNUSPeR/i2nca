@@ -223,11 +223,9 @@ dependencies:
   - zlib-ng=2.0.7=hcfcfb64_0
   - zstd=1.5.5=h12be248_0
   - pip:
-    - i2nca==0.2.0
+    - -e git+https://github.com/cKNUSPeR/pyimzml.git#egg=pyimzml
     - m2aia==0.5.1
-    - pyimzml==1.5.3
     - simpleitk==2.3.1
     - wget==3.2
     - wheezy-template==3.2.2
-    - -e git+https://github.com/cKNUSPeR/pyimzml.git#egg=pyimzml
     - -e git+https://github.com/cKNUSPeR/i2nca.git#egg=i2nca
