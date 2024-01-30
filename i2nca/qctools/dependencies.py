@@ -1,5 +1,6 @@
 
 # namespace and import declaration
+import matplotlib as mpl
 import matplotlib.backends as mpb
 import m2aia as m2
 import numpy as np
@@ -23,3 +24,5 @@ import skimage.measure as skim
 import warnings
 # catch of FutueWarnings (looking at you, pandas  )
 warnings.simplefilter(action='ignore', category=FutureWarning)
+# catch of plt decrep warning (honestly, they have no docs on implementing the required_interactive_framework i could find )
+warnings.filterwarnings(action="ignore", category=mpl.MatplotlibDeprecationWarning)

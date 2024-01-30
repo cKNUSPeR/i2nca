@@ -789,6 +789,7 @@ def collect_noise(mz_vals, int_vals, mz_window_halfsize, theta_threshold=0.001, 
 
     return medians, stds, mz_steps
 
+
 def test_formats(form_dict, keywords):
     """Tests is keywords are True in the provided flag dictionary.
     Alowe dkeywords are: profile, centroid, processed, continuous"""
@@ -799,6 +800,7 @@ def test_formats(form_dict, keywords):
                 f" Check the accensions in the imzML file to ensure the correct file type."
                 "}"
             )
+
 
 def check_uniform_length(I, randomlist):
     """check the lenght (datapoints in spectrum) of a list with ids and returns only those with maxim"""
@@ -834,3 +836,75 @@ def evaluate_group_spacing(I, randomlist):
 
     return dpoint_mean, dpoint_spread, dbin_spread
 
+
+def evaluate_polarity(Image):
+    """Evaluates the m2aia image to return a polarity dict
+    allowed keywords are "positive" and "negative"
+    """
+
+    metadata = Image.GetMetaData()
+
+    polarity_dict = {
+        "positive": False,
+        "negative": False
+    }
+
+    try:
+        if metadata["[MS:1000129] spectrum1.negative scan"] == "true":
+            polarity_dict["negative"] = True
+    except:
+        pass
+
+    try:
+        if metadata["[MS:1000130] spectrum1.positive scan"] == "true":
+            polarity_dict["positive"] = True
+    except:
+        pass
+
+    if polarity_dict["negative"] == False and polarity_dict["positive"] == False:
+        raise ValueError(f"The provided dataset has no defined polarity. \n"
+                         f" Check the [MS:1000129] and [MS:1000130] assencions.")
+
+    return polarity_dict
+
+
+def get_polarity(polarity_dict):
+    """Getter for ploarity dict."""
+    if polarity_dict["negative"] == True:
+        return "negative"
+    elif polarity_dict["positive"] == True:
+        return "positive"
+    else:
+        raise ValueError(f"The provided dataset has no defined polarity. \n"
+                         f" Check the [MS:1000129] and [MS:1000130] assencions.")
+
+
+def get_pixsize(Image):
+    """ Getter for pixel size.
+    Evaluates the m2aia image to return a pixel size
+    Looks wonky to avoid misrepresentation
+    """
+
+    metadata = Image.GetMetaData()
+
+    try:
+        x_size = float(metadata['[IMS:1000046] pixel size x'])
+        # m2aia 0.5.1 gives pixel size in cm and not in um
+        x_size = x_size * 1000
+    except:
+        raise ValueError(f"The provided dataset has no x pixel size. \n"
+                         f" Check the [IMS:1000046] assencion.")
+
+    try:
+        y_size = float(metadata["[IMS:1000047] pixel size y"])
+        # m2aia 0.5.1 gives pixel size in cm and not in um
+        y_size = y_size * 1000
+    except:
+        raise ValueError(f"The provided dataset has no y pixel size. \n"
+                         f" Check the [IMS:1000047] assencion.")
+
+    if x_size == y_size:
+        return str(int(x_size))
+    else:
+        raise AssertionError(f"The provided dataset has non-sqare pixel sizes. \n"
+                             f" That sucks. This is not yet implemented ")
