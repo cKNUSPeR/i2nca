@@ -132,6 +132,18 @@ def write_tdf_to_pc_imzml(TdfReader,
     return output_file
 
 
+def convert_tdf_to_pc_imzml(file_path, output_path):
+    """ top-level converter for tdf files to processed centroids"""
+    if output_path is None:
+        output_path = file_path[:-6]
+
+    # parse imzml file
+    Image = TdfReader(file_path)
+
+    # write the  file
+    outfile_path = write_tdf_to_pc_imzml(Image, output_path)
+    return outfile_path
+
 
 
 if __name__ == "__main__":
