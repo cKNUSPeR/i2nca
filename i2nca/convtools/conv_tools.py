@@ -470,7 +470,7 @@ def report_prof_to_centroid(Image, outfile_path):
     The data points if all pixels are arranged into distinct clusters. (or a subsample of the pixels)"""
 
     # Create a PDF file to save the figures
-    pdf_pages = make_pdf_backend(outfile_path, "_control_report_pc_to_cp")
+    pdf_pages = make_pdf_backend(outfile_path, "_control_report_prof_to_pc")
 
     # create format flag dict to check formatting of imzML file
     format_flags = evaluate_formats(Image.GetSpectrumType())
