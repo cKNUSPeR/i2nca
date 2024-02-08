@@ -1,14 +1,15 @@
 from i2nca.qctools.visualization import make_pdf_backend, plot_feature_number, image_feature_number, \
-    plot_max_mz_number, image_max_mz_number, plot_min_mz_number, image_min_mz_number, plot_bin_spreads
+    plot_max_mz_number, image_max_mz_number, plot_min_mz_number, image_min_mz_number, plot_bin_spreads, \
+    plot_noise_spectrum, plot_profile_spectrum
 from i2nca.qctools.utils import make_subsample, evaluate_formats, collect_image_stats, evaluate_image_corners, \
-    test_formats, check_uniform_length, evaluate_group_spacing, evaluate_polarity, get_polarity, get_pixsize
-
+    test_formats, check_uniform_length, evaluate_group_spacing, evaluate_polarity, get_polarity, get_pixsize, \
+    collect_noise
 
 import numpy as np
 import m2aia as m2
 import random as rnd
 from pyimzml.ImzMLWriter import ImzMLWriter
-import scipy.signal as ssi
+from scipy.signal import find_peaks
 
 # tools for processed profile
 
@@ -24,29 +25,19 @@ def convert_pp_to_pp_imzml(file_path, output_path=None):
     # parse imzml file
     Image = m2.ImzMLReader(file_path)
 
-    # get the polarity
-    polarity = get_polarity(evaluate_polarity(Image))
-
-    # get the pixel size
-    pix_size = get_pixsize(Image)
-
     # write the profile processed  file
-    return write_pp_to_pp_imzml(Image, output_path, polarity, pix_size)
+    return write_pp_to_pp_imzml(Image, output_path)
 
 
 def write_pp_to_pp_imzml(Image,
-                         output_dir: str,
-                         polarity: str = "positive",
-                         pixel_size: str = "20",
+                         output_dir: str
                          ) -> str:
     """
         Writer for processed profile imzml files within m2aia.
 
 
         Parameters:
-            I: parsed izML file (by m2aia or equvalent object that emulates the methods)
-            polarity  : Polarity, either "positive" or "negative", not accessible in pym2aia
-            pixel_size (Opt): pixel size of imaging run, currently not accessible in pym2aia
+            Image: parsed izML file (by m2aia or equvalent object that emulates the methods)
             output_dir (Opt): File path for output. in same folder as tsf if not specified.
 
 
@@ -58,10 +49,14 @@ def write_pp_to_pp_imzml(Image,
     # specification of output imzML file location and file extension
     output_file = output_dir + "_conv_output_proc_profile.imzML"
 
-    # setting up of  reader
-
     # Get total spectrum count:
     n = Image.GetNumberOfSpectra()
+
+    # get the polarity
+    polarity = get_polarity(evaluate_polarity(Image))
+
+    # get the pixel size
+    pix_size = get_pixsize(Image)
 
     # writing of the imzML file, based on pyimzML
     with ImzMLWriter(output_file,
@@ -70,8 +65,8 @@ def write_pp_to_pp_imzml(Image,
                      # intensity_dtype=np.uintc,
                      mode='processed',
                      spec_type='profile',
-                     pixel_size_x=pixel_size,
-                     pixel_size_y=pixel_size,
+                     pixel_size_x=pix_size,
+                     pixel_size_y=pix_size,
                      # the laser movement param are adapted to TTF presets
                      scan_direction='top_down',
                      line_scan_direction='line_right_left',
@@ -129,7 +124,7 @@ def convert_pp_to_cp_imzml(file_path, output_path = None, pixel_nr = 100):
     ref_mz = imzml_check_spacing(Image, pixel_nr)
 
     # write the continous file
-    return write_pp_to_cp_imzml(Image, ref_mz, output_path, polarity, pix_size)
+    return write_pp_to_cp_imzml(Image, ref_mz, output_path)
 
 
 def report_pp_to_cp_imzml(file_path, output_path=None, coverage=0.25):
@@ -146,25 +141,18 @@ def report_pp_to_cp_imzml(file_path, output_path=None, coverage=0.25):
     # parse imzml file
     Image = m2.ImzMLReader(file_path)
 
-    # get the polarity
-    polarity = get_polarity(evaluate_polarity(Image))
-
-    # get the pixel size
-    pix_size = get_pixsize(Image)
 
     # get the refernce mz value
     ref_mz = report_pp_to_cp(Image, output_path, coverage)
 
     # write the continous file
-    return write_pp_to_cp_imzml(Image, ref_mz, output_path, polarity, pix_size)
+    return write_pp_to_cp_imzml(Image, ref_mz, output_path)
 
 
 
 def write_pp_to_cp_imzml(Image,
                            ref_mz: np.ndarray,
-                           output_dir: str,
-                           polarity: str = "positive",
-                           pixel_size: str = "20",
+                           output_dir: str
                            ) -> str:
     """
         Writer for continous profile imzml files within m2aia.
@@ -176,10 +164,8 @@ def write_pp_to_cp_imzml(Image,
 
 
         Parameters:
-            I: parsed izML file (by m2aia or equvalent object that emulates the methods)
+            Image: parsed izML file (by m2aia or equvalent object that emulates the methods)
             ref_mz(np.ndarray): An array containing the reference mz axis.
-            polarity  : Polarity, either "positive" or "negative", not accessible in pym2aia
-            pixel_size (Opt): pixel size of imaging run, currently not accessible in pym2aia
             output_dir (Opt): File path for output. in same folder as tsf if not specified.
 
 
@@ -191,7 +177,11 @@ def write_pp_to_cp_imzml(Image,
     # specification of output imzML file location and file extension
     output_file = output_dir + "_conv_output_cont_profile.imzML"
 
-    # setting up of  reader
+    # get the polarity
+    polarity = get_polarity(evaluate_polarity(Image))
+
+    # get the pixel size
+    pix_size = get_pixsize(Image)
 
     # Get total spectrum count:
     n = Image.GetNumberOfSpectra()
@@ -200,8 +190,8 @@ def write_pp_to_cp_imzml(Image,
     # writing of the imzML file, based on pyimzML
     with ImzMLWriter(output_file,
                      polarity=polarity,
-                     pixel_size_x="20",
-                     pixel_size_y="20",
+                     pixel_size_x=pix_size,
+                     pixel_size_y=pix_size,
                      mz_dtype=np.float32,
                      # intensity_dtype=np.uintc,
                      mode='continuous',
@@ -289,7 +279,6 @@ def report_pp_to_cp(Image, outfile_path, coverage):
     plot_bin_spreads(mean_bin, intra_bin_spread, inter_bin_spread, pdf_pages)
 
     pdf_pages.close()
-    print("report generated at: ", outfile_path + "control_report_pp_to_cp.pdf")
 
     return mean_bin
 
@@ -334,13 +323,42 @@ def imzml_check_spacing(Image, batch_size: int = 100) -> np.ndarray:
 # peak detection and stuff
 
 
+def set_find_peaks(height=None,
+                   threshold=None,
+                   distance=None,
+                   prominence=None,
+                   width=None,
+                   wlen=None,
+                   rel_height=0.5,
+                   plateau_size=None):
+    """higher order function to pass peak-detection arguments without performing peak-finding.
+
+    Example usage:
+    set_find_peaks(height=2500, width=4)(mz, intensity)
+
+    set_find_peaks(height=20, prominence=3) can be passed as argument to peak centroiding funktions.
+    see the loc_max_preset for an example.
+        """
+
+    def inner_function(mz, intensity):
+        # a call of scipy.find_peaks with all available parameters.
+        peaks, _ = find_peaks(intensity,
+                              height=height,
+                              threshold=threshold,
+                              distance=distance,
+                              prominence=prominence,
+                              width=width,
+                              wlen=wlen,
+                              rel_height=rel_height,
+                              plateau_size=plateau_size)
+        return mz[peaks], intensity[peaks]
+    return inner_function
+
+
 def loc_max_preset(mz, intensity):
-    """functional appraoch to user specificatio in peak detection"""
-    peaks, _ = ssi.find_peaks(intensity,
-                              distance=3,   # considers peaks at with minimal distance of 3 datapoints
-                              height=20     # considers only peaks above intensity of 20
-                              )
-    return mz[peaks], intensity[peaks]
+    """preset peak finding settings.
+    Heigth above 20 and a width of 5"""
+    return set_find_peaks(height=20, width=5)(mz, intensity)
 
 
 def convert_profile_to_pc_imzml(file_path,
@@ -350,8 +368,6 @@ def convert_profile_to_pc_imzml(file_path,
     """ Top-level converter for
      profile imzML to processed centroid imzML.
      The centroiding is implemented by user definition of a peak detection function.
-     Presets are:
-
 
     Introduces no changes to file."""
     if output_path is None:
@@ -367,26 +383,23 @@ def convert_profile_to_pc_imzml(file_path,
     pix_size = get_pixsize(Image)
 
     # write the profile processed  file
-    return write_profile_to_cp_imzml(Image, output_path, detection_function, polarity, pix_size)
+    return write_profile_to_cp_imzml(Image, output_path, detection_function)
 
 
 def write_profile_to_cp_imzml(Image,
                               output_dir: str,
-                              detection_function,
-                              polarity,
-                              pixel_size
+                              detection_function
                          ) -> str:
     """
         Writer for processed profile imzml files within m2aia.
 
 
         Parameters:
-            I: parsed izML file (by m2aia or equvalent object that emulates the methods)
+            Image: parsed izML file (by m2aia or equvalent object that emulates the methods)
+
             detection function: this can be any function that takes two arrays, (mzs and intensities) and return
             the result of peak detection on that daatset.
 
-            polarity  : Polarity, either "positive" or "negative", not accessible in pym2aia
-            pixel_size (Opt): pixel size of imaging run, currently not accessible in pym2aia
             output_dir (Opt): File path for output. in same folder as tsf if not specified.
 
 
@@ -401,11 +414,17 @@ def write_profile_to_cp_imzml(Image,
     # Get total spectrum count:
     n = Image.GetNumberOfSpectra()
 
+    # get the polarity
+    polarity = get_polarity(evaluate_polarity(Image))
+
+    # get the pixel size
+    pix_size = get_pixsize(Image)
+
     # writing of the imzML file, based on pyimzML
     with ImzMLWriter(output_file,
                      polarity=polarity,
-                     pixel_size_x=pixel_size,
-                     pixel_size_y=pixel_size,
+                     pixel_size_x=pix_size,
+                     pixel_size_y=pix_size,
                      mz_dtype=np.float32,
                      # intensity_dtype=np.uintc,
                      mode='processed',
@@ -442,3 +461,38 @@ def write_profile_to_cp_imzml(Image,
     return output_file
 
 
+# add a conversion report for profile to centroids.
+
+def report_prof_to_centroid(Image, outfile_path):
+    """creates a pdf report that checks:
+    The file has the same number of data points in each pixel.
+    The data points start and end at nearly the same value.
+    The data points if all pixels are arranged into distinct clusters. (or a subsample of the pixels)"""
+
+    # Create a PDF file to save the figures
+    pdf_pages = make_pdf_backend(outfile_path, "_control_report_pc_to_cp")
+
+    # create format flag dict to check formatting of imzML file
+    format_flags = evaluate_formats(Image.GetSpectrumType())
+
+    # check if the porvided file is profile.
+    # fro efficientcy purpose, continuous filetype is not controlled
+    test_formats(format_flags, ["profile"])
+
+    # visualize the mean spectra
+    if format_flags["profile"]:
+        plot_profile_spectrum(Image.GetXAxis(), Image.GetMeanSpectrum(), pdf_pages)
+
+    # equates to interval of plus/minus noise_interval
+    noise_interval = 2
+    # get noise data on mean spectrum
+    noise_medain, _, noise_axis = collect_noise(Image.GetXAxis(), Image.GetMeanSpectrum(), noise_interval)
+
+    # PLOT NOISES'
+    plot_noise_spectrum(noise_axis, noise_medain,
+                        f'Noise estimation within interval of {2 * noise_interval}', pdf_pages)
+
+    # how nice would it be if the QC score would be plotted here
+
+    pdf_pages.close()
+    print("report generated at: ", outfile_path + "control_report_pp_to_cp.pdf")

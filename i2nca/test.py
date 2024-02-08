@@ -46,7 +46,7 @@ plt.grid(True)
 
 
 
-def set_peak_finding(height=None,
+def set_find_peaks(height=None,
                    threshold=None,
                    distance=None,
                    prominence=None,
@@ -69,8 +69,7 @@ def set_peak_finding(height=None,
     return inner_function
 
 
-default_find_locmax = lambda mz, ints: set_peak_finding(height=0.4,
-                                                distance=5)(mz, ints)
+default_find_locmax = set_peak_finding(height=0.4, distance=5)
 
 
 mz_cent, int_cent = default_find_locmax(s_mz, s_intensity)
