@@ -1,4 +1,4 @@
-import tsfdata
+import i2nca.brukertools.tsfdata as tsfdata
 import numpy as np
 from pyimzml.ImzMLWriter import ImzMLWriter
 from scipy.signal import find_peaks
