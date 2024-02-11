@@ -114,12 +114,6 @@ def convert_pp_to_cp_imzml(file_path, output_path = None, pixel_nr = 100):
     # parse imzml file
     Image = m2.ImzMLReader(file_path)
 
-    # get the polarity
-    polarity = get_polarity(evaluate_polarity(Image))
-
-    # get the pixel size
-    pix_size = get_pixsize(Image)
-
     # get the refernce mz value
     ref_mz = imzml_check_spacing(Image, pixel_nr)
 
@@ -383,6 +377,27 @@ def convert_profile_to_pc_imzml(file_path,
     pix_size = get_pixsize(Image)
 
     # write the profile processed  file
+    return write_profile_to_cp_imzml(Image, output_path, detection_function)
+
+
+def report_profile_to_pc_imzml(file_path, output_path=None, detection_function=loc_max_preset):
+    """Top-level converter for any profile imzml to
+     processed centroids imzml.
+     This is essentailly a mapping of the detection_funtion to each pixel.
+     This function is produces a report.
+
+     functions returns filepath of new file for further use.
+     """
+    if output_path is None:
+        output_path = file_path[:-6]
+
+    # parse imzml file
+    Image = m2.ImzMLReader(file_path)
+
+    # make the file converion report
+    report_prof_to_centroid(Image, output_path)
+
+    # write the continous file
     return write_profile_to_cp_imzml(Image, output_path, detection_function)
 
 
