@@ -2,7 +2,7 @@ import unittest
 import os as os
 
 from m2aia import ImzMLReader
-from i2nca import report_agnostic_qc, report_calibrant_qc
+from i2nca import report_agnostic_qc, report_calibrant_qc, report_regions_qc
 
 
 def get_wdir(rel_path:str):
@@ -259,6 +259,48 @@ class TestCalibrantQC(unittest.TestCase):
         # cleanup temp files
         if delete_output() == True: 
             os.remove(result)
-            
+
+
+class TestRegionQC(unittest.TestCase):
+
+    def test_region_qc_on_cc_imzml_no_anno(self):
+        input = get_wdir(r"testdata\cc.imzML")
+        output = get_wdir(r"tempfiles\cc_no_anno")
+
+        # parse dataset
+        I = ImzMLReader(input)
+        # report QC
+        report_regions_qc(I, output)
+
+        # expected result
+        result = output + "_region_QC.pdf"
+
+        # assert file building
+        self.assertTrue(os.path.isfile(result))
+
+        # cleanup temp files
+        if delete_output() == True:
+            os.remove(result)
+
+    def test_region_qc_on_cc_imzml_with_anno(self):
+        input = get_wdir(r"testdata\cc.imzML")
+        output = get_wdir(r"tempfiles\cc_w_anno")
+        region_file = get_wdir(r"testdata\regions.tsv")
+
+        # parse dataset
+        I = ImzMLReader(input)
+        # report QC
+        report_regions_qc(I, output, region_file)
+
+        # expected result
+        result = output + "_region_QC.pdf"
+
+        # assert file building
+        self.assertTrue(os.path.isfile(result))
+
+        # cleanup temp files
+        if delete_output() == True:
+            os.remove(result)
+
 if __name__ == "__main__":
     unittest.main()

@@ -112,7 +112,11 @@ def parse_regionfile(file, annotation_group, image):
     df = pd.read_csv(file, sep="\t", header=0)
 
     # translate the annotation to values starting from 1
-    df['annotation_values'] = pd.factorize(df[annotation_group])[0] + 1
+    try:
+        df['annotation_values'] = pd.factorize(df[annotation_group])[0] + 1
+    except KeyError:
+        raise KeyError('The supplied annotation file does not have the required column heads.'
+                       'These columns are required: [x    y    annotation ]')
 
     # the maximum number of regions (counting starts at 1)
     max_regions = df['annotation_values'].max()

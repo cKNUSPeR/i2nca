@@ -162,7 +162,7 @@ def report_calibrant_qc(I,  # m2.imzMLReader (passing by ref allows faster compu
 
 def report_regions_qc(I,  # m2.imzMLReader (passing by ref allows faster computation)
                       outfile_path: str,  # path for output file
-                      regionfile_path=False,  # path to tsv file for region annotation
+                      regionfile_path: Union[str,bool] = False,  # path to tsv file for region annotation
                       ):
     # Create a PDF file to save the figures
     pdf_pages = make_pdf_backend(outfile_path, "_region_QC")

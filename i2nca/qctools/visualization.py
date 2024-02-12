@@ -104,7 +104,9 @@ def image_pixel_index(image, binary_mask, pdf, x_limits, y_limits):
     im = ax.imshow(image_masked,
                    cmap=my_rbw, vmin=-0.1, interpolation='none')
 
-    fig.colorbar(im, extend='min')
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="5%", pad=0.05)
+    fig.colorbar(im, extend='min', cax=cax)
 
     pdf.savefig(fig)
     plt.close()
@@ -128,7 +130,9 @@ def image_regions(regionarray, binary_mask, max_nr_region, pdf, x_limits, y_limi
                    vmin=-0.1, interpolation='none', origin='lower')
     # extent=[x_limits[0], x_limits[1], y_limits[0], y_limits[1]])
 
-    fig.colorbar(im, extend='min', format=lambda x, _: f"{int(x)}", label="Index of group")
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="5%", pad=0.05)
+    fig.colorbar(im, extend='min', format=lambda x, _: f"{int(x)}", label="Index of group", cax=cax)
 
     pdf.savefig(fig)
     plt.close()
@@ -168,7 +172,10 @@ def image_basic_heatmap(Image,
     ax.set_ylim(y_limits[0], y_limits[1])
 
     im = ax.imshow(Image, cmap=my_vir, vmin=-0.1)
-    fig.colorbar(im, ax=ax, extend='min')
+
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="5%", pad=0.05)
+    fig.colorbar(im, cax=cax, extend='min')
 
     pdf.savefig(fig)
     plt.close()
