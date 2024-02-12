@@ -8,4 +8,4 @@ from i2nca.convtools.conv_tools import  report_pp_to_cp_imzml, report_pp_to_cp, 
 
 __author__ = "Jannik Witte"
 
-__version__ = "0.2.2"
+__version__ = "0.2.3"
