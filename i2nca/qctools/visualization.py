@@ -549,6 +549,10 @@ def plot_calibrant_spectra_panel(cal_spectra,
     wavg = calibrants_df.loc[index, "value_wavg"]
     dist = calibrants_df.loc[index, "interval"]
 
+    # reconvert the cal_spectra to large array
+    mz_vals = np.concatenate(cal_spectra[0], axis=0)
+    int_vals = np.concatenate(cal_spectra[1], axis=0)
+
     fig = plt.figure(figsize=[10, 10])  # constrained_layout=True)
 
     # make the panel layout
@@ -585,12 +589,14 @@ def plot_calibrant_spectra_panel(cal_spectra,
 
     if format_dict["centroid"]:
         # plot centroid spectrum
-        ax1.vlines(cal_spectra[0], 0, cal_spectra[1], color='k', linewidth=0.8, zorder=-1)
-        ax1.scatter(cal_spectra[0], cal_spectra[1], s=6, color='k', marker="o", zorder=-1)
+        ax1.vlines(mz_vals, 0, int_vals, color='k', linewidth=0.8, zorder=-1)
+        ax1.scatter(mz_vals, int_vals, s=6, color='k', marker="o", zorder=-1)
 
     elif format_dict["profile"]:
         # plot profile spectrum
-        ax1.plot(cal_spectra[0], cal_spectra[1], color='k', linewidth=0.5, zorder=-1)
+        for mzs, ints in zip(cal_spectra[0], cal_spectra[1]):
+            ax1.plot(mzs, ints, color='k', linewidth=0.5, zorder=-1)
+        ax1.scatter(mz_vals, int_vals, s=6, color='k', marker="o", zorder=-1)
 
     # adjust y limits
     ax1.set_ylim(bottom=0)
@@ -616,12 +622,11 @@ def plot_calibrant_spectra_panel(cal_spectra,
     # control block for plotting spectra
     if format_dict["centroid"]:
         # scatter centroid spectrum
-        ax2.scatter(cal_spectra[0], cal_spectra[1], color='k', marker="x", zorder=-1)
+        ax2.scatter(mz_vals, int_vals, color='k', marker="x", zorder=-1)
 
     elif format_dict["profile"]:
         # plot profile spectrum
-        ax2.plot(cal_spectra[0], cal_spectra[1], color='k', linewidth=0.5, zorder=-1)
-        ax2.scatter(cal_spectra[0], cal_spectra[1], color='k', marker="x", zorder=-1)
+        ax2.scatter(mz_vals, int_vals, color='k', marker="x", zorder=-1)
 
     # adjust y limits
     ax2.set_ylim(bottom=0)
@@ -636,7 +641,7 @@ def plot_calibrant_spectra_panel(cal_spectra,
     ax3.set_xlabel('m/z')
     ax3.set_ylabel('Intensity')
     # set the axis range and styles
-    ax3.set_xlim(min(cal_spectra[0]) - offset, max(cal_spectra[0]) + offset)
+    ax3.set_xlim(min(mz_vals) - offset, max(mz_vals) + offset)
     ax3.ticklabel_format(useOffset=False, )
     ax3.ticklabel_format(axis="y", style='sci', scilimits=(0, 0))
     # set x-axis style
@@ -648,13 +653,14 @@ def plot_calibrant_spectra_panel(cal_spectra,
     # control block for profile/centroid case
     if format_dict["centroid"]:
         # plot centroid spectrum
-        ax3.vlines(cal_spectra[0], 0, cal_spectra[1], color='k', linewidth=0.8, zorder=-1)
-        ax3.scatter(cal_spectra[0], cal_spectra[1], s=6, color='k', marker="o", zorder=-1)
+        ax3.vlines(mz_vals, 0, int_vals, color='k', linewidth=0.8, zorder=-1)
+        ax3.scatter(mz_vals, int_vals, s=6, color='k', marker="o", zorder=-1)
 
     elif format_dict["profile"]:
         # plot profile spectrum
-        ax3.plot(cal_spectra[0], cal_spectra[1], color='k', linewidth=0.5, zorder=-1)
-        ax3.scatter(cal_spectra[0], cal_spectra[1], s=6, color='k', marker="o", zorder=-1)
+        for mzs, ints in zip(cal_spectra[0], cal_spectra[1]):
+            ax3.plot(mzs, ints, color='k', linewidth=0.5, zorder=-1)
+        ax3.scatter(mz_vals, int_vals, s=6, color='k', marker="o", zorder=-1)
 
     # adjust yaxis bottom
     ax3.set_ylim(bottom=0)
@@ -688,13 +694,14 @@ def plot_calibrant_spectra_panel(cal_spectra,
     # control block for profile/centroid case
     if format_dict["centroid"]:
         # scatter centroid spectrum
-        ax4.vlines(cal_spectra[0], 0, cal_spectra[1], color='k', linewidth=0.8, zorder=-1)
-        ax4.scatter(cal_spectra[0], cal_spectra[1], s=6, color='k', marker="o", zorder=-1)
+        ax4.vlines(mz_vals, 0, int_vals, color='k', linewidth=0.8, zorder=-1)
+        ax4.scatter(mz_vals, int_vals, s=6, color='k', marker="o", zorder=-1)
 
     elif format_dict["profile"]:
         # plot profile spectrum
-        ax4.plot(cal_spectra[0], cal_spectra[1], color='k', linewidth=0.5, zorder=-1)
-        ax4.scatter(cal_spectra[0], cal_spectra[1], s=6, color='k', marker="o", zorder=-1)
+        for mzs, ints in zip(cal_spectra[0], cal_spectra[1]):
+            ax4.plot(mzs, ints, color='k', linewidth=0.5, zorder=-1)
+        ax4.scatter(mz_vals, int_vals, s=6, color='k', marker="o", zorder=-1)
 
     # adjust y limits
     ax4.set_ylim(bottom=0)

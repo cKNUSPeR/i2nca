@@ -426,7 +426,9 @@ def find_nearest_loc_max(mzs, intensites, value, distance=0):
 
 def extract_calibrant_spectra(Image, cal_mass, subsample, mz_bin):
     """Read the full image. Collects the spectral data for a given mass in the given mz bin."""
-    accu_list = np.array([[], []])
+    accu_list = [[], []]
+    # accu_list[0] is a list with mz values in np.arrays
+    # accu_list[1] is a list with mz values in np.arrays
 
     # looping over sample
     for ind in subsample:
@@ -447,14 +449,18 @@ def extract_calibrant_spectra(Image, cal_mass, subsample, mz_bin):
         # pixels are only written if there is data present in the specified part
         if maxdex_flag and mindex_flag:
             # collecting of masses and intensities
-            adder = np.array((mass[mindex:maxdex], intensity[mindex:maxdex]))
-            accu_list = np.concatenate((accu_list, adder), axis=1)
+            mass_adder, int_adder = mass[mindex:maxdex], intensity[mindex:maxdex]
+            accu_list[0].append(mass_adder)
+            accu_list[1].append(int_adder)
         elif mindex_flag and not maxdex_flag:
-            adder = np.array((mass[mindex:], intensity[mindex:]))
-            accu_list = np.concatenate((accu_list, adder), axis=1)
+            mass_adder, int_adder = mass[mindex:], intensity[mindex:]
+            accu_list[0].append(mass_adder)
+            accu_list[1].append(int_adder)
         elif not mindex_flag and maxdex_flag:
-            adder = np.array((mass[:maxdex], intensity[:maxdex]))
-            accu_list = np.concatenate((accu_list, adder), axis=1)
+            mass_adder, int_adder = mass[:maxdex], intensity[:maxdex]
+            accu_list[0].append(mass_adder)
+            accu_list[1].append(int_adder)
+
 
     return accu_list
 
@@ -472,24 +478,34 @@ def collect_calibrant_stats(cal_spectra, calibrant_df, index):
     # deep-copy the df (it gets mutated over function call)
     calibrant_df = calibrant_df.copy(deep=True)
 
+
     # extraction of most Abundant Peaks and peak centers and their validity
+    # check if there are any pixels
     if len(cal_spectra[1]) > 0:
 
-        # peak with hightest intensity
-        most_abundant_peak = cal_spectra[0][np.where(cal_spectra[1] == max(cal_spectra[1]))][0]
+        mz_vals = np.concatenate(cal_spectra[0], axis=0)
+        int_vals = np.concatenate(cal_spectra[1], axis=0)
+        # check length in each pixel
+        if len(int_vals) > 0:
 
-        # weighted average of mz values weighted by their intensity
-        wavg = np.ma.average(cal_spectra[0], weights=cal_spectra[1])
+            # peak with hightest intensity
+            most_abundant_peak = mz_vals[np.where(int_vals == max(int_vals))][0]
 
-        # update the dataframe
-        calibrant_df.loc[index, "found"] = True
-        calibrant_df.loc[index, "value_wavg"] = wavg
-        calibrant_df.loc[index, "value_map"] = most_abundant_peak
+            # weighted average of mz values weighted by their intensity
+            wavg = np.ma.average(mz_vals, weights=int_vals)
 
-        # calculate distane ppm
-        calibrant_df.loc[index, "distance_wavg"] = calculate_ppm(wavg, calibrant_df.loc[index, "mz"])
-        calibrant_df.loc[index, "distance_map"] = calculate_ppm(most_abundant_peak, calibrant_df.loc[index, "mz"])
+            # update the dataframe
+            calibrant_df.loc[index, "found"] = True
+            calibrant_df.loc[index, "value_wavg"] = wavg
+            calibrant_df.loc[index, "value_map"] = most_abundant_peak
 
+            # calculate distane ppm
+            calibrant_df.loc[index, "distance_wavg"] = calculate_ppm(wavg, calibrant_df.loc[index, "mz"])
+            calibrant_df.loc[index, "distance_map"] = calculate_ppm(most_abundant_peak, calibrant_df.loc[index, "mz"])
+
+        else:
+            calibrant_df.loc[index, "found"] = False
+            # values are not updated, NaN signifies non-found peaks
 
     else:
         calibrant_df.loc[index, "found"] = False
@@ -586,11 +602,11 @@ def collect_calibrant_converage(accuracy_images, calibrants_df, accuracy_cutoff)
     return calibrant_df
 
 
-def collect_dynamic_cmaps(accuracy_images, calibrants_df, accuracy_cutoff):
+"""def collect_dynamic_cmaps(accuracy_images, calibrants_df, accuracy_cutoff):
     # cool but sadly decrep.
-    """Dynamically calculates range of interest for cmapping for each calibrant.
+    'Dynamically calculates range of interest for cmapping for each calibrant.
     This is achieved by using DBSCAN to cluster the data, and then get the cluster nearest to 0 ppm.
-    The color range is adapted to include 0 for ease of readablility"""
+    The color range is adapted to include 0 for ease of readablility'
 
     # copy df for
     calibrant_df = calibrants_df.copy(deep=True)
@@ -637,8 +653,7 @@ def collect_dynamic_cmaps(accuracy_images, calibrants_df, accuracy_cutoff):
         calibrant_df.loc[i, 'accuracy_llimits'] = i_min
         calibrant_df.loc[i, 'accuracy_ulimits'] = i_max
 
-    return calibrant_df
-
+    return calibrant_df"""
 
 def collect_image_stats(Image, statistic_keywords):
     """ Expensive function to call. iterates over the full spectrum and returns the specified metrics.
