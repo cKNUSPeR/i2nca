@@ -13,7 +13,7 @@ class TestAgnosticQC(unittest.TestCase):
     def test_agnostic_qc_on_pp_imzml(self):
 
         input = get_wdir(r"testdata\pp.imzML")
-        output = get_wdir(r"tempdata\pp")
+        output = get_wdir(r"tempfiles\pp")
 
         # parse dataset
         I = ImzMLReader(input)
@@ -32,7 +32,7 @@ class TestAgnosticQC(unittest.TestCase):
     def test_agnostic_qc_on_cp_imzml(self):
 
         input = get_wdir(r"testdata\cp.imzML")
-        output = get_wdir(r"tempdata\cp")
+        output = get_wdir(r"tempfiles\cp")
 
         # parse dataset
         I = ImzMLReader(input)
@@ -51,7 +51,7 @@ class TestAgnosticQC(unittest.TestCase):
     def test_agnostic_qc_on_pc_imzml(self):
 
         input = get_wdir(r"testdata\pc.imzML")
-        output = get_wdir(r"tempdata\pc")
+        output = get_wdir(r"tempfiles\pc")
 
         # parse dataset
         I = ImzMLReader(input)
@@ -70,7 +70,7 @@ class TestAgnosticQC(unittest.TestCase):
     def test_agnostic_qc_on_cc_imzml(self):
 
         input = get_wdir(r"testdata\cc.imzML")
-        output = get_wdir(r"tempdata\cc")
+        output = get_wdir(r"tempfiles\cc")
 
         # parse dataset
         I = ImzMLReader(input)

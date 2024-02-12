@@ -16,7 +16,7 @@ class TestConvToolsCC(unittest.TestCase):
     def test_conv_pc_to_cc_imzml_unique(self):
         # get data paths
         input_data = get_wdir(r"testdata\pc.imzML")
-        output = get_wdir(r"tempdata\cc")
+        output = get_wdir(r"tempfiles\cc")
 
         # convert data
         convert_pc_to_cc_imzml(input_data, output, bin_strategy="unique")
@@ -34,7 +34,7 @@ class TestConvToolsCC(unittest.TestCase):
     def test_conv_pc_to_cc_imzml_fixed(self):
         # get data paths
         input_data = get_wdir(r"testdata\pc.imzML")
-        output = get_wdir(r"tempdata\cc")
+        output = get_wdir(r"tempfiles\cc")
 
         # convert data
         convert_pc_to_cc_imzml(input_data, output, bin_strategy="fixed", bin_accuracy=200)
@@ -52,7 +52,7 @@ class TestConvToolsCC(unittest.TestCase):
     def test_conv_pc_to_cc_imzml_fallback(self):
         # get data paths
         input_data = get_wdir(r"testdata\pc.imzML")
-        output = get_wdir(r"tempdata\cc")
+        output = get_wdir(r"tempfiles\cc")
 
         # convert data
         convert_pc_to_cc_imzml(input_data, output, bin_strategy="random_input", bin_accuracy=200)

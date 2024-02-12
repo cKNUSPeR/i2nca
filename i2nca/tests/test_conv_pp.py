@@ -15,7 +15,7 @@ class TestConvTools(unittest.TestCase):
     def test_conv_pp_to_pp_imzml(self):
         # get data paths
         input_data = get_wdir(r"testdata\pp.imzML")
-        output = get_wdir(r"tempdata\pp")
+        output = get_wdir(r"tempfiles\pp")
 
         # convert data
         convert_pp_to_pp_imzml(input_data, output)
@@ -33,7 +33,7 @@ class TestConvTools(unittest.TestCase):
     def test_conv_pp_to_cp_imzml(self):
         # get data paths
         input_data = get_wdir(r"testdata\pp.imzML")
-        output = get_wdir(r"tempdata\cp")
+        output = get_wdir(r"tempfiles\cp")
 
         # convert data
         convert_pp_to_cp_imzml(input_data, output)
@@ -51,7 +51,7 @@ class TestConvTools(unittest.TestCase):
     def test_conv_pp_to_pc_imzml(self):
         # get data paths
         input_data = get_wdir(r"testdata\pp.imzML")
-        output = get_wdir(r"tempdata\pc")
+        output = get_wdir(r"tempfiles\pc")
 
         # convert data
         convert_profile_to_pc_imzml(input_data, output, loc_max_preset)
@@ -69,7 +69,7 @@ class TestConvTools(unittest.TestCase):
     def test_conv_cp_to_pc_imzml(self):
         # get data paths
         input_data = get_wdir(r"testdata\cp.imzML")
-        output = get_wdir(r"tempdata\pc")
+        output = get_wdir(r"tempfiles\pc")
 
         # convert data
         convert_profile_to_pc_imzml(input_data, output, loc_max_preset)
