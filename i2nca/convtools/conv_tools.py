@@ -370,12 +370,6 @@ def convert_profile_to_pc_imzml(file_path,
     # parse imzml file
     Image = m2.ImzMLReader(file_path)
 
-    # get the polarity
-    polarity = get_polarity(evaluate_polarity(Image))
-
-    # get the pixel size
-    pix_size = get_pixsize(Image)
-
     # write the profile processed  file
     return write_profile_to_cp_imzml(Image, output_path, detection_function)
 
@@ -511,3 +505,151 @@ def report_prof_to_centroid(Image, outfile_path):
 
     pdf_pages.close()
     print("report generated at: ", outfile_path + "control_report_pp_to_cp.pdf")
+
+
+# tools for the conversion of pc to cc
+
+def convert_pc_to_cc_imzml(file_path, output_path=None, bin_strategy="unique", bin_accuracy = 100):
+    """Top-level converter for any processed centroids imzml to
+     continuous centroids imzml.
+     This is essentailly a user-defined mass binning at each pixel.
+     This function does not yet produce a report.
+
+     functions returns filepath of new file for further use.
+     """
+    if output_path is None:
+        output_path = file_path[:-6]
+
+    # parse imzml file
+    Image = m2.ImzMLReader(file_path)
+
+    ref_mz = create_bins(Image, bin_strategy, bin_accuracy)
+
+    # write the continous file
+    return write_pc_to_cc_imzml(Image, ref_mz,  output_path)
+
+
+def create_bins(Image, method="unique", accuracy = 100):
+    """make bins to represent the continous bins"""
+    if method == "unique":
+        bins = get_unique_masses(Image)
+        return bins
+    elif method =="fixed":
+        start = min(Image.GetXAxis())
+        end = max(Image.GetXAxis())
+        return  np.array(list(mz_range(start, end, accuracy)))
+    else:
+        return sorted(Image.GetXAxis())
+
+
+def get_unique_masses(Image):
+    """get all the unique mass values"""
+    unique_values = set()
+
+    n = Image.GetNumberOfSpectra()
+
+    # Iterate through arrays and collect unique values
+    for id in range(0, n):
+
+        mz, _ = Image.GetSpectrum(id)
+        unique_values.update(mz)
+
+    return sorted(unique_values)
+
+
+def mz_range(start, end, step):
+    """generator, creates a list of mz values begining with start and incrementing with step as ppm stepsize"""
+    yield start
+    current = start
+    while current <= end:
+        current = current + (current * step / (10 ** 6))
+        yield current
+
+
+def write_pc_to_cc_imzml(Image,
+                           ref_mz: np.ndarray,
+                           output_dir: str
+                           ) -> str:
+    """
+        Writer for continous profile imzml files within m2aia.
+
+        Sparcity implementation:
+        pixel is skipped if it does not fit the lenght requirement of the mz axis.
+        Further implementations could be an intensity array of 0 together with shared mass maxis
+        or a binary tree implementation to only fit this t the nearest neighbours.
+
+
+        Parameters:
+            Image: parsed izML file (by m2aia or equvalent object that emulates the methods)
+            ref_mz(np.ndarray): An array containing the reference mz axis.
+            output_dir (Opt): File path for output. in same folder as tsf if not specified.
+
+
+        Returns:
+           (str): imzML File path,
+           additionally, imzML file is written there
+
+        """
+    # specification of output imzML file location and file extension
+    output_file = output_dir + "_conv_output_cont_centroid.imzML"
+
+    # get the polarity
+    polarity = get_polarity(evaluate_polarity(Image))
+
+    # get the pixel size
+    pix_size = get_pixsize(Image)
+
+    # Get total spectrum count:
+    n = Image.GetNumberOfSpectra()
+    len_ref_mz = len(ref_mz)
+
+    # writing of the imzML file, based on pyimzML
+    with ImzMLWriter(output_file,
+                     polarity=polarity,
+                     pixel_size_x=pix_size,
+                     pixel_size_y=pix_size,
+                     mz_dtype=np.float32,
+                     # intensity_dtype=np.uintc,
+                     mode='continuous',
+                     spec_type='centroid',
+                     # the laser movement param are taken from scilslab export for ttf
+                     scan_direction='top_down',
+                     line_scan_direction='line_right_left',
+                     scan_pattern='meandering',
+                     scan_type='horizontal_line',
+                     ) as w:
+
+        # m2aia is 0-indexed
+        for id in range(0, n):
+
+            # get the data from Image
+            mz, intensities = Image.GetSpectrum(id)
+            xyz_pos = Image.GetSpectrumPosition(id)
+
+            # image offset (m2aia5.1 quirk, persistent up to 5.10.)
+            img_offset = 1
+            # offset needs to be added for 1-based indexing of xyz system
+            pos = (xyz_pos[0] + img_offset, xyz_pos[1] + img_offset)
+
+            # make the ref axis
+            index_array = find_nearest_element(mz, ref_mz)
+            binned_ints = np.bincount(index_array, weights=intensities)
+
+            # writing with pyimzML
+            w.addSpectrum(ref_mz, binned_ints, pos)
+
+    return output_file
+
+
+def find_nearest_element(values, search_array):
+    """find nearest elements with a binary search in sorted array"""
+
+    # make and vectoize function
+    search_bisect = lambda x: np.searchsorted(search_array, x)
+    vsearch_bisect = np.vectorize(search_bisect)
+
+    indices = vsearch_bisect(values) # applythis, there really should be a one-liner
+
+    indices = np.clip(indices, 0, len(search_array) - 1) # drop all invalid right indices
+
+    return indices
