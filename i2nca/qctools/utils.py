@@ -479,7 +479,7 @@ def collect_calibrant_stats(cal_spectra, calibrant_df, index):
         most_abundant_peak = cal_spectra[0][np.where(cal_spectra[1] == max(cal_spectra[1]))][0]
 
         # weighted average of mz values weighted by their intensity
-        wavg = np.average(cal_spectra[0], weights=cal_spectra[1])
+        wavg = np.ma.average(cal_spectra[0], weights=cal_spectra[1])
 
         # update the dataframe
         calibrant_df.loc[index, "found"] = True

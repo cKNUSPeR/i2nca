@@ -101,7 +101,7 @@ def report_calibrant_qc(I,  # m2.imzMLReader (passing by ref allows faster compu
                         calfile_path: str,  # path to tsv file for calibrants
                         # dist: float, # allowed distance to check for bulk metrics around theo. masses
                         ppm: float,  # +- ppm cutoff for accuracy determination
-                        sample_size: float = 1  # coverage of sample to be used for bulk calc, between 0 and 1
+                        sample_size: float = 1.0  # coverage of sample to be used for bulk calc, between 0 and 1
                         ):
     #  read in the calibrants
     calibrants = read_calibrants(calfile_path, ppm)
