@@ -8,8 +8,13 @@ from i2nca import report_agnostic_qc, report_calibrant_qc
 def get_wdir(rel_path:str):
     return str(os.path.join(os.getcwd(), rel_path))
 
-class TestAgnosticQC(unittest.TestCase):
 
+def delete_output():
+    return False
+
+
+class TestAgnosticQC(unittest.TestCase):
+        
     def test_agnostic_qc_on_pp_imzml(self):
 
         input = get_wdir(r"testdata\pp.imzML")
@@ -27,7 +32,8 @@ class TestAgnosticQC(unittest.TestCase):
         self.assertTrue(os.path.isfile(result))
 
         # cleanup temp files
-        #os.remove(result)
+        if delete_output() == True: 
+            os.remove(result)
 
     def test_agnostic_qc_on_cp_imzml(self):
 
@@ -46,7 +52,8 @@ class TestAgnosticQC(unittest.TestCase):
         self.assertTrue(os.path.isfile(result))
 
         # cleanup temp files
-        #os.remove(result)
+        if delete_output() == True: 
+            os.remove(result)
 
     def test_agnostic_qc_on_pc_imzml(self):
 
@@ -65,7 +72,8 @@ class TestAgnosticQC(unittest.TestCase):
         self.assertTrue(os.path.isfile(result))
 
         # cleanup temp files
-        #os.remove(result)
+        if delete_output() == True: 
+            os.remove(result)
 
     def test_agnostic_qc_on_cc_imzml(self):
 
@@ -84,7 +92,8 @@ class TestAgnosticQC(unittest.TestCase):
         self.assertTrue(os.path.isfile(result))
 
         # cleanup temp files
-        #os.remove(result)
+        if delete_output() == True: 
+            os.remove(result)
 
 
 class TestCalibrantQC(unittest.TestCase):
@@ -107,7 +116,8 @@ class TestCalibrantQC(unittest.TestCase):
         self.assertTrue(os.path.isfile(result))
 
         # cleanup temp files
-        #os.remove(result)
+        if delete_output() == True: 
+            os.remove(result)
 
     def test_calibrant_qc_on_pp_imzml_def_param(self):
 
@@ -127,7 +137,8 @@ class TestCalibrantQC(unittest.TestCase):
         self.assertTrue(os.path.isfile(result))
 
         # cleanup temp files
-        #os.remove(result)
+        if delete_output() == True: 
+            os.remove(result)
 
     def test_calibrant_qc_on_cp_imzml_user_param(self):
         input = get_wdir(r"testdata\cp.imzML")
@@ -146,7 +157,8 @@ class TestCalibrantQC(unittest.TestCase):
         self.assertTrue(os.path.isfile(result))
 
         # cleanup temp files
-        # os.remove(result)
+        if delete_output() == True: 
+            os.remove(result)
 
     def test_calibrant_qc_on_cp_imzml_def_param(self):
         input = get_wdir(r"testdata\cp.imzML")
@@ -165,7 +177,8 @@ class TestCalibrantQC(unittest.TestCase):
         self.assertTrue(os.path.isfile(result))
 
         # cleanup temp files
-        # os.remove(result)
+        if delete_output() == True: 
+            os.remove(result)
 
     def test_calibrant_qc_on_pc_imzml_user_param(self):
         input = get_wdir(r"testdata\pc.imzML")
@@ -184,7 +197,8 @@ class TestCalibrantQC(unittest.TestCase):
         self.assertTrue(os.path.isfile(result))
 
         # cleanup temp files
-        # os.remove(result)
+        if delete_output() == True: 
+            os.remove(result)
 
     def test_calibrant_qc_on_pc_imzml_def_param(self):
         input = get_wdir(r"testdata\pc.imzML")
@@ -203,7 +217,8 @@ class TestCalibrantQC(unittest.TestCase):
         self.assertTrue(os.path.isfile(result))
 
         # cleanup temp files
-        # os.remove(result)
+        if delete_output() == True: 
+            os.remove(result)
 
     def test_calibrant_qc_on_cc_imzml_user_param(self):
         input = get_wdir(r"testdata\cc.imzML")
@@ -222,7 +237,8 @@ class TestCalibrantQC(unittest.TestCase):
         self.assertTrue(os.path.isfile(result))
 
         # cleanup temp files
-        # os.remove(result)
+        if delete_output() == True: 
+            os.remove(result)
 
     def test_calibrant_qc_on_cc_imzml_def_param(self):
         input = get_wdir(r"testdata\cc.imzML")
@@ -241,6 +257,8 @@ class TestCalibrantQC(unittest.TestCase):
         self.assertTrue(os.path.isfile(result))
 
         # cleanup temp files
-        # os.remove(result)
+        if delete_output() == True: 
+            os.remove(result)
+            
 if __name__ == "__main__":
     unittest.main()

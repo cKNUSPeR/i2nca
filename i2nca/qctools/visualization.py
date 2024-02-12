@@ -811,7 +811,10 @@ def plot_accuracy_images(Image, accuracy_images, calibrants_df, ppm, index_nr, x
         im = ax.imshow(img, cmap=my_cw,
                        vmin=-ppm,
                        vmax=+ppm)
-        fig.colorbar(im, extend='both', label="ppm")
+
+        divider = make_axes_locatable(ax)
+        cax = divider.append_axes("right", size="5%", pad=0.05)
+        fig.colorbar(im, extend='both', label="ppm", cax=cax)
 
         pdf.savefig(fig)
         plt.close()

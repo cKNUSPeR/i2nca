@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt # best to shoot for 3.5.3 to resolve userwarings
 import matplotlib.cm as cm
 import matplotlib.ticker as ticker
 import matplotlib.backends.backend_pdf
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 import random as rnd
 import statistics as stat
