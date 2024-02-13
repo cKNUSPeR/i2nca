@@ -2,7 +2,7 @@ import unittest
 import os as os
 
 from m2aia import ImzMLReader
-from i2nca import convert_pp_to_pp_imzml, convert_pp_to_cp_imzml, convert_profile_to_pc_imzml, loc_max_preset
+from i2nca import convert_pp_to_pp_imzml, squeeze_pp_to_cp_imzml, squeeze_profile_to_pc_imzml, loc_max_preset
 
 
 
@@ -36,7 +36,7 @@ class TestConvTools(unittest.TestCase):
         output = get_wdir(r"tempfiles\cp")
 
         # convert data
-        convert_pp_to_cp_imzml(input_data, output)
+        squeeze_pp_to_cp_imzml(input_data, output)
 
         # expected result
         result = output + "_conv_output_cont_profile.imzML"
@@ -54,7 +54,7 @@ class TestConvTools(unittest.TestCase):
         output = get_wdir(r"tempfiles\pc")
 
         # convert data
-        convert_profile_to_pc_imzml(input_data, output, loc_max_preset)
+        squeeze_profile_to_pc_imzml(input_data, output, loc_max_preset)
 
         # expected result
         result = output + "_conv_output_proc_centroid.imzML"
@@ -72,7 +72,7 @@ class TestConvTools(unittest.TestCase):
         output = get_wdir(r"tempfiles\pc")
 
         # convert data
-        convert_profile_to_pc_imzml(input_data, output, loc_max_preset)
+        squeeze_profile_to_pc_imzml(input_data, output, loc_max_preset)
 
         # expected result
         result = output + "_conv_output_proc_centroid.imzML"

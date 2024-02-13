@@ -9,16 +9,34 @@ import numpy as np
 import m2aia as m2
 import random as rnd
 from pyimzml.ImzMLWriter import ImzMLWriter
-from scipy.signal import find_peaks
+from scipy.signal import find_peaks, find_peaks_cwt
+from typing import Optional, Union, Callable
 
 # tools for processed profile
 
 
-def convert_pp_to_pp_imzml(file_path, output_path=None):
-    """ Top-level converter for
-    processed profile imzML to processed profile imzML.
+def convert_pp_to_pp_imzml(file_path,
+                           output_path: Optional[str] =None) -> str:
+    """
+      Top-level converter for processed profile imzML to processed profile imzML.
 
-    Introduces no changes to file."""
+      This converter does not explicitly change files.
+      Converts all read data to float32 arrays.
+
+      Parameters
+      ----------
+      file_path : string
+          Path of imzML file.
+      output_path : string ,optional
+          Path to filename where the output file should be built.
+          If ommitted, the file_path is used.
+
+      Returns
+      -------
+      output_file : str
+          File path as string of succesfully converted imzML file.
+    """
+
     if output_path is None:
         output_path = file_path[:-6]
 
@@ -100,11 +118,12 @@ def write_pp_to_pp_imzml(Image,
 #  Tools for Continous Profile conversion
 
 
-def convert_pp_to_cp_imzml(file_path, output_path = None, pixel_nr = 100):
+def squeeze_pp_to_cp_imzml(file_path, output_path = None, pixel_nr = 100):
     """Top-level converter for processed profile imzml to
      continuous profile imzml.
      This is achieved my mz axis alignment.
-     This function is silent and does not produce a report
+     THis functin does not create a conversion report.
+     It is meant to be used in batch datasets
 
      functions returns filepath of new file for further use.
      """
@@ -121,14 +140,32 @@ def convert_pp_to_cp_imzml(file_path, output_path = None, pixel_nr = 100):
     return write_pp_to_cp_imzml(Image, ref_mz, output_path)
 
 
-def report_pp_to_cp_imzml(file_path, output_path=None, coverage=0.25):
-    """Top-level converter for processed profile imzml to
-     continuous profile imzml.
-     This is achieved my mz axis alignment.
-     This function is produces a report.
+def convert_pp_to_cp_imzml(file_path: str,
+                           output_path: Optional[str] =None,
+                           coverage: float =0.25) -> str:
+    """
+    Top-level converter for processed profile imzml to continuous profile imzml.
 
-     functions returns filepath of new file for further use.
-     """
+    This converter does theconversion by alingning the mz axis to the mean axis from a subsample.
+    A conversion report is created at output location monitoring all the assumptions for this.
+
+    Parameters
+    ----------
+    file_path : string
+        Path of imzML file.
+    output_path : string , optional
+        Path to filename where the output file should be built.
+        If ommitted, the file_path is used.
+    coverage : float , optional
+        Percentage of sample used for shared mz axis calculation.
+        Between 0 and 1.
+
+
+    Returns
+    -------
+    output_file : str
+      File path as string of succesfully converted imzML file.
+    """
     if output_path is None:
         output_path = file_path[:-6]
 
@@ -222,10 +259,31 @@ def write_pp_to_cp_imzml(Image,
 
 
 def report_pp_to_cp(Image, outfile_path, coverage):
-    """creates a pdf report that checks if the following assumptions are correct:
-    The file has the same number of data points in each pixel.
-    The data points start and end at nearly the same value.
-    The data points if all pixels are arranged into distinct clusters. (or a subsample of the pixels)"""
+    """
+    Reporter function for mz alignment.
+
+    This reporter creates a pdf report that checks if the following assumptions are correct.
+        - The file has the same number of data points in each pixel.
+        - The data points start and end at nearly the same value.
+        - The data points of all pixels in a subsample are arranged into distinct clusters.
+    Output is only graphically presented
+
+    Parameters
+    ----------
+    Image :
+        A m2aia.ImzMLReader image object, or similar
+    outfile_path : string
+        Path to filename where the pdf output file should be built.
+    coverage : float
+        Percentage of sample used for shared mz axis calculation.
+        Between 0 and 1.
+
+
+    Returns
+    -------
+    report : file
+      PDF file at specified location with report on assumptions.
+    """
 
     # Create a PDF file to save the figures
     pdf_pages = make_pdf_backend(outfile_path, "_control_report_pp_to_cp")
@@ -314,7 +372,7 @@ def imzml_check_spacing(Image, batch_size: int = 100) -> np.ndarray:
     return dpoint_mean
 
 
-# peak detection and stuff
+# profile to centroid conversion
 
 
 def set_find_peaks(height=None,
@@ -334,7 +392,7 @@ def set_find_peaks(height=None,
     see the loc_max_preset for an example.
         """
 
-    def inner_function(mz, intensity):
+    def inner_locmax_function(mz, intensity):
         # a call of scipy.find_peaks with all available parameters.
         peaks, _ = find_peaks(intensity,
                               height=height,
@@ -346,7 +404,40 @@ def set_find_peaks(height=None,
                               rel_height=rel_height,
                               plateau_size=plateau_size)
         return mz[peaks], intensity[peaks]
-    return inner_function
+    return inner_locmax_function
+
+
+
+def set_find_peaks_cwt(widths,
+                       wavelet=None,
+                       max_distances=None,
+                       gap_thresh=None,
+                       min_length=None,
+                       min_snr=1,
+                       noise_perc=10,
+                       window_size=None):
+    """higher order function to pass peak-detection arguments without performing peak-finding.
+
+    Example usage:
+    set_find_peaks_cwt(widths=np.arange(1,10), min_snr = 3)(mz, intensity)
+
+    set_find_peaks_cwt([6,7,8], min_snr=3) can be passed as argument to peak centroiding funktions.
+    """
+
+    def inner_cwt_function(mz, intensity):
+        # a call of scipy.find_peaks_cwt with all available parameters.
+        # unspecified parameters are set to default value
+        peaks = find_peaks_cwt(intensity,
+                                  widths=widths,
+                                  wavelet=wavelet,
+                                  max_distances=max_distances,
+                                  gap_thresh=gap_thresh,
+                                  min_length=min_length,
+                                  min_snr=min_snr,
+                                  noise_perc=noise_perc,
+                                  window_size=window_size)
+        return mz[peaks], intensity[peaks]
+    return inner_cwt_function
 
 
 def loc_max_preset(mz, intensity):
@@ -355,7 +446,7 @@ def loc_max_preset(mz, intensity):
     return set_find_peaks(height=20, width=5)(mz, intensity)
 
 
-def convert_profile_to_pc_imzml(file_path,
+def squeeze_profile_to_pc_imzml(file_path,
                                 output_path=None,
                                 detection_function=loc_max_preset):
 
@@ -374,14 +465,34 @@ def convert_profile_to_pc_imzml(file_path,
     return write_profile_to_cp_imzml(Image, output_path, detection_function)
 
 
-def report_profile_to_pc_imzml(file_path, output_path=None, detection_function=loc_max_preset):
-    """Top-level converter for any profile imzml to
-     processed centroids imzml.
-     This is essentailly a mapping of the detection_funtion to each pixel.
-     This function is produces a report.
+def convert_profile_to_pc_imzml(file_path: str,
+                                output_path: Optional[str] = None,
+                                detection_function: Callable = loc_max_preset) -> str:
+    """
+    Top-level converter for any profile imzml to processed centroid imzml.
 
-     functions returns filepath of new file for further use.
-     """
+    This converter maps the detection_function on the mass spectrum on a pixel_by_pixel basis.
+    A conversion report is created at output location for monitoring of relevant metrics before converion.
+
+    Parameters
+    ----------
+    file_path : string
+        Path of imzML file.
+    output_path : string , optional
+        Path to filename where the output file should be built.
+        If ommitted, the file_path is used.
+    detection_function : function , optional
+        Function object that takes 2 arrays and returns the decected peaks.
+        If ommitted, local maxima detection with preset paramerters is used.
+        See set_find_peaks for further information
+
+
+    Returns
+    -------
+    output_file : str
+      File path as string of succesfully converted imzML file.
+    """
+
     if output_path is None:
         output_path = file_path[:-6]
 
@@ -473,10 +584,26 @@ def write_profile_to_cp_imzml(Image,
 # add a conversion report for profile to centroids.
 
 def report_prof_to_centroid(Image, outfile_path):
-    """creates a pdf report that checks:
-    The file has the same number of data points in each pixel.
-    The data points start and end at nearly the same value.
-    The data points if all pixels are arranged into distinct clusters. (or a subsample of the pixels)"""
+    """
+    Reporter function for peak detection.
+
+    This reporter creates a pdf report that shows the following metrics for help in peak detection parametrization:
+        - The mean spectrum over the file
+        - The simga-clipping estiamted noise in an interval of 4 mz
+    Output is only graphically presented
+
+    Parameters
+    ----------
+    Image :
+        A m2aia.ImzMLReader image object, or similar
+    outfile_path : string
+        Path to filename where the pdf output file should be built.
+
+    Returns
+    -------
+    report : file
+      PDF file at specified location with report on assumptions.
+    """
 
     # Create a PDF file to save the figures
     pdf_pages = make_pdf_backend(outfile_path, "_control_report_prof_to_pc")
@@ -509,14 +636,38 @@ def report_prof_to_centroid(Image, outfile_path):
 
 # tools for the conversion of pc to cc
 
-def convert_pc_to_cc_imzml(file_path, output_path=None, bin_strategy="unique", bin_accuracy = 100):
-    """Top-level converter for any processed centroids imzml to
-     continuous centroids imzml.
-     This is essentailly a user-defined mass binning at each pixel.
-     This function does not yet produce a report.
+def convert_pc_to_cc_imzml(file_path: str,
+                           output_path:str = None,
+                           bin_strategy: str = "fixed",
+                           bin_accuracy: int = 100) -> str:
+    """
+    Top-level converter for processed centroid imzml to continuous centroid imzml.
 
-     functions returns filepath of new file for further use.
-     """
+    This converter bins the data of each mass spectrum on a pixel_by_pixel basis to a comon mass axis.
+    The common mass axis can be instanced by different means.
+
+    Parameters
+    ----------
+    file_path : string
+        Path of imzML file.
+    output_path : string , optional_
+        Path to filename where the output file should be built.
+        If ommitted, the file_path is used.
+    bin_strategy : string , {"unique","fixed"}
+        Employed strategy for generation of common mass axis.
+        If "unique", all unique mz values of all pixels are used. Only recommended for small datasets.
+        If "fixed", a common mass axis is generated and used.
+        If ommitted, "fixed" is used.
+    bin_accuracy : int, optional
+        The inaccuracy in ppm of the "fixed" mz axis.
+        If ommited, mass axis is generated at 100 ppm accuracy.
+
+
+    Returns
+    -------
+    output_file : str
+      File path as string of succesfully converted imzML file.
+    """
     if output_path is None:
         output_path = file_path[:-6]
 
