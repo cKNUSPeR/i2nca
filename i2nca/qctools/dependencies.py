@@ -22,7 +22,12 @@ from scipy.signal import argrelextrema
 import skimage.measure as skim
 #from sklearn.cluster import DBSCAN
 
-from typing import Union
+# imports for type linting
+from typing import Optional, Union, Callable
+
+# namespace availabiliy of modifed ImzMLWriter
+from pyimzml.ImzMLWriter import ImzMLWriter
+
 
 
 import warnings as warm
