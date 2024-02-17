@@ -17,7 +17,7 @@ import statistics as stat
 
 import scipy.stats as SST
 import scipy.signal as SSI
-from scipy.signal import argrelextrema
+from scipy.signal import argrelextrema, find_peaks, find_peaks_cwt
 
 import skimage.measure as skim
 #from sklearn.cluster import DBSCAN

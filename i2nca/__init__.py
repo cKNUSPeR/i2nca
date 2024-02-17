@@ -1,10 +1,13 @@
 """inca - INteractive quality Control and Assesment using m2aia"""
 
-from i2nca.qctools.qctools import report_agnostic_qc, report_calibrant_qc, report_regions_qc
+# registery of main function for i2nca namespace, each defined over their own group.
 
-from i2nca.convtools.conv_tools import squeeze_pp_to_cp_imzml, convert_pp_to_pp_imzml, squeeze_profile_to_pc_imzml
+from i2nca.qctools import *
 
-from i2nca.convtools.conv_tools import  report_pp_to_cp_imzml, report_pp_to_cp, loc_max_preset
+from i2nca.convtools import *
+
+
+# bruker tools are excluded here. checkout the branch "bruker inclusive" to get acces to these functions.
 
 __author__ = "Jannik Witte"
 

@@ -2,16 +2,16 @@ import unittest
 import os as os
 
 from m2aia import ImzMLReader
-from i2nca import convert_pp_to_pp_imzml, squeeze_pp_to_cp_imzml, squeeze_profile_to_pc_imzml, loc_max_preset
 from i2nca.convtools.conv_tools import convert_pc_to_cc_imzml
-
 
 
 def get_wdir(rel_path:str):
     return str(os.path.join(os.getcwd(), rel_path))
 
+def delete_output():
+    return False
 
-class TestConvToolsCC(unittest.TestCase):
+class TestConvToolsPC(unittest.TestCase):
 
     def test_conv_pc_to_cc_imzml_unique(self):
         # get data paths

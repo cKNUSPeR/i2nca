@@ -7,7 +7,7 @@ from i2nca.qctools.utils import evaluate_formats, get_polarity, evaluate_polarit
 
 def convert_data_to_snippet_imzml(file_path,
                                   output_path: Optional[str] = None,
-                                  snippet_size: int = 25,
+                                  snippet_size: int = 1,
                                   scattered: Optional[bool] = True ) -> str:
     """
     Top-level sample file producer.
@@ -23,7 +23,7 @@ def convert_data_to_snippet_imzml(file_path,
         If ommitted, the file_path is used.
     snippet_size : int, optional
         The number of pixels that are written in the new snippet dataset.
-        If ommitted, 25  pixels are returned
+        If ommitted, only one pixel is returned
     scattered : bool, optional
         Determines if random number of pixels are randomly distributed over image or grouped as one block.
         If ommitted, True is used.
@@ -105,7 +105,7 @@ def write_snippet_imzml(Image,
 
         """
     # specification of output imzML file location and file extension
-    output_file = output_dir + "_conv_output_proc_profile.imzML"
+    output_file = output_dir + "_data_snippet.imzML"
 
     # Get total spectrum count:
     n = Image.GetNumberOfSpectra()
@@ -116,12 +116,12 @@ def write_snippet_imzml(Image,
     # get the pixel size
     pix_size = get_pixsize(Image)
 
-    if scattered != True:
-        begin = rnd.randint(0, n)
-        subsample_indices = list(range(begin, begin + n))
     # get the index of subsamples as list
-    else:
+    if scattered == True:
         subsample_indices = rnd.sample(range(0, n), sample_size)
+    else:
+        begin = rnd.randint(0, n-sample_size) # reduce the total numer of pixels by the amount of chained pixels
+        subsample_indices = list(range(begin, begin + sample_size))
 
     # writing of the imzML file, based on pyimzML
     with ImzMLWriter(output_file,

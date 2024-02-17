@@ -1,22 +1,27 @@
-from i2nca.qctools.visualization import make_pdf_backend, plot_feature_number, image_feature_number, \
-    plot_max_mz_number, image_max_mz_number, plot_min_mz_number, image_min_mz_number, plot_bin_spreads, \
-    plot_noise_spectrum, plot_profile_spectrum
+# import random as rnd
+# from typing import Optional, Callable
+#
+# import m2aia as m2
+# import numpy as np
+# from pyimzml.ImzMLWriter import ImzMLWriter
+# from scipy.signal import find_peaks, find_peaks_cwt
+
+from i2nca.qctools.dependencies import *
+
+
 from i2nca.qctools.utils import make_subsample, evaluate_formats, collect_image_stats, evaluate_image_corners, \
     test_formats, check_uniform_length, evaluate_group_spacing, evaluate_polarity, get_polarity, get_pixsize, \
     collect_noise
+from i2nca.qctools.visualization import make_pdf_backend, plot_feature_number, image_feature_number, \
+    plot_max_mz_number, image_max_mz_number, plot_min_mz_number, image_min_mz_number, plot_bin_spreads, \
+    plot_noise_spectrum, plot_profile_spectrum
 
-import numpy as np
-import m2aia as m2
-import random as rnd
-from pyimzml.ImzMLWriter import ImzMLWriter
-from scipy.signal import find_peaks, find_peaks_cwt
-from typing import Optional, Union, Callable
 
 # tools for processed profile
 
 
 def convert_pp_to_pp_imzml(file_path,
-                           output_path: Optional[str] =None) -> str:
+                           output_path: Optional[str] = None) -> str:
     """
       Top-level converter for processed profile imzML to processed profile imzML.
 
@@ -98,7 +103,7 @@ def write_pp_to_pp_imzml(Image,
 
             xyz_pos = Image.GetSpectrumPosition(id)
 
-            #image offset (m2aia5.1 quirk, persistent up to 5.10)
+            # image offset (m2aia5.1 quirk, persistent up to 5.10)
             img_offset = 1
             # offset needs to be added fro 1-based indexing of xyz system
             pos = (xyz_pos[0] + img_offset, xyz_pos[1] + img_offset)
@@ -113,13 +118,12 @@ def write_pp_to_pp_imzml(Image,
     return output_file
 
 
-
-
 #  Tools for Continous Profile conversion
 
-
-def squeeze_pp_to_cp_imzml(file_path, output_path = None, pixel_nr = 100):
-    """Top-level converter for processed profile imzml to
+def squeeze_pp_to_cp_imzml(file_path, output_path=None, pixel_nr=100):
+    """
+    shelfed pp to cp imzml converter, replaced by convert_pp_to_cp_imzml
+    Top-level converter for processed profile imzml to
      continuous profile imzml.
      This is achieved my mz axis alignment.
      THis functin does not create a conversion report.
@@ -141,8 +145,8 @@ def squeeze_pp_to_cp_imzml(file_path, output_path = None, pixel_nr = 100):
 
 
 def convert_pp_to_cp_imzml(file_path: str,
-                           output_path: Optional[str] =None,
-                           coverage: float =0.25) -> str:
+                           output_path: Optional[str] = None,
+                           coverage: float = 0.25) -> str:
     """
     Top-level converter for processed profile imzml to continuous profile imzml.
 
@@ -172,7 +176,6 @@ def convert_pp_to_cp_imzml(file_path: str,
     # parse imzml file
     Image = m2.ImzMLReader(file_path)
 
-
     # get the refernce mz value
     ref_mz = report_pp_to_cp(Image, output_path, coverage)
 
@@ -180,11 +183,10 @@ def convert_pp_to_cp_imzml(file_path: str,
     return write_pp_to_cp_imzml(Image, ref_mz, output_path)
 
 
-
 def write_pp_to_cp_imzml(Image,
-                           ref_mz: np.ndarray,
-                           output_dir: str
-                           ) -> str:
+                         ref_mz: np.ndarray,
+                         output_dir: str
+                         ) -> str:
     """
         Writer for continous profile imzml files within m2aia.
 
@@ -255,7 +257,6 @@ def write_pp_to_cp_imzml(Image,
                 print(f"Sparce pixel at {id}")
 
     return output_file
-
 
 
 def report_pp_to_cp(Image, outfile_path, coverage):
@@ -335,7 +336,6 @@ def report_pp_to_cp(Image, outfile_path, coverage):
     return mean_bin
 
 
-
 # special checker, return the mean points with specified pixel numbers,
 # intented for workflows
 def imzml_check_spacing(Image, batch_size: int = 100) -> np.ndarray:
@@ -352,9 +352,9 @@ def imzml_check_spacing(Image, batch_size: int = 100) -> np.ndarray:
         randomlist = [i for i in range(0, n)]
 
     # instance and collect mass values from the small batch
-    #first_mz, _ = I.GetSpectrum(0)
+    # first_mz, _ = I.GetSpectrum(0)
     len_first_mz = len(Image.GetSpectrum(0)[0])
-   # processed_collector = first_mz
+    # processed_collector = first_mz
 
     # 'for id in randomlist:
     # ''    mz, _ = I.GetSpectrum(id)
@@ -363,7 +363,8 @@ def imzml_check_spacing(Image, batch_size: int = 100) -> np.ndarray:
     #         processed_collector = np.vstack((processed_collector, mz))
 
     # collection via list comprehension
-    processed_collector = np.vstack([Image.GetSpectrum(id)[0] for id in randomlist if len_first_mz == len(Image.GetSpectrum(id)[0])])
+    processed_collector = np.vstack(
+        [Image.GetSpectrum(id)[0] for id in randomlist if len_first_mz == len(Image.GetSpectrum(id)[0])])
 
     processed_collector = processed_collector.T  # transpose to easily access each group of masses
 
@@ -371,9 +372,7 @@ def imzml_check_spacing(Image, batch_size: int = 100) -> np.ndarray:
 
     return dpoint_mean
 
-
 # profile to centroid conversion
-
 
 def set_find_peaks(height=None,
                    threshold=None,
@@ -404,8 +403,8 @@ def set_find_peaks(height=None,
                               rel_height=rel_height,
                               plateau_size=plateau_size)
         return mz[peaks], intensity[peaks]
-    return inner_locmax_function
 
+    return inner_locmax_function
 
 
 def set_find_peaks_cwt(widths,
@@ -428,15 +427,16 @@ def set_find_peaks_cwt(widths,
         # a call of scipy.find_peaks_cwt with all available parameters.
         # unspecified parameters are set to default value
         peaks = find_peaks_cwt(intensity,
-                                  widths=widths,
-                                  wavelet=wavelet,
-                                  max_distances=max_distances,
-                                  gap_thresh=gap_thresh,
-                                  min_length=min_length,
-                                  min_snr=min_snr,
-                                  noise_perc=noise_perc,
-                                  window_size=window_size)
+                               widths=widths,
+                               wavelet=wavelet,
+                               max_distances=max_distances,
+                               gap_thresh=gap_thresh,
+                               min_length=min_length,
+                               min_snr=min_snr,
+                               noise_perc=noise_perc,
+                               window_size=window_size)
         return mz[peaks], intensity[peaks]
+
     return inner_cwt_function
 
 
@@ -449,7 +449,6 @@ def loc_max_preset(mz, intensity):
 def squeeze_profile_to_pc_imzml(file_path,
                                 output_path=None,
                                 detection_function=loc_max_preset):
-
     """ Top-level converter for
      profile imzML to processed centroid imzML.
      The centroiding is implemented by user definition of a peak detection function.
@@ -509,7 +508,7 @@ def convert_profile_to_pc_imzml(file_path: str,
 def write_profile_to_cp_imzml(Image,
                               output_dir: str,
                               detection_function
-                         ) -> str:
+                              ) -> str:
     """
         Writer for processed profile imzml files within m2aia.
 
@@ -637,7 +636,7 @@ def report_prof_to_centroid(Image, outfile_path):
 # tools for the conversion of pc to cc
 
 def convert_pc_to_cc_imzml(file_path: str,
-                           output_path:str = None,
+                           output_path: str = None,
                            bin_strategy: str = "fixed",
                            bin_accuracy: int = 100) -> str:
     """
@@ -677,18 +676,18 @@ def convert_pc_to_cc_imzml(file_path: str,
     ref_mz = create_bins(Image, bin_strategy, bin_accuracy)
 
     # write the continous file
-    return write_pc_to_cc_imzml(Image, ref_mz,  output_path)
+    return write_pc_to_cc_imzml(Image, ref_mz, output_path)
 
 
-def create_bins(Image, method="unique", accuracy = 100):
+def create_bins(Image, method="unique", accuracy=100):
     """make bins to represent the continous bins"""
     if method == "unique":
         bins = get_unique_masses(Image)
         return bins
-    elif method =="fixed":
+    elif method == "fixed":
         start = min(Image.GetXAxis())
         end = max(Image.GetXAxis())
-        return  np.array(list(mz_range(start, end, accuracy)))
+        return np.array(list(mz_range(start, end, accuracy)))
     else:
         return sorted(Image.GetXAxis())
 
@@ -701,7 +700,6 @@ def get_unique_masses(Image):
 
     # Iterate through arrays and collect unique values
     for id in range(0, n):
-
         mz, _ = Image.GetSpectrum(id)
         unique_values.update(mz)
 
@@ -716,11 +714,25 @@ def mz_range(start, end, step):
         current = current + (current * step / (10 ** 6))
         yield current
 
+def find_nearest_element(values, search_array):
+    """find nearest elements with a binary search in sorted array"""
+
+    # make and vectoize function
+    search_bisect = lambda x: np.searchsorted(search_array, x)
+    vsearch_bisect = np.vectorize(search_bisect)
+
+    indices = vsearch_bisect(values)  # applythis, there really should be a one-liner
+
+    indices = np.clip(indices, 0, len(search_array) - 1)  # drop all invalid right indices
+
+    return indices
+
+
 
 def write_pc_to_cc_imzml(Image,
-                           ref_mz: np.ndarray,
-                           output_dir: str
-                           ) -> str:
+                         ref_mz: np.ndarray,
+                         output_dir: str
+                         ) -> str:
     """
         Writer for continous profile imzml files within m2aia.
 
@@ -769,10 +781,8 @@ def write_pc_to_cc_imzml(Image,
                      scan_pattern='meandering',
                      scan_type='horizontal_line',
                      ) as w:
-
         # m2aia is 0-indexed
         for id in range(0, n):
-
             # get the data from Image
             mz, intensities = Image.GetSpectrum(id)
             xyz_pos = Image.GetSpectrumPosition(id)
@@ -792,15 +802,83 @@ def write_pc_to_cc_imzml(Image,
     return output_file
 
 
-def find_nearest_element(values, search_array):
-    """find nearest elements with a binary search in sorted array"""
+# general writer
 
-    # make and vectoize function
-    search_bisect = lambda x: np.searchsorted(search_array, x)
-    vsearch_bisect = np.vectorize(search_bisect)
 
-    indices = vsearch_bisect(values) # applythis, there really should be a one-liner
+def write_out_imzml(Image,
+                    output_dir: str,
+                    spectrum_type: str,
+                    alignment_type: str) -> str:
+    """
+    Writer for any imzml files within m2aia to their respective format.
 
-    indices = np.clip(indices, 0, len(search_array) - 1) # drop all invalid right indices
 
-    return indices
+    Parameters:
+        Image:
+            parsed izML file (by m2aia or equvalent object that emulates the methods)
+        output_path : string ,optional
+            Path to filename where the output file should be built.
+            If ommitted, the file_path is used.
+        spectrum_type: string
+            The spectrum type. Either 'profile' or 'centroid'.
+        alignment_type: string
+            The alignment type. Either 'processed' or 'continuous'.
+        sample_size: interget
+            The number of pixels that are written in the new snippet dataset
+        scattered : bool, optional
+            Determines if random number of pixels are randomly distributed over image or grouped as one block
+            If ommitted, True is used.
+
+
+    Returns:
+       (str): imzML File path,
+       additionally, imzML file is written there
+
+        """
+    # specification of output imzML file location and file extension
+    output_file = output_dir + "_data_snippet.imzML"
+
+    # Get total spectrum count:
+    n = Image.GetNumberOfSpectra()
+
+    # get the polarity
+    polarity = get_polarity(evaluate_polarity(Image))
+
+    # get the pixel size
+    pix_size = get_pixsize(Image)
+
+        # writing of the imzML file, based on pyimzML
+    with ImzMLWriter(output_file,
+                     polarity=polarity,
+                     mz_dtype=np.float32,
+                     # intensity_dtype=np.uintc,
+                     mode=alignment_type,
+                     spec_type=spectrum_type,
+                     pixel_size_x=pix_size,
+                     pixel_size_y=pix_size,
+                     # the laser movement param are adapted to TTF presets
+                     scan_direction='top_down',
+                     line_scan_direction='line_right_left',
+                     scan_pattern='meandering',
+                     scan_type='horizontal_line',
+                     ) as w:
+        # m2aia is 0-indexed
+        for id in range(0, n):
+            #
+            mz, intensities = Image.GetSpectrum(id)
+
+            xyz_pos = Image.GetSpectrumPosition(id)
+
+            # image offset (m2aia5.1 quirk, persistent up to 5.10)
+            img_offset = 1
+            # offset needs to be added fro 1-based indexing of xyz system
+            pos = (xyz_pos[0] + img_offset, xyz_pos[1] + img_offset)
+
+            # writing with pyimzML
+
+            w.addSpectrum(mz, intensities, pos)
+
+            # progress print statement
+            # if (id % 100) == 0:
+            #    print(f"pixels {id}/{n} written.")
+    return output_file
