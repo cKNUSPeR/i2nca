@@ -19,8 +19,3 @@ from i2nca.convtools.snippet_tools import convert_data_to_snippet_imzml
 
 # import the combine tool
 from i2nca.convtools.combiner_tools import combine_datasets_imzml
-
-
-__author__ = "Jannik Witte"
-
-__version__ = "0.2.3"
