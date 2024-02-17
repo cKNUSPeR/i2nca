@@ -25,6 +25,9 @@ import skimage.measure as skim
 # imports for type linting
 from typing import Optional, Union, Callable
 
+# argparse for CLI tools
+import argparse as argparse
+
 # namespace availabiliy of modifed ImzMLWriter
 from pyimzml.ImzMLWriter import ImzMLWriter
 
