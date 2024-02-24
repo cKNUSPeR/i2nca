@@ -3,7 +3,6 @@
 
 # Installation:
 Download the conda recipe provided in the repository and use it to create a new conda env with:
-
 ```
 conda env create -n env_name -f path\to\file\...\conda_recipe.yml
 ```
