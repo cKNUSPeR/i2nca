@@ -1,25 +1,35 @@
 # i2nca
- ms <ins>I</ins>maging <ins>IN</ins>teractive quality <ins>C</ins>ontrol and <ins>A</ins>ssesment tool bundle
+ Mass Spectrometry <ins>I</ins>maging <ins>IN</ins>teractive  <ins>C</ins>onversion and Quality <ins>A</ins>ssesment tool bundle
 
 # Installation:
-After downloading the conda recipe and using it to create a new conda env with
+Download the conda recipe provided in the repository and use it to create a new conda env with:
+```
+conda env create -n env_name -f path\to\file\...\conda_recipe.yml
+```
 
-conda env create -f path\to\file\conda_recipe.yml
+Conda will setup the environment, including the pacakges installable from GitHub.
+Activate the enviroment with:
 
-That should do the trick.
+```
+conda activate env_name
+```
 
-Update existing envs with the recipe via
+# Updating to Brukertools
 
-conda env update --name myenv --file path\to\file\conda_recipe.yml --prune
+Get the additional Bruker Tools by reinstalling i2nca to the conda enviroment:
 
-
-earlier versions used the separated github install:
-
-pip install i2nca@git+https://github.com/cKNUSPeR/i2nca.git
-
-GEt the additional Bruker Tools with the following command:
-
+```
+pip uninstall i2nca
+```
+```
 pip install git+https://github.com/cKNUSPeR/i2nca.git@brukertools
+```
 
-In order to run, they the TDF-SDK (distributed by Bruker).
-THe timsdata.dll na dtimsdata.so files need to placed at the directory of the python executable to be addressable.
+In order to use the Bruker-specific tools, the TDF-SDK needs to be installed as well (distributed by Bruker).
+It is obtainable after registration with Bruker account under this [link](https://www.bruker.com/protected/en/services/software-downloads/mass-spectrometry/raw-data-access-libraries.html)
+
+
+The timsdata.dll and timsdata.lib files from the SDK need to placed at the directory of the (virtual) Python executable to be addressable.
+For conda environments, the Python executable is in the root folder of the env.
+
+
