@@ -63,7 +63,6 @@ class TdfReader:
         non_empty_bins = np.unique(bin_indices)
         # sum up per non-empty bin
         sum_ints = [np.sum(total_ints[bin_indices == i]) for i in non_empty_bins]
-
         return bins[non_empty_bins], sum_ints
 
 
