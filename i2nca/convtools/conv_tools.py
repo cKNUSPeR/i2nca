@@ -382,14 +382,24 @@ def set_find_peaks(height=None,
                    wlen=None,
                    rel_height=0.5,
                    plateau_size=None):
-    """higher order function to pass peak-detection arguments without performing peak-finding.
-
-    Example usage:
-    set_find_peaks(height=2500, width=4)(mz, intensity)
-
+    """
+    Higher order function to pass peak-detection arguments without performing peak-finding.
     set_find_peaks(height=20, prominence=3) can be passed as argument to peak centroiding funktions.
-    see the loc_max_preset for an example.
-        """
+    See the loc_max_preset for an example.
+
+     Parameters
+    ----------
+     parameters : float, Optinal
+
+     See the documentation of scipy.singal.find_peaks for further info
+
+    Returns
+    -------
+    [[peaks_mz], [peaks_intensity]] : tuple(array)
+        A nested tuple of arrays containing mz and intensity vaules of found peaks.
+
+
+    """
 
     def inner_locmax_function(mz, intensity):
         # a call of scipy.find_peaks with all available parameters.
@@ -415,12 +425,21 @@ def set_find_peaks_cwt(widths,
                        min_snr=1,
                        noise_perc=10,
                        window_size=None):
-    """higher order function to pass peak-detection arguments without performing peak-finding.
+    """
+    Higher order function to pass peak-detection arguments without performing peak-finding.
+    set_find_peaks_cwt([6,7,8], min_snr=3) can be passed as argument to peak centroiding functions.
+    Example usage: set_find_peaks_cwt(widths=np.arange(1,10), min_snr = 3)(mz, intensity)
 
-    Example usage:
-    set_find_peaks_cwt(widths=np.arange(1,10), min_snr = 3)(mz, intensity)
+    Parameters
+    ----------
+     parameters : float, Optinal
 
-    set_find_peaks_cwt([6,7,8], min_snr=3) can be passed as argument to peak centroiding funktions.
+     See the documentation of scipy.singal.find_peaks_cwt for further info
+
+    Returns
+    -------
+    [[peaks_mz], [peaks_intensity]] : tuple(array)
+        A nested tuple of arrays containing mz and intensity vaules of found peaks.
     """
 
     def inner_cwt_function(mz, intensity):
@@ -441,8 +460,22 @@ def set_find_peaks_cwt(widths,
 
 
 def loc_max_preset(mz, intensity):
-    """preset peak finding settings.
-    Heigth above 20 and a width of 5"""
+    """Preset peak detection function.
+    Shows the application of the funtional set_find_peaks.
+    Preset Arguments are a peak heigth above 20 and a width of 5.
+
+    Parameters
+    ----------
+    mz :  array-like
+        An array of mz values.
+    intensity : array-like
+        An array of intensities.
+
+    Returns
+    -------
+    [[peaks_mz], [peaks_intensity]] : tuple(array)
+        A nested tuple of arrays containing mz and intensity vaules of found peaks.
+    """
     return set_find_peaks(height=20, width=5)(mz, intensity)
 
 

@@ -149,7 +149,7 @@ def report_calibrant_qc(I,  # m2.imzMLReader (passing by ref allows faster compu
     Returns
     -------
     output_file : str
-        File path as string of succesfully generated pdf report.
+        File path as string of succesfully generated calibrant QC pdf report.
     """
 
     #  read in the calibrants
