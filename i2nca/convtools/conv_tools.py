@@ -760,6 +760,23 @@ def find_nearest_element(values, search_array):
 
     return indices
 
+def get_averaged_intensites(mz, ref_mz, intensities):
+    """helper fuction to obtain binned intensities for a set of given mz and intensities by a reference mz axis"""
+    # get test parameter
+    corr_length = len(ref_mz)
+    # make the ref axis
+    index_array = find_nearest_element(mz, ref_mz)
+    # get the binned intensity axis
+    binned_ints = np.bincount(index_array, weights=intensities)
+    # chekc if binned_ints has no trailing lenthgs (bincount only instances the index array till the highest count, not to match the shape of the reference_mz)
+    if len(binned_ints) != corr_length:
+        # get the max index
+        max_index = max(index_array)
+        # get the number of missing entries
+        missing = corr_length - max_index
+        print(missing)
+        binned_ints = np.concatenate((binned_ints, np.zeros(missing)), axis=0)
+    return binned_ints
 
 
 def write_pc_to_cc_imzml(Image,
@@ -826,8 +843,7 @@ def write_pc_to_cc_imzml(Image,
             pos = (xyz_pos[0] + img_offset, xyz_pos[1] + img_offset)
 
             # make the ref axis
-            index_array = find_nearest_element(mz, ref_mz)
-            binned_ints = np.bincount(index_array, weights=intensities)
+            binned_ints = get_averaged_intensites(mz, ref_mz, intensities)
 
             # writing with pyimzML
             w.addSpectrum(ref_mz, binned_ints, pos)
