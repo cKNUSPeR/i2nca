@@ -760,6 +760,7 @@ def find_nearest_element(values, search_array):
 
     return indices
 
+
 def get_averaged_intensites(mz, ref_mz, intensities):
     """helper fuction to obtain binned intensities for a set of given mz and intensities by a reference mz axis"""
     # get test parameter
@@ -768,14 +769,14 @@ def get_averaged_intensites(mz, ref_mz, intensities):
     index_array = find_nearest_element(mz, ref_mz)
     # get the binned intensity axis
     binned_ints = np.bincount(index_array, weights=intensities)
-    # chekc if binned_ints has no trailing lenthgs (bincount only instances the index array till the highest count, not to match the shape of the reference_mz)
+
+    # check if binned_ints has no trailing lenthgs
+    # (bincount only instances the index array till the highest count, not to match the shape of the reference_mz)
     if len(binned_ints) != corr_length:
-        # get the max index
-        max_index = max(index_array)
         # get the number of missing entries
-        missing = corr_length - max_index
-        print(missing)
+        missing = corr_length - len(binned_ints)
         binned_ints = np.concatenate((binned_ints, np.zeros(missing)), axis=0)
+
     return binned_ints
 
 
