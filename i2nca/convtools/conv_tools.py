@@ -535,10 +535,10 @@ def convert_profile_to_pc_imzml(file_path: str,
     report_prof_to_centroid(Image, output_path)
 
     # write the continous file
-    return write_profile_to_cp_imzml(Image, output_path, detection_function)
+    return write_profile_to_pc_imzml(Image, output_path, detection_function)
 
 
-def write_profile_to_cp_imzml(Image,
+def write_profile_to_pc_imzml(Image,
                               output_dir: str,
                               detection_function
                               ) -> str:
