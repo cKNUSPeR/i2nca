@@ -494,7 +494,7 @@ def squeeze_profile_to_pc_imzml(file_path,
     Image = m2.ImzMLReader(file_path)
 
     # write the profile processed  file
-    return write_profile_to_cp_imzml(Image, output_path, detection_function)
+    return write_profile_to_pc_imzml(Image, output_path, detection_function)
 
 
 def convert_profile_to_pc_imzml(file_path: str,
