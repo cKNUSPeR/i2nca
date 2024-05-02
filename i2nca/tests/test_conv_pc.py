@@ -29,7 +29,8 @@ class TestConvToolsPC(unittest.TestCase):
         # check if m2aia parses new file
         I = ImzMLReader(result)
         # cleanup temp files
-        os.remove(result)
+        if delete_output() == True:
+            os.remove(result)
 
     def test_conv_pc_to_cc_imzml_fixed(self):
         # get data paths
@@ -47,7 +48,8 @@ class TestConvToolsPC(unittest.TestCase):
         # check if m2aia parses new file
         I = ImzMLReader(result)
         # cleanup temp files
-        os.remove(result)
+        if delete_output() == True:
+            os.remove(result)
 
     def test_conv_pc_to_cc_imzml_fallback(self):
         # get data paths
@@ -65,7 +67,8 @@ class TestConvToolsPC(unittest.TestCase):
         # check if m2aia parses new file
         I = ImzMLReader(result)
         # cleanup temp files
-        os.remove(result)
+        if delete_output() == True:
+            os.remove(result)
 
 
 
