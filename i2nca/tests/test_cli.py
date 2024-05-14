@@ -10,7 +10,7 @@ def get_wdir(rel_path: str):
 
 
 def delete_output():
-    return False
+    return True
 
 
 class TestCLI_QC(unittest.TestCase):
@@ -116,9 +116,9 @@ class test_CLI_conv(unittest.TestCase):
 
         input_dir = get_wdir(r"testdata\pp.imzML")
         output_dir = get_wdir(r"tempfiles\pp")
+        cov = "1"
 
         # optinal parameters
-        cov = "1"
         bsl = "Median"
         bsl_hws = "20"
         nor ="RMS"
@@ -158,18 +158,45 @@ class test_CLI_conv(unittest.TestCase):
 
         input_dir = get_wdir(r"testdata\pp.imzML")
         output_dir = get_wdir(r"tempfiles\pp")
+        cov = "1"
 
         # optinal parameters
-        """cov = "1"
-        bsl = "Median"
-        bsl_hws = "20"
-        nor = "RMS"
-        smo = "Gaussian"
-        smo_hws = "3"
-        itr = "Log2" """
 
         # prepare the command
         command = [executable, cli,
+                   "--cov", cov,
+                   input_dir, output_dir]
+        # run in shell
+        subprocess.run(command)
+
+        # check expected result
+        result = output_dir + "_conv_output_cont_profile.imzML"
+
+        # assert file building
+        self.assertTrue(os.path.isfile(result))
+
+        # cleanup temp files
+        if delete_output() == True:
+            os.remove(result)
+
+    def test_pp_conv_cli_mixed(self):
+        # dependant on machine and env
+        executable = r"C:\Users\Jannik\.conda\envs\QCdev\python.exe"
+
+        # denendant on machinene and built
+        cli = r"C:\Users\Jannik\Documents\Uni\Master_Biochem\4_Semester\QCdev\src\i2nca\i2nca\workflows\CLI\processed_profile_cli.py"
+
+        input_dir = get_wdir(r"testdata\pp.imzML")
+        output_dir = get_wdir(r"tempfiles\pp")
+        cov = "1"
+
+        # optinal parameters
+        itr = "Log2"
+
+        # prepare the command
+        command = [executable, cli,
+                   "--cov", cov,
+                   "--itr", itr,
                    input_dir, output_dir]
         # run in shell
         subprocess.run(command)

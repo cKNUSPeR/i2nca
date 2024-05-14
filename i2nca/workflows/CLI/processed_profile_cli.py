@@ -13,22 +13,22 @@ parser.add_argument("input_path", help="Path to imzML file.")
 parser.add_argument("output", help="Path to output file.")
 
 #register optional arguments:
-parser.add_argument("--cov", help="Coverage used for the reference mz axis calculation.")
-parser.add_argument("--bsl", help="m2aia Baseline Correction")
-parser.add_argument("--bsl_hws", help="m2aia Baseline Correction Half Window Size")
-parser.add_argument("--nor", help="m2aia Normalization")
-parser.add_argument("--smo", help="m2aia Smoothing")
-parser.add_argument("--smo_hws", help="m2aia Smoothing Half Window Size")
-parser.add_argument("--itr", help="m2aia Intensity Transformation")
+parser.add_argument("--cov", help="Coverage used for the reference mz axis calculation.", default= 0.05, type=float)
+parser.add_argument("--bsl", help="m2aia Baseline Correction", default="None")
+parser.add_argument("--bsl_hws", help="m2aia Baseline Correction Half Window Size", default= 50, type=int)
+parser.add_argument("--nor", help="m2aia Normalization", default="None")
+parser.add_argument("--smo", help="m2aia Smoothing", default="None")
+parser.add_argument("--smo_hws", help="m2aia Smoothing Half Window Size", default=2, type=int)
+parser.add_argument("--itr", help="m2aia Intensity Transformation", default="None")
 
 # parse arguments from CLI
 args = parser.parse_args()
 
 # parse dataset
 Image = m2.ImzMLReader(args.input_path,
-                   args.bsl, int(args.bsl_hws),
+                   args.bsl, args.bsl_hws,
                    args.nor,
-                   args.smo, int(args.smo_hws),
+                   args.smo, args.smo_hws,
                    args.itr)
 
 """
@@ -42,7 +42,7 @@ baseline_correction: m2BaselineCorrection = "None",
 
 
 # get the refernce mz value
-ref_mz = report_pp_to_cp(Image, args.output, float(args.cov))
+ref_mz = report_pp_to_cp(Image, args.output, args.cov)
 
 # write the continous file
 write_pp_to_cp_imzml(Image, ref_mz, args.output)
