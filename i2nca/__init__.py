@@ -10,8 +10,7 @@ from i2nca.qctools import *
 
 from i2nca.convtools import *
 
-from i2nca.brukertools import *
-
+# from i2nca.brukertools import *
 
 
 # bruker tools are excluded here. checkout the branch "bruker inclusive" to get acces to these functions.

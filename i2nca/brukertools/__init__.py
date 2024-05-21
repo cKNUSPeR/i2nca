@@ -1,4 +1,4 @@
-"""i2nca"""
+"""inca - ms Imaging INteractive quality Control and Assesment using m2aia tools distro"""
 
 # tool set for pp to pp imzml
 from i2nca.brukertools.tdf_tools import TdfReader, convert_tdf_to_pc_imzml
