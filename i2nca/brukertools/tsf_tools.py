@@ -56,7 +56,7 @@ def convert_tsf_to_pp_imzml(file_path, output_path):
 
     # write the continous file
     outfile_path = write_tsf_to_pp_imzml(Image, output_path)
-    return output_file
+    return outfile_path
 
 
 def write_pp_to_pp_imzml(Image,
