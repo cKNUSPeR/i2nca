@@ -4,7 +4,7 @@
 from i2nca.convtools.conv_tools import convert_pp_to_pp_imzml
 
 # imports for pp to cp imzml
-from i2nca.convtools.conv_tools import convert_pp_to_cp_imzml, report_pp_to_cp, write_pp_to_cp_imzml
+from i2nca.convtools.conv_tools import convert_pp_to_cp_imzml, report_pp_to_cp, make_profile_axis, write_pp_to_cp_imzml
 
 # import for cp to pc imzML
 from i2nca.convtools.conv_tools import convert_profile_to_pc_imzml, report_prof_to_centroid, write_profile_to_pc_imzml
