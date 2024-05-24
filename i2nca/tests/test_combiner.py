@@ -151,6 +151,60 @@ class TestCombineToolCentroid(unittest.TestCase):
         if delete_output() == True:
             os.remove(result)
 
+    def test_join_two_pc_imzML_polarity_overwrite(self):
+        # get data paths
+        input_data = get_wdir(r"testdata\pc.imzML")
+        input_data2 = get_wdir(r"testdata\pc.imzML")
+
+        output = get_wdir(r"tempfiles\pc")
+
+        # convert data
+        combine_datasets_imzml([input_data, input_data2], output, norm_method="TIC", padding=5, overwrite_polarity="negative")
+
+        # expected result
+        result = output + "_combined.imzML"
+
+        self.assertTrue(os.path.isfile(result))
+
+        # check if m2aia parses new file
+        I = ImzMLReader(result)
+
+        # cleanup temp files
+        if delete_output() == True:
+            os.remove(result)
+
+    def test_join_two_pc_imzML_xcols(self):
+        # get data paths
+        input_data = get_wdir(r"testdata\pc.imzML")
+        input_data2 = get_wdir(r"testdata\pc.imzML")
+        input_data3 = get_wdir(r"testdata\pc.imzML")
+        input_data4 = get_wdir(r"testdata\pc.imzML")
+        input_data5 = get_wdir(r"testdata\pc.imzML")
+
+        output = get_wdir(r"tempfiles\pc")
+
+        # convert data
+        combine_datasets_imzml([input_data,
+                                input_data2,
+                                input_data3,
+                                input_data4,
+                                input_data5], output, norm_method="TIC", padding=5, x_cols=3)
+
+        # expected result
+        result = output + "_combined.imzML"
+        result2 = output + "_pixel_transform_matrix.tsv"
+
+        self.assertTrue(os.path.isfile(result))
+        self.assertTrue(os.path.isfile(result2))
+
+        # check if m2aia parses new file
+        I = ImzMLReader(result)
+
+        # cleanup temp files
+        if delete_output() == True:
+            os.remove(result)
+            os.remove(result2)
+
 
     def test_join_cc_pc_imzML_def_param(self):
         # get data paths

@@ -63,7 +63,7 @@ class TestConvToolsPP(unittest.TestCase):
         coverage = 0.5
 
         # convert data
-        convert_pp_to_cp_imzml(input_data, output, coverage)
+        convert_pp_to_cp_imzml(input_data, output, coverage=coverage)
 
         # expected result
         result = output + "_conv_output_cont_profile.imzML"
@@ -79,6 +79,31 @@ class TestConvToolsPP(unittest.TestCase):
         if delete_output() == True:
             os.remove(result)
             os.remove(result2)
+
+
+
+    def test_convert_pp_to_cp_imzml_fixbins(self):
+        # get data paths
+        input_data = get_wdir(r"testdata\pp.imzML")
+        output = get_wdir(r"tempfiles\cp")
+        method = "fixed"
+        accuracy = 20
+
+        # convert data
+        convert_pp_to_cp_imzml(input_data, output, method=method, accuracy=accuracy)
+
+        # expected result
+        result = output + "_conv_output_cont_profile.imzML"
+
+        self.assertTrue(os.path.isfile(result))
+
+        # check if m2aia parses new file
+        I = ImzMLReader(result)
+
+        # cleanup temp files
+        if delete_output() == True:
+            os.remove(result)
+
 
     def test_conv_pp_to_pc_imzml(self):
         # get data paths

@@ -2,7 +2,7 @@
 
 __author__ = "Jannik Witte"
 
-__version__ = "0.2.4"
+__version__ = "0.2.6"
 
 # registery of main function for i2nca namespace, each defined over their own group.
 

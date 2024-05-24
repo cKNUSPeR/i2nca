@@ -146,7 +146,9 @@ def squeeze_pp_to_cp_imzml(file_path, output_path=None, pixel_nr=100):
 
 def convert_pp_to_cp_imzml(file_path: str,
                            output_path: Optional[str] = None,
-                           coverage: float = 0.25) -> str:
+                           coverage: float = 0.25,
+                           method = "fixed_alignment",
+                           accuracy = 20) -> str:
     """
     Top-level converter for processed profile imzml to continuous profile imzml.
 
@@ -163,7 +165,10 @@ def convert_pp_to_cp_imzml(file_path: str,
     coverage : float , optional
         Percentage of sample used for shared mz axis calculation.
         Between 0 and 1.
-
+    mwethod:
+        The method for conversion:
+            - aq_bins allows to create a experimental binning apporach for the TTF data
+            - fixed allows to create a mass axis based on a fix ppm cutoff
 
     Returns
     -------
@@ -177,10 +182,23 @@ def convert_pp_to_cp_imzml(file_path: str,
     Image = m2.ImzMLReader(file_path)
 
     # get the refernce mz value
-    ref_mz = report_pp_to_cp(Image, output_path, coverage)
+    ref_mz = make_profile_axis(Image, output_path, method, coverage, accuracy)
 
     # write the continous file
     return write_pp_to_cp_imzml(Image, ref_mz, output_path)
+
+
+def make_profile_axis(Image, output_path, method, coverage, accuracy):
+        """Helper function to make bins fro profile axis"""
+        if method == "fixed_bins":
+            bins = report_pp_to_cp(Image, output_path, coverage)
+            return bins
+        elif method == "fixed_alignment":
+            start = min(Image.GetXAxis())
+            end = max(Image.GetXAxis())
+            return np.array(list(mz_range(start, end, accuracy)))
+        else:
+            return sorted(Image.GetXAxis())
 
 
 def write_pp_to_cp_imzml(Image,
@@ -239,7 +257,7 @@ def write_pp_to_cp_imzml(Image,
         # m2aia is 0-indexed
         for id in range(0, n):
 
-            _, intensities = Image.GetSpectrum(id)
+            mz, intensities = Image.GetSpectrum(id)
             length = len(intensities)
 
             xyz_pos = Image.GetSpectrumPosition(id)
@@ -254,7 +272,8 @@ def write_pp_to_cp_imzml(Image,
             if length == len_ref_mz:
                 w.addSpectrum(ref_mz, intensities, pos)
             else:
-                print(f"Sparce pixel at {id}")
+                binned_ints = get_averaged_intensites(mz, ref_mz, intensities)
+                w.addSpectrum(ref_mz, binned_ints, pos)
 
     return output_file
 
