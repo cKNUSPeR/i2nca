@@ -125,15 +125,12 @@ def combine_datasets_imzml(path_list: list[str],
     # array for image offsets ([0]: x offset and [1]:y offset)
     image_offsets = np.zeros((2, len(image_array) ))
 
-    # update plan:
-    # make a df
-    # get all positional data in df with name from file:
-    # assign pos_nr_x and pos_nr_y
-    # find largest x and y value
+    # image offset (m2aia5.1 quirk, persistent up to 5.10)
+    img_offset = 1
 
     positions_df = make_positional_grid_df(path_list, image_array, x_cols, padding)
 
-    save_image_transform_matrix(positions_df, output_path)
+    save_image_transform_matrix(positions_df, img_offset, output_path)
 
     for i in range(0, len(image_array)):
         if i == 0:
@@ -171,8 +168,7 @@ def combine_datasets_imzml(path_list: list[str],
 
                     xyz_pos = Image.GetSpectrumPosition(id)
 
-                    # image offset (m2aia5.1 quirk, persistent up to 5.10)
-                    img_offset = 1
+                  
 
                     # offset needs to be added fro 1-based indexing of xyz system and real offset
                     #old_pos = (xyz_pos[0] + img_offset + image_offsets[0][i], xyz_pos[1] + img_offset + image_offsets[1][i])
@@ -230,6 +226,7 @@ def make_positional_grid_df(path_list, image_list, x_cols, pad):
     return pixel_pos_df
 
 def save_image_transform_matrix(pixel_positions_df,
+                                grid_offset,
                                 output_path):
     "Quick helper to save the df for further annotaion use"
 
@@ -239,6 +236,9 @@ def save_image_transform_matrix(pixel_positions_df,
     # Selecting the relevant columns
     df_selection= df_selection[['old_x', 'old_y', 'old_file', 'new_x', 'new_y']]
 
+    df_selection['new_x'] = df_selection['new_x'] + grid_offset
+
+    df_selection['new_y'] = df_selection['new_y'] + grid_offset                              
 
     # Save the selected columns to a TSV file
     df_selection.to_csv(f'{output_path}_pixel_transform_matrix.tsv',
