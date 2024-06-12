@@ -260,15 +260,6 @@ class TestCalibrantQC(unittest.TestCase):
         if delete_output() == True: 
             os.remove(result)
 
-    def test_calibrant_qc_on_cc_imzml_def_param(self):
-        input = get_wdir(r"testdata\cc.imzML")
-        calibrants = get_wdir(r"testdata\calibrant.csv")
-        output = get_wdir(r"tempfiles\cc_def")
-
-        # parse dataset
-        I = ImzMLReader(input)
-
-
 
 class TestRegionQC(unittest.TestCase):
 
