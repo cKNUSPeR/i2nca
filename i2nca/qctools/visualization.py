@@ -801,30 +801,65 @@ def plot_accu_barplot(names, values, metric_name, color, pdf):
 
 
 def plot_accuracy_images(Image, accuracy_images, calibrants_df, ppm, index_nr, x_limits, y_limits, pdf):
-    """Makes accuracy heatmaps per pixel ofthe found calibrant accuracy."""
-    # loop over the calibrants
+
     for i, mass in enumerate(calibrants_df["mz"]):
         img = mask_bad_image(index_nr, accuracy_images[i], make_index_image(Image))
+        if calibrants_df.loc[i, "found"]:
+            # plot the calibrant spectra panel
+            plot_accuracy_image_distribution(Image, img, calibrants_df, ppm, i, x_limits, y_limits, pdf)
+            plot_intensity_image_distribution(Image, calibrants_df, ppm, i, x_limits, y_limits, pdf)
 
-        # plot each image
-        fig = plt.figure(figsize=[7, 5])
-        ax = plt.subplot(111)
-        ax.set_title(f'Mass accuracy of {calibrants_df.loc[i, "mz"]}, ({calibrants_df.loc[i, "name"]})')
-        ax.set_xlabel('x axis')
-        ax.set_ylabel('y axis')
+        else:
+            # plot an empty box
+            plot_empty_peak(calibrants_df.loc[i, "mz"], calibrants_df.loc[i, "name"], pdf)
+            # Todo: add string for title to correct
 
-        ax.set_xlim(x_limits[0], x_limits[1])
-        ax.set_ylim(y_limits[0], y_limits[1])
-        im = ax.imshow(img, cmap=my_cw,
-                       vmin=-ppm,
-                       vmax=+ppm)
 
-        divider = make_axes_locatable(ax)
-        cax = divider.append_axes("right", size="5%", pad=0.05)
-        fig.colorbar(im, extend='both', label="ppm", cax=cax)
 
-        pdf.savefig(fig)
-        plt.close()
+def plot_accuracy_image_distribution(Image, accuracy_image, calibrants_df, ppm, calibrant_index,  x_limits, y_limits, pdf):
+    """Makes accuracy heatmaps per pixel ofthe found calibrant accuracy."""
+    # loop over the calibrants
+
+    # plot each image
+    fig = plt.figure(figsize=[7, 5])
+    ax = plt.subplot(111)
+    ax.set_title(f'Mass accuracy of {calibrants_df.loc[calibrant_index, "mz"]}, ({calibrants_df.loc[calibrant_index, "name"]})')
+    ax.set_xlabel('x axis')
+    ax.set_ylabel('y axis')
+
+    ax.set_xlim(x_limits[0], x_limits[1])
+    ax.set_ylim(y_limits[0], y_limits[1])
+    im = ax.imshow(accuracy_image, cmap=my_cw,
+                   vmin=-ppm,
+                   vmax=+ppm)
+
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="5%", pad=0.05)
+    fig.colorbar(im, extend='both', label="ppm", cax=cax)
+
+    pdf.savefig(fig)
+    plt.close()
+
+
+def plot_intensity_image_distribution(Image, calibrants_df, ppm, calibrant_index, x_limits, y_limits,
+                                             pdf):
+    fig = plt.figure(figsize=[7, 5])
+    ax = plt.subplot(111)
+    ax.set_title(f'Intensity of {calibrants_df.loc[calibrant_index, "mz"]} ± {ppm} ppm, ({calibrants_df.loc[calibrant_index, "name"]})')
+    ax.set_xlabel('x axis')
+    ax.set_ylabel('y axis')
+
+    ax.set_xlim(x_limits[0], x_limits[1])
+    ax.set_ylim(y_limits[0], y_limits[1])
+    im = ax.imshow(Image.GetArray(calibrants_df.loc[calibrant_index, "mz"], tol=ppm)[0],
+                   cmap=my_vir)
+
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="5%", pad=0.05)
+    fig.colorbar(im, extend='min', label="Intensity", cax=cax)
+    pdf.savefig(fig)
+    plt.close()
+
 
 
 def plot_region_noise(region_spectra, format_flags, nr_regions, noise_ivl, pdf):

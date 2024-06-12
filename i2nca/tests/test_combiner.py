@@ -5,8 +5,6 @@ from m2aia import ImzMLReader
 
 from i2nca import combine_datasets_imzml
 
-from i2nca import cut_dataset_imzml
-
 
 def get_wdir(rel_path: str):
     return str(os.path.join(os.getcwd(), rel_path))

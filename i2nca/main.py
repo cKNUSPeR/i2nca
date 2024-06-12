@@ -1,28 +1,25 @@
 
 import m2aia as m2
+import matplotlib.pyplot as plt
 from qctools.qc_tools import report_agnostic_qc, report_calibrant_qc, report_regions_qc
 import webbrowser
 
 
 if __name__ == "__main__":
 
-    file_name = r"D:\data\Jannik\Files_for_minidata\proteo\proteomics_full_mz_processed_profile.imzML"
+    file_name = r"C:\Users\Jannik\Documents\Uni\Master_Biochem\4_Semester\QCdev\src\i2nca\i2nca\tests\testdata\cc.imzML"
 
     I = m2.ImzMLReader(file_name)
 
-    pdf1 = report_agnostic_qc(I,
-                       file_name[:-6])
-    webbrowser.open(pdf1, new=2)
+    fig = plt.figure(figsize=[7, 5])
+    ax = plt.subplot(111)
+    ax.set_title(
+        f'Intensity of 78.959, "mz"] ± {50} ppm')
+    ax.set_xlabel('x axis')
+    ax.set_ylabel('y axis')
 
-    pdf2 = report_calibrant_qc(I,
-                        file_name[:-6],
-                        r"D:\data\Jannik\Files_for_minidata\proteo\calibrants_peptides.csv",
-                        50, 1)
-    webbrowser.open(pdf2, new=2)
+    im = ax.imshow(I.GetArray(78.959, tol=50)[0],
+                   cmap="viridis")
+    fig.show()
 
-    pdf3 = report_regions_qc(I,
-                      file_name[:-6],
-                      False)
-                      #r"C:\Users\Jannik\Documents\Uni\Master_Biochem\4_Semester\M2aia\data\exmpl_cont\kidney_annotated_regions.tsv")
-    webbrowser.open(pdf3, new=2)
-
+    print(I.GetArray(78.959, tol=50)[0])
