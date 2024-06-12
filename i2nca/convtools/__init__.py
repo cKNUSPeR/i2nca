@@ -15,7 +15,7 @@ from i2nca.convtools.conv_tools import set_find_peaks, set_find_peaks_cwt, loc_m
 from i2nca.convtools.conv_tools import convert_pc_to_cc_imzml, write_pc_to_cc_imzml
 
 # import the subsmaple generator
-from i2nca.convtools.snippet_tools import convert_data_to_snippet_imzml
+from i2nca.convtools.snippet_tools import cut_dataset_imzml
 
 # import the combine tool
 from i2nca.convtools.combiner_tools import combine_datasets_imzml

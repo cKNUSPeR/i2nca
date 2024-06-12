@@ -264,8 +264,8 @@ class TestCalibrantQC(unittest.TestCase):
 class TestRegionQC(unittest.TestCase):
 
     def test_region_qc_on_cc_imzml_no_anno(self):
-        input = get_wdir(r"testdata\cc.imzML")
-        output = get_wdir(r"tempfiles\cc_no_anno")
+        input = get_wdir(r"tempfiles\pc_combined.imzML")
+        output = get_wdir(r"tempfiles\pc_small_comb")
 
         # parse dataset
         I = ImzMLReader(input)

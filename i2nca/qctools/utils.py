@@ -139,7 +139,7 @@ def parse_regionfile(file, annotation_group, image):
 def write_region_tsv(df, path):
     """writes a region pd.df to a tsv for reimport later."""
     file_name = path + "annotated_regions.tsv"
-    df.to_csv(file_name, sep="\t", columns=["x", "y", "annotation_value"], index=False)
+    df.to_csv(file_name, sep="\t", columns=["x", "y", "annotation"], index=False)
 
 
 def group_region_stat(labeled_image, index_image, label_nr, image_stats, keyword):
