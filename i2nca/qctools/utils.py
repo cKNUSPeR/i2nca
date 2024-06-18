@@ -86,7 +86,7 @@ def calc_accuraciues(found_mz, theo_mz, mask):
 
 
 def label_connected_region(Image):
-    labeled_image = skim.label(Image.GetMaskArray()[0], connectivity=1)
+    labeled_image, max_regions = label_connected_components(Image.GetMaskArray()[0], connectivity=1)
 
     # shape of image array:
     rows, cols = labeled_image.shape
@@ -94,15 +94,60 @@ def label_connected_region(Image):
     x_coords, y_coords = np.meshgrid(range(cols), range(rows))
 
     # make a dataframe
-    df = pd.DataFrame({'x': x_coords.flatten(), 'y': y_coords.flatten(), 'annotation_value': labeled_image.flatten()})
+    df = pd.DataFrame({'x': x_coords.flatten(), 'y': y_coords.flatten(), 'annotation': labeled_image.flatten()})
     # remove 0-entries (they represent empty pixels)
-    df = df.loc[df["annotation_value"] > 0]
+    df = df.loc[df["annotation"] > 0]
 
-    # number of regions found
-    max_regions = df['annotation_value'].max()
 
     return df, labeled_image, max_regions
 
+# helper function to remove skimage dependency
+
+def label_connected_components(binary_image, connectivity=1):
+    """
+    Labels connected components in a binary image.
+
+    Parameters:
+        binary_image (ndarray): The binary image to be labeled.
+        connectivity (int): The connectivity to use (1 for 4-connectivity, 2 for 8-connectivity).
+
+    Returns:
+        labeled_image (ndarray): The labeled image where each connected component has a unique label.
+        num_features (int): The number of connected components.
+    """
+    # checks the connectivity
+    def get_neighbors(r, c):
+        if connectivity == 1:
+            return [(r - 1, c), (r + 1, c), (r, c - 1), (r, c + 1)]
+        elif connectivity == 2:
+            return [(r - 1, c - 1), (r - 1, c), (r - 1, c + 1),
+                    (r, c - 1), (r, c + 1),
+                    (r + 1, c - 1), (r + 1, c), (r + 1, c + 1)]
+
+    # fill for one blob
+    def flood_fill(r, c, label):
+        stack = [(r, c)]
+        while stack:
+            x, y = stack.pop()
+            if labeled_image[x, y] == 0 and binary_image[x, y] == 1:
+                labeled_image[x, y] = label
+                for nx, ny in get_neighbors(x, y):
+                    if 0 <= nx < binary_image.shape[0] and 0 <= ny < binary_image.shape[1]:
+                        stack.append((nx, ny))
+
+    labeled_image = np.zeros_like(binary_image, dtype=int)
+    # zero already given
+    label = 1
+
+    for row in range(binary_image.shape[0]):
+        for col in range(binary_image.shape[1]):
+            if binary_image[row, col] == 1 and labeled_image[row, col] == 0:
+                flood_fill(row, col, label)
+                label += 1
+
+    # reduce for final label_increase
+    num_features = label - 1
+    return labeled_image, num_features
 
 def parse_regionfile(file, annotation_group, image):
     """parses the regions tsv file. Assumes that the regions are annotated

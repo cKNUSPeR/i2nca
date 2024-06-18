@@ -12,9 +12,7 @@ from i2nca.qctools.dependencies import *
 from i2nca.qctools.utils import make_subsample, evaluate_formats, collect_image_stats, evaluate_image_corners, \
     test_formats, check_uniform_length, evaluate_group_spacing, evaluate_polarity, get_polarity, get_pixsize, \
     collect_noise
-from i2nca.qctools.visualization import make_pdf_backend, plot_feature_number, image_feature_number, \
-    plot_max_mz_number, image_max_mz_number, plot_min_mz_number, image_min_mz_number, plot_bin_spreads, \
-    plot_noise_spectrum, plot_profile_spectrum
+from i2nca.qctools.visualization import make_pdf_backend, plot_noise_spectrum, plot_profile_spectrum
 
 
 # tools for processed profile
@@ -165,7 +163,7 @@ def convert_pp_to_cp_imzml(file_path: str,
     coverage : float , optional
         Percentage of sample used for shared mz axis calculation.
         Between 0 and 1.
-    mwethod:
+    method:
         The method for conversion:
             - aq_bins allows to create a experimental binning apporach for the TTF data
             - fixed allows to create a mass axis based on a fix ppm cutoff
@@ -189,16 +187,16 @@ def convert_pp_to_cp_imzml(file_path: str,
 
 
 def make_profile_axis(Image, output_path, method, coverage, accuracy):
-        """Helper function to make bins fro profile axis"""
-        if method == "fixed_bins":
-            bins = report_pp_to_cp(Image, output_path, coverage)
-            return bins
-        elif method == "fixed_alignment":
-            start = min(Image.GetXAxis())
-            end = max(Image.GetXAxis())
-            return np.array(list(mz_range(start, end, accuracy)))
-        else:
-            return sorted(Image.GetXAxis())
+    """Helper function to make bins fro profile axis"""
+    if method == "fixed_bins":
+        bins = report_pp_to_cp(Image, output_path, coverage)
+        return bins
+    elif method == "fixed_alignment":
+        start = min(Image.GetXAxis())
+        end = max(Image.GetXAxis())
+        return np.array(list(mz_range(start, end, accuracy)))
+    else:
+        return sorted(Image.GetXAxis())
 
 
 def write_pp_to_cp_imzml(Image,
@@ -278,22 +276,15 @@ def write_pp_to_cp_imzml(Image,
     return output_file
 
 
-def report_pp_to_cp(Image, outfile_path, coverage):
+def report_pp_to_cp(Image, coverage):
     """
     Reporter function for mz alignment.
-
-    This reporter creates a pdf report that checks if the following assumptions are correct.
-        - The file has the same number of data points in each pixel.
-        - The data points start and end at nearly the same value.
-        - The data points of all pixels in a subsample are arranged into distinct clusters.
-    Output is only graphically presented
+    returns the mean mz yixs and checks if the spacing is acceptable
 
     Parameters
     ----------
     Image :
         A m2aia.ImzMLReader image object, or similar
-    outfile_path : string
-        Path to filename where the pdf output file should be built.
     coverage : float
         Percentage of sample used for shared mz axis calculation.
         Between 0 and 1.
@@ -301,12 +292,8 @@ def report_pp_to_cp(Image, outfile_path, coverage):
 
     Returns
     -------
-    report : file
-      PDF file at specified location with report on assumptions.
+    the mean axis over the selected subsample
     """
-
-    # Create a PDF file to save the figures
-    pdf_pages = make_pdf_backend(outfile_path, "_control_report_pp_to_cp")
 
     # Make a subsample to test accuracies on
     randomlist = make_subsample(Image.GetNumberOfSpectra(), coverage)
@@ -320,39 +307,29 @@ def report_pp_to_cp(Image, outfile_path, coverage):
     # check if the porvided file is profile and processed
     test_formats(format_flags, ["profile", "processed"])
 
-    # find the bulk data for assumption check
-    image_stats = collect_image_stats(Image,
-                                      ['index_nr', 'peak_nr', 'max_mz_nr', 'min_mz_nr'])
-
-    # visualize the feature numbers
-    plot_feature_number(image_stats, pdf_pages)
-    image_feature_number(image_stats, Image,
-                         pdf_pages, x_lims, y_lims)
-
-    # vis the max intensitsy metrics
-    plot_max_mz_number(image_stats, pdf_pages)
-    image_max_mz_number(image_stats, Image,
-                        pdf_pages, x_lims, y_lims)
-
-    # vis the  min intensitsy metrics
-    plot_min_mz_number(image_stats, pdf_pages)
-    image_min_mz_number(image_stats, Image,
-                        pdf_pages, x_lims, y_lims)
-
     # sanitize randomlist
     clean_rndlist = check_uniform_length(Image, randomlist)
-
-    # visualize random pixel position (black, red, green)
 
     # get the spacings of each pseudobins
     mean_bin, intra_bin_spread, inter_bin_spread = evaluate_group_spacing(Image, clean_rndlist)
 
-    # visualize the spread
-    plot_bin_spreads(mean_bin, intra_bin_spread, inter_bin_spread, pdf_pages)
+    # set intra spacing to same length as inter
+    intra_bin_spread = intra_bin_spread[:-1]
 
-    pdf_pages.close()
+    # compare intra- and inter-bins
+    comparisons = intra_bin_spread > inter_bin_spread
 
-    return mean_bin
+    # count how often itra-bin spacing is larger (ref: undesirable outcome)
+    counts_intra = np.sum(comparisons)
+
+    total_counts = len(comparisons)
+
+    if counts_intra/total_counts > 0.3:
+        # more that 30% of the intrabin-spacings are larger. Indicating that alingment wont produce nice results
+        raise ValueError(r"The dataset has a large deviation between the pixels. An alignment might change the data significantly."
+                         r"Please run another method (like binning)")
+    else:
+        return mean_bin
 
 
 # special checker, return the mean points with specified pixel numbers,
@@ -523,7 +500,7 @@ def convert_profile_to_pc_imzml(file_path: str,
     Top-level converter for any profile imzml to processed centroid imzml.
 
     This converter maps the detection_function on the mass spectrum on a pixel_by_pixel basis.
-    A conversion report is created at output location for monitoring of relevant metrics before converion.
+
 
     Parameters
     ----------
@@ -550,8 +527,9 @@ def convert_profile_to_pc_imzml(file_path: str,
     # parse imzml file
     Image = m2.ImzMLReader(file_path)
 
+    # decrep feature
     # make the file converion report
-    report_prof_to_centroid(Image, output_path)
+    #report_prof_to_centroid(Image, output_path)
 
     # write the continous file
     return write_profile_to_pc_imzml(Image, output_path, detection_function)
@@ -633,7 +611,7 @@ def write_profile_to_pc_imzml(Image,
 
 
 # add a conversion report for profile to centroids.
-
+# decrepated function
 def report_prof_to_centroid(Image, outfile_path):
     """
     Reporter function for peak detection.

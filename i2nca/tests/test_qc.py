@@ -237,8 +237,8 @@ class TestCalibrantQC(unittest.TestCase):
         self.assertTrue(os.path.isfile(result))
 
         # cleanup temp files
-        if delete_output() == True: 
-            os.remove(result)
+        if delete_output() == True:
+             os.remove(result)
 
     def test_calibrant_qc_on_cc_imzml_def_param(self):
         input = get_wdir(r"testdata\cc.imzML")
@@ -264,8 +264,8 @@ class TestCalibrantQC(unittest.TestCase):
 class TestRegionQC(unittest.TestCase):
 
     def test_region_qc_on_cc_imzml_no_anno(self):
-        input = get_wdir(r"tempfiles\pc_combined.imzML")
-        output = get_wdir(r"tempfiles\pc_small_comb")
+        input = get_wdir(r"testdata\cc.imzML")
+        output = get_wdir(r"tempfiles\cc")
 
         # parse dataset
         I = ImzMLReader(input)

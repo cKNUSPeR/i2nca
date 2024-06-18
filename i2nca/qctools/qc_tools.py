@@ -201,6 +201,17 @@ def report_calibrant_qc(I,  # m2.imzMLReader (passing by ref allows faster compu
     # plot the accuracy boxplots.
     plot_accuracy_boxplots(accuracy_images, calibrants, ppm, pdf_pages)
 
+    # sanitize randomlist
+    clean_rndlist = check_uniform_length(I, randomlist)
+
+    # visualize random pixel position (black, red, green)
+
+    # get the spacings of each pseudobins
+    mean_bin, intra_bin_spread, inter_bin_spread = evaluate_group_spacing(I, clean_rndlist)
+
+    # visualize the spread
+    plot_bin_spreads(mean_bin, intra_bin_spread, inter_bin_spread, pdf_pages)
+
     # sumamary with coverage and avg. accuracy in non-zero pixels
     write_calibrant_summary_table(calibrants, pdf_pages)
 

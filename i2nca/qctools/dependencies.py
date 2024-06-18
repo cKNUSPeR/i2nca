@@ -5,6 +5,8 @@ import numpy as np
 import pandas as pd
 
 import matplotlib as mpl
+mpl.use('svg')
+
 import matplotlib.backends as mpb
 import matplotlib.pyplot as plt # best to shoot for 3.5.3 to resolve userwarings
 import matplotlib.cm as cm
@@ -19,7 +21,7 @@ import scipy.stats as SST
 import scipy.signal as SSI
 from scipy.signal import argrelextrema, find_peaks, find_peaks_cwt
 
-import skimage.measure as skim
+#import skimage.measure as skim
 #from sklearn.cluster import DBSCAN
 
 # imports for type linting
@@ -38,3 +40,4 @@ import warnings as warm
 warm.simplefilter(action='ignore', category=FutureWarning)
 # catch of plt decrep warning (honestly, they have no docs on implementing the required_interactive_framework i could find )
 warm.filterwarnings(action="ignore", category=mpl.MatplotlibDeprecationWarning)
+
