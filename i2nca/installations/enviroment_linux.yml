@@ -101,10 +101,11 @@ dependencies:
   - zlib=1.2.13=h5eee18b_1
   - zstd=1.5.5=hc292b87_2
   - pip:
-      - i2nca==0.2.9
       - m2aia==0.5.1
       - pyimzml==1.5.3
       - simpleitk==2.3.1
       - wget==3.2
       - wheezy-template==3.2.2
-prefix: /home/ubuntu/anaconda3/envs/i2nca
+      - "git+https://github.com/cKNUSPeR/pyimzml.git#egg=pyimzml"
+      - "git+https://github.com/cKNUSPeR/i2nca.git#egg=i2nca"
+
