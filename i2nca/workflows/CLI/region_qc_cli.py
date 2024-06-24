@@ -18,8 +18,13 @@ args = parser.parse_args()
 
 # parse dataset
 I = m2.ImzMLReader(args.input_path)
-# report QC
-report_regions_qc(I, args.output, args.region_path)
+# check if "None" is the annotation file
+if args.region_path == "None":
+    # report QC
+    report_regions_qc(I, args.output)
+else:
+    # report QC
+    report_regions_qc(I, args.output, args.region_path)
 
 # CLI command
 # [python instance] [file.py]  [input_path] [output] [region_path]

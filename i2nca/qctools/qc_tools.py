@@ -301,6 +301,9 @@ def report_regions_qc(I,  # m2.imzMLReader (passing by ref allows faster computa
     # plot the averaged spectra of each region
     plot_regions_averages(region_spectra, format_flags, nr_regions, pdf_pages)
 
+    #plot region difference spectra to first region
+    plot_regions_difference(region_spectra, format_flags, nr_regions, pdf_pages)
+
     # show spectral coveraage per mean spectrum
     plot_spectral_coverages(region_spectra, format_flags, nr_regions, pdf_pages)
 

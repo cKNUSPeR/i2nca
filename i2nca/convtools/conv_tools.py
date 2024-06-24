@@ -180,18 +180,18 @@ def convert_pp_to_cp_imzml(file_path: str,
     Image = m2.ImzMLReader(file_path)
 
     # get the refernce mz value
-    ref_mz = make_profile_axis(Image, output_path, method, coverage, accuracy)
+    ref_mz = make_profile_axis(Image, method, coverage, accuracy)
 
     # write the continous file
     return write_pp_to_cp_imzml(Image, ref_mz, output_path)
 
 
-def make_profile_axis(Image, output_path, method, coverage, accuracy):
+def make_profile_axis(Image, method, coverage, accuracy):
     """Helper function to make bins fro profile axis"""
-    if method == "fixed_bins":
-        bins = report_pp_to_cp(Image, output_path, coverage)
+    if method == "fixed_alignment":
+        bins = report_pp_to_cp(Image, coverage)
         return bins
-    elif method == "fixed_alignment":
+    elif method == "fixed_bins":
         start = min(Image.GetXAxis())
         end = max(Image.GetXAxis())
         return np.array(list(mz_range(start, end, accuracy)))

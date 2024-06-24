@@ -116,7 +116,9 @@ class test_CLI_conv(unittest.TestCase):
 
         input_dir = get_wdir(r"testdata\pp.imzML")
         output_dir = get_wdir(r"tempfiles\pp")
+        method = "fixed_bins"
         cov = "1"
+        ppm = "10"
 
         # optinal parameters
         bsl = "Median"
@@ -129,13 +131,15 @@ class test_CLI_conv(unittest.TestCase):
         # prepare the command
         command = [executable, cli,
                    "--cov", cov,
+                   "--acc", ppm,
                    "--bsl", bsl,
                    "--bsl_hws", bsl_hws,
                    "--nor", nor,
                    "--smo", smo,
                    "--smo_hws", smo_hws,
                    "--itr", itr,
-                   input_dir, output_dir]
+                   input_dir, output_dir,
+                   method]
         # run in shell
         subprocess.run(command)
 
@@ -149,7 +153,7 @@ class test_CLI_conv(unittest.TestCase):
         if delete_output() == True:
             os.remove(result)
 
-    def test_pp_conv_cli_minimal(self):
+    def test_pp_conv_cli_minimal_alignment(self):
         # dependant on machine and env
         executable = r"C:\Users\Jannik\.conda\envs\QCdev\python.exe"
 
@@ -158,6 +162,9 @@ class test_CLI_conv(unittest.TestCase):
 
         input_dir = get_wdir(r"testdata\pp.imzML")
         output_dir = get_wdir(r"tempfiles\pp")
+        input_dir = get_wdir(r"testdata\pp.imzML")
+        output_dir = get_wdir(r"tempfiles\pp")
+        method = "fixed_alignment"
         cov = "1"
 
         # optinal parameters
@@ -165,7 +172,42 @@ class test_CLI_conv(unittest.TestCase):
         # prepare the command
         command = [executable, cli,
                    "--cov", cov,
-                   input_dir, output_dir]
+                   input_dir, output_dir,
+                   method]
+        # run in shell
+        subprocess.run(command)
+
+        # check expected result
+        result = output_dir + "_conv_output_cont_profile.imzML"
+
+        # assert file building
+        self.assertTrue(os.path.isfile(result))
+
+        # cleanup temp files
+        if delete_output() == True:
+            os.remove(result)
+
+    def test_pp_conv_cli_minimal_bins(self):
+        # dependant on machine and env
+        executable = r"C:\Users\Jannik\.conda\envs\QCdev\python.exe"
+
+        # denendant on machinene and built
+        cli = r"C:\Users\Jannik\Documents\Uni\Master_Biochem\4_Semester\QCdev\src\i2nca\i2nca\workflows\CLI\processed_profile_cli.py"
+
+        input_dir = get_wdir(r"testdata\pp.imzML")
+        output_dir = get_wdir(r"tempfiles\pp")
+        input_dir = get_wdir(r"testdata\pp.imzML")
+        output_dir = get_wdir(r"tempfiles\pp")
+        method = "fixed_bins"
+        ppm = "200"
+
+        # optinal parameters
+
+        # prepare the command
+        command = [executable, cli,
+                   "--acc", ppm,
+                   input_dir, output_dir,
+                   method]
         # run in shell
         subprocess.run(command)
 

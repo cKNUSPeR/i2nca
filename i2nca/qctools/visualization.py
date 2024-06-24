@@ -348,6 +348,26 @@ def plot_centroid_spectrum(mz_axis, spectrum_data, title, pdf):
     pdf.savefig(fig)
     plt.close()
 
+def plot_centroid_difference_spectrum(spectrum_axis, spectrum_data, spectrum_id,
+                                      ref_axis, ref_data, ref_id,
+                                      title, pdf):
+    fig = plt.figure(figsize=[10, 6])
+    ax = plt.subplot(111)
+
+    ax.set_title(title)
+    ax.set_xlabel('m/z')
+    ax.set_ylabel('Intensity')
+    ax.set_xlim(min(spectrum_axis).round(0), max(spectrum_axis).round(0))
+
+    ax.vlines(spectrum_axis, 0, spectrum_data, linewidth=0.8, color="blue",
+              label=f"Centroid spectrum of region {spectrum_id}")
+    ax.vlines(ref_axis, 0, -ref_data, linewidth=0.8, color="gray",
+              label=f"Centroid spectrum of region {ref_id}")
+
+    ax.legend()
+
+    pdf.savefig(fig)
+    plt.close()
 
 def plot_profile_spectrum(mz_axis, spectrum_data, pdf):
     fig = plt.figure(figsize=[10, 6])
@@ -364,6 +384,27 @@ def plot_profile_spectrum(mz_axis, spectrum_data, pdf):
     pdf.savefig(fig)
     plt.close()
 
+
+def plot_profile_difference_spectrum(spectrum_axis, spectrum_data, spectrum_id,
+                                      ref_axis, ref_data, ref_id,
+                                      title, pdf):
+    fig = plt.figure(figsize=[10, 6])
+    ax = plt.subplot(111)
+
+    ax.set_title(title)
+    ax.set_xlabel('m/z')
+    ax.set_ylabel('Intensity')
+    ax.set_xlim(min(spectrum_axis).round(0), max(spectrum_axis).round(0))
+
+    ax.plot(spectrum_axis, spectrum_data, linewidth=0.8, color="blue",
+              label=f"Profile spectrum of region {spectrum_id}")
+    ax.plot(ref_axis, -ref_data, linewidth=0.8, color="gray",
+              label=f"Profile spectrum of region {ref_id}")
+
+    ax.legend()
+
+    pdf.savefig(fig)
+    plt.close()
 
 def plot_noise_spectrum(mz_axis, spectral_data, title, pdf):
     fig = plt.figure(figsize=[10, 6])
@@ -483,6 +524,21 @@ def plot_regions_averages(regional_spectra, format_dict, region_number, pdf):
                                    f"Averaged centroid mass spectrum of group {i + 1}", pdf)
         elif format_dict["profile"]:
             plot_profile_spectrum(avg_mz, avg_ints, pdf)
+
+def plot_regions_difference(regional_spectra, format_dict, region_number, pdf):
+    """Helper to plot difference spectrum against first region"""
+
+    for i in range(region_number):
+        ref_mz, ref_ints = regional_spectra[0]
+        avg_mz, avg_ints = regional_spectra[i]
+        if format_dict["centroid"]:
+            plot_centroid_difference_spectrum(avg_mz, avg_ints, i+1,
+                                              ref_mz, ref_ints, 1,
+                                            f"Spectral comparison of Region {i + 1} against {1}", pdf)
+        elif format_dict["profile"]:
+            plot_profile_difference_spectrum(avg_mz, avg_ints, i+1,
+                                              ref_mz, ref_ints, 1,
+                                            f"Spectral comparison of Region {i + 1} against {1}", pdf)
 
 
 def old_plot_regions_average(Image, format_dict, regions_image, region_number, pdf):

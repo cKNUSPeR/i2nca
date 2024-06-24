@@ -237,6 +237,12 @@ def collect_region_averages(Image, format_dict, regions_image, region_number):
 
     averaged_spectra = []
 
+    # get the mz dim to be constant over full comparison
+    min_mz, max_mz = int(np.floor(min(Image.GetXAxis()))), int(np.ceil(max(Image.GetXAxis())))
+    # get the spacing in 1/100 per unit m/z value in mz range
+    spacing = (max_mz - min_mz) * 100
+
+
     for index in range(1, region_number + 1):
         # get the index per segment
         pindex = ind_ar[np.where(lab_ar == index)]  # extracion of pixel indices per segment
@@ -245,7 +251,7 @@ def collect_region_averages(Image, format_dict, regions_image, region_number):
         if format_dict["continuous"]:
             avg_mz, avg_ints = average_cont_spectra(Image, pindex)
         elif format_dict["processed"]:
-            avg_mz, avg_ints = average_processed_spectra(Image, pindex)
+            avg_mz, avg_ints = average_processed_spectra(Image, pindex, spacing)
 
         # collect averaged spectra
         averaged_spectra.append((avg_mz, avg_ints))
@@ -869,6 +875,10 @@ def test_formats(form_dict, keywords):
 def check_uniform_length(I, randomlist):
     """check the lenght (datapoints in spectrum) of a list with ids and returns only those with maxim"""
     lenght_collector = []
+
+    # collect at least one
+    if len(randomlist) == 0:
+        randomlist.append(0)
 
     # get length of each element:
     for id in randomlist:

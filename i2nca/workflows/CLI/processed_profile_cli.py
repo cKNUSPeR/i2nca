@@ -3,7 +3,7 @@ import subprocess
 
 from i2nca.qctools.dependencies import *
 
-from i2nca import report_pp_to_cp, write_pp_to_cp_imzml
+from i2nca import make_profile_axis, write_pp_to_cp_imzml
 
 # instance the parser
 parser = argparse.ArgumentParser()
@@ -11,9 +11,14 @@ parser = argparse.ArgumentParser()
 # register the positional arguments
 parser.add_argument("input_path", help="Path to imzML file.")
 parser.add_argument("output", help="Path to output file.")
+parser.add_argument("method", help="Method of Spectral Covnersion. Currently 'fixed_bins' or 'fixed_alignment'", type=str)
+
+
 
 #register optional arguments:
-parser.add_argument("--cov", help="Coverage used for the reference mz axis calculation.", default= 0.05, type=float)
+parser.add_argument("--cov", help="Subsample coverage size to calculate alignment reference mz axis .", default=0.05, type=float)
+parser.add_argument("--acc", help="Accuracy in ppm for mz axis binning.", default=200 ,type=int)
+
 parser.add_argument("--bsl", help="m2aia Baseline Correction", default="None")
 parser.add_argument("--bsl_hws", help="m2aia Baseline Correction Half Window Size", default= 50, type=int)
 parser.add_argument("--nor", help="m2aia Normalization", default="None")
@@ -42,11 +47,11 @@ baseline_correction: m2BaselineCorrection = "None",
 
 
 # get the refernce mz value
-ref_mz = report_pp_to_cp(Image, args.output, args.cov)
+ref_mz = make_profile_axis(Image, args.method, args.cov, args.acc)
 
 # write the continous file
 write_pp_to_cp_imzml(Image, ref_mz, args.output)
 
 # CLI command
-# [python instance] [file.py]  --cov [1] --bsl [Median] --bsl_hws [20] --nor [RMS] --smo [Gaussian]  --smo_hws [3] --itr [Log2] [input_path] [output]
+# [python instance] [file.py] --accuracy[20] --cov [0.0.5] --bsl [Median] --bsl_hws [20] --nor [RMS] --smo [Gaussian]  --smo_hws [3] --itr [Log2] [input_path] [output] [method]
 # C:\Users\Jannik\.conda\envs\QCdev\python.exe C:\Users\Jannik\Documents\Uni\Master_Biochem\4_Semester\QCdev\src\i2nca\i2nca\workflows\CLI\calibrant_qc_cli.py --ppm 50 --sample_size 1  C:\Users\Jannik\Documents\Uni\Master_Biochem\4_Semester\QCdev\src\i2nca\i2nca\tests\testdata\cc.imzML C:\Users\Jannik\Documents\Uni\Master_Biochem\4_Semester\QCdev\src\i2nca\i2nca\tests\tempfiles\empty C:\Users\Jannik\Documents\Uni\Master_Biochem\4_Semester\QCdev\src\i2nca\i2nca\tests\testdata\calibrant.csv

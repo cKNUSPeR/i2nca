@@ -289,7 +289,7 @@ class TestRegionQC(unittest.TestCase):
 
         # parse dataset
         I = ImzMLReader(input)
-        # report QC
+        # report
         report_regions_qc(I, output, region_file)
 
         # expected result
