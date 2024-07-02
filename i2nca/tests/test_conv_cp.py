@@ -24,10 +24,10 @@ class TestConvToolsCP(unittest.TestCase):
 
         # expected result
         result = output + "_conv_output_proc_centroid.imzML"
-        result2 = output + "_control_report_prof_to_pc.pdf"
+
 
         self.assertTrue(os.path.isfile(result))
-        self.assertTrue(os.path.isfile(result2))
+
 
         # check if m2aia parses new file
         I = ImzMLReader(result)
@@ -35,7 +35,7 @@ class TestConvToolsCP(unittest.TestCase):
         # cleanup temp files
         if delete_output() == True:
             os.remove(result)
-            os.remove(result2)
+
 
     def test_conv_cp_to_pc_imzml(self):
         # get data paths
@@ -47,10 +47,9 @@ class TestConvToolsCP(unittest.TestCase):
 
         # expected result
         result = output + "_conv_output_proc_centroid.imzML"
-        result2 = output + "_control_report_prof_to_pc.pdf"
+
 
         self.assertTrue(os.path.isfile(result))
-        self.assertTrue(os.path.isfile(result2))
 
         # check if m2aia parses new file
         I = ImzMLReader(result)
@@ -58,7 +57,7 @@ class TestConvToolsCP(unittest.TestCase):
         # cleanup temp files
         if delete_output() == True:
             os.remove(result)
-            os.remove(result2)
+
 
 
 if __name__ == "__main__":

@@ -12,7 +12,7 @@ from i2nca.convtools.conv_tools import convert_profile_to_pc_imzml, report_prof_
 from i2nca.convtools.conv_tools import set_find_peaks, set_find_peaks_cwt, loc_max_preset
 
 # import for pc to cc imzML
-from i2nca.convtools.conv_tools import convert_pc_to_cc_imzml, write_pc_to_cc_imzml
+from i2nca.convtools.conv_tools import convert_pc_to_cc_imzml, write_pc_to_cc_imzml, create_bins
 
 # import the subsmaple generator
 from i2nca.convtools.snippet_tools import cut_dataset_imzml

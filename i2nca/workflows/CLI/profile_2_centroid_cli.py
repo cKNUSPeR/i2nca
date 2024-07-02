@@ -1,9 +1,10 @@
 
 import subprocess
+from typing import Optional
 
 from i2nca.qctools.dependencies import *
 
-from i2nca import make_profile_axis, write_pp_to_cp_imzml
+from i2nca import set_find_peaks, write_profile_to_pc_imzml, loc_max_preset
 
 # instance the parser
 parser = argparse.ArgumentParser()
@@ -11,13 +12,20 @@ parser = argparse.ArgumentParser()
 # register the positional arguments
 parser.add_argument("input_path", help="Path to imzML file.")
 parser.add_argument("output", help="Path to output file.")
-parser.add_argument("method", help="Method of Spectral Covnersion. Currently 'fixed_bins' or 'fixed_alignment'", type=str)
+parser.add_argument("method", help="Method of Spectral Covnersion. Currently 'set_find_peaks' or 'set_find_peaks_cwt'", type=str)
 
 #register optional arguments:
-parser.add_argument("--cov", help="Subsample coverage size to calculate alignment reference mz axis .", default=0.05, type=float)
-parser.add_argument("--acc", help="Accuracy in ppm for mz axis binning.", default=200 ,type=int)
+parser.add_argument("--fp_hei", help="Required height of peaks", default=None, type=float)
+parser.add_argument("--fp_thr", help="Required threshold of peaks, the vertical distance to its neighboring samples.", default=None ,type=float)
+parser.add_argument("--fp_dis", help="Required minimal horizontal distance (>= 1) in samples between neighbouring peaks.", default=None ,type=float)
+parser.add_argument("--fp_pro", help="Required prominence of peaks.", default=None ,type=float)
+parser.add_argument("--fp_wid", help="Required width of peaks in samples.", default=None ,type=float)
+parser.add_argument("--fp_wlen", help="Used for calculation of the peaks width, thus it is only used if `width` is given.",
+                    default=None ,type=float)
+parser.add_argument("--fp_rhei", help="Required width of peaks in samples.", default=None ,type=float)
+parser.add_argument("--fp_pla", help="Required size of the flat top of peaks in samples.", default=None ,type=float)
 
-# register prepr options
+#register m2aia preprocessing options
 parser.add_argument("--bsl", help="m2aia Baseline Correction", default="None")
 parser.add_argument("--bsl_hws", help="m2aia Baseline Correction Half Window Size", default= 50, type=int)
 parser.add_argument("--nor", help="m2aia Normalization", default="None")
@@ -44,12 +52,17 @@ baseline_correction: m2BaselineCorrection = "None",
                  intensity_transformation: m2IntensityTransformation = "None",
 """
 
+if args.method == "set_find_peaks":
+    # get the detection function
+    detection = set_find_peaks(height=args.fp_hei,
+                               threshold=args.fp_thr,
+                               distance=args.fp_dis)
+else:
+    detection = loc_max_preset
 
-# get the refernce mz value
-ref_mz = make_profile_axis(Image, args.method, args.cov, args.acc)
 
 # write the continous file
-write_pp_to_cp_imzml(Image, ref_mz, args.output)
+write_profile_to_pc_imzml(Image, args.output, detection)
 
 # CLI command
 # [python instance] [file.py] --accuracy[20] --cov [0.0.5] --bsl [Median] --bsl_hws [20] --nor [RMS] --smo [Gaussian]  --smo_hws [3] --itr [Log2] [input_path] [output] [method]

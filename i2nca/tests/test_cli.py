@@ -10,7 +10,7 @@ def get_wdir(rel_path: str):
 
 
 def delete_output():
-    return True
+    return False
 
 
 class TestCLI_QC(unittest.TestCase):
@@ -104,7 +104,7 @@ class TestCLI_QC(unittest.TestCase):
 
 
 
-class test_CLI_conv(unittest.TestCase):
+class test_CLI_conv_pp(unittest.TestCase):
 
 
     def test_pp_conv_cli_full_param(self):
@@ -245,6 +245,125 @@ class test_CLI_conv(unittest.TestCase):
 
         # check expected result
         result = output_dir + "_conv_output_cont_profile.imzML"
+
+        # assert file building
+        self.assertTrue(os.path.isfile(result))
+
+        # cleanup temp files
+        if delete_output() == True:
+            os.remove(result)
+
+
+class test_CLI_conv_prof(unittest.TestCase):
+
+    def test_pc_conv_cli_set_find_peaks_full_param(self):
+        # dependant on machine and env
+        executable = r"C:\Users\Jannik\.conda\envs\QCdev\python.exe"
+
+        # denendant on machinene and built
+        cli = r"C:\Users\Jannik\Documents\Uni\Master_Biochem\4_Semester\QCdev\src\i2nca\i2nca\workflows\CLI\profile_2_centroid_cli.py"
+
+        input_dir = get_wdir(r"testdata\pp.imzML")
+        output_dir = get_wdir(r"tempfiles\test")
+        method = "set_find_peaks"
+
+        # optinal parameters
+        fp_hei = "10"
+        fp_thr = "2"
+        fp_dis = "1"
+        fp_pro = "0.5"
+        fp_wid = "2"
+        fp_wlen = "1"
+        fp_rhei = "1"
+        fp_pla = "1"
+
+        # prepare the command
+        command = [executable, cli,
+                   "--fp_hei", fp_hei,
+                   "--fp_thr", fp_thr,
+                   "--fp_dis", fp_dis,
+                   "--fp_pro", fp_pro,
+                   "--fp_wid", fp_wid,
+                   "--fp_wlen", fp_wlen,
+                   "--fp_rhei", fp_rhei,
+                   "--fp_pla", fp_pla,
+                   input_dir, output_dir,
+                   method]
+        # run in shell
+        subprocess.run(command)
+
+        # check expected result
+        result = output_dir + "_conv_output_proc_centroid.imzML"
+
+        # assert file building
+        self.assertTrue(os.path.isfile(result))
+
+        # cleanup temp files
+        if delete_output() == True:
+            os.remove(result)
+
+    # add the find_peaks_cwt method
+
+
+class test_CLI_conv_proc_cent(unittest.TestCase):
+
+    def test_cc_conv_cli_bins_200(self):
+        # dependant on machine and env
+        executable = r"C:\Users\Jannik\.conda\envs\QCdev\python.exe"
+
+        # denendant on machinene and built
+        cli = r"C:\Users\Jannik\Documents\Uni\Master_Biochem\4_Semester\QCdev\src\i2nca\i2nca\workflows\CLI\pc_2_cc_cli.py"
+
+        input_dir = get_wdir(r"testdata\pc.imzML")
+        output_dir = get_wdir(r"tempfiles\cc")
+        method = "fixed"
+
+        # optinal parameters
+        acc = "200"
+
+        # prepare the command
+        command = [executable, cli,
+                   "--acc", acc,
+                   input_dir, output_dir,
+                   method]
+        # run in shell
+        subprocess.run(command)
+
+        # check expected result
+        result = output_dir + "_conv_output_cont_centroid.imzML"
+
+        # assert file building
+        self.assertTrue(os.path.isfile(result))
+
+        # cleanup temp files
+        if delete_output() == True:
+            os.remove(result)
+
+    def test_cc_conv_cli_unique(self):
+        # dependant on machine and env
+        executable = r"C:\Users\Jannik\.conda\envs\QCdev\python.exe"
+
+        # denendant on machinene and built
+        cli = r"C:\Users\Jannik\Documents\Uni\Master_Biochem\4_Semester\QCdev\src\i2nca\i2nca\workflows\CLI\pc_2_cc_cli.py"
+
+        input_dir = get_wdir(r"testdata\pc.imzML")
+        output_dir = get_wdir(r"tempfiles\cc")
+        method = "unique"
+
+        # optinal parameters
+        acc = "200"
+
+
+        # prepare the command
+        command = [executable, cli,
+                   "--acc", acc,
+                   input_dir, output_dir,
+                   method]
+        # run in shell
+        subprocess.run(command)
+
+        # check expected result
+        result = output_dir + "_conv_output_cont_centroid.imzML"
 
         # assert file building
         self.assertTrue(os.path.isfile(result))
