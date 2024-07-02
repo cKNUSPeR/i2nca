@@ -371,3 +371,104 @@ class test_CLI_conv_proc_cent(unittest.TestCase):
         # cleanup temp files
         if delete_output() == True:
             os.remove(result)
+
+
+class test_CLI_joiner(unittest.TestCase):
+
+    def test_4_joins_no_Args(self):
+        # dependant on machine and env
+        executable = r"C:\Users\Jannik\.conda\envs\QCdev\python.exe"
+
+        # denendant on machinene and built
+        cli = r"C:\Users\Jannik\Documents\Uni\Master_Biochem\4_Semester\QCdev\src\i2nca\i2nca\workflows\CLI\file_joiner_cli.py"
+
+        input_dir = get_wdir(r"testdata\cc.imzML")
+        output_dir = get_wdir(r"tempfiles\joined")
+
+        # prepare the command
+        command = [executable, cli,
+                   output_dir,
+                   input_dir, input_dir, input_dir, input_dir]
+
+        # run in shell
+        subprocess.run(command)
+
+        # check expected result
+        result = output_dir + "_combined.imzML"
+
+        # assert file building
+        self.assertTrue(os.path.isfile(result))
+
+        # cleanup temp files
+        if delete_output() == True:
+            os.remove(result)
+
+    def test_4_joins_all_Args(self):
+        # dependant on machine and env
+        executable = r"C:\Users\Jannik\.conda\envs\QCdev\python.exe"
+
+        # denendant on machinene and built
+        cli = r"C:\Users\Jannik\Documents\Uni\Master_Biochem\4_Semester\QCdev\src\i2nca\i2nca\workflows\CLI\file_joiner_cli.py"
+
+        input_dir = get_wdir(r"testdata\cc.imzML")
+        output_dir = get_wdir(r"tempfiles\joined")
+
+        norm = "RMS"
+        pad = "2"
+        cols = "3"
+        polarity = "negative"
+
+        # prepare the command
+        command = [executable, cli,
+                   "--nor", norm,
+                   "--pad",pad,
+                   "--col",cols,
+                   "--pol",polarity,
+                   output_dir,
+                   input_dir, input_dir, input_dir, input_dir]
+
+        # run in shell
+        subprocess.run(command)
+
+        # check expected result
+        result = output_dir + "_combined.imzML"
+
+        # assert file building
+        self.assertTrue(os.path.isfile(result))
+
+        # cleanup temp files
+        if delete_output() == True:
+            os.remove(result)
+
+class test_CLI_cutter(unittest.TestCase):
+
+    def test_cutter(self):
+        # dependant on machine and env
+        executable = r"C:\Users\Jannik\.conda\envs\QCdev\python.exe"
+
+        # denendant on machinene and built
+        cli = r"C:\Users\Jannik\Documents\Uni\Master_Biochem\4_Semester\QCdev\src\i2nca\i2nca\workflows\CLI\file_cutter_cli.py"
+
+        input_data = get_wdir(r"testdata\combined_pc.imzML")
+        input_roi = get_wdir(r"testdata\combined_pc_roi.tsv")
+
+        output_dir = get_wdir(r"tempfiles\ROI_")
+
+        # prepare the command
+        command = [executable, cli,
+                   input_data, input_roi, output_dir]
+
+        # run in shell
+        subprocess.run(command)
+
+        # expected result
+        result1 = output_dir + "A.imzML"
+        result2 = output_dir + "B.imzML"
+
+        self.assertTrue(os.path.isfile(result1))
+        self.assertTrue(os.path.isfile(result2))
+
+        # cleanup temp files
+        if delete_output() == True:
+            os.remove(result1)
+            os.remove(result2)
