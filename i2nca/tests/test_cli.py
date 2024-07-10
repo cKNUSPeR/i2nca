@@ -472,3 +472,20 @@ class test_CLI_cutter(unittest.TestCase):
         if delete_output() == True:
             os.remove(result1)
             os.remove(result2)
+
+
+class test_CLI_version(unittest.TestCase):
+
+    def test_get_version(self):
+        # dependant on machine and env
+        executable = r"C:\Users\Jannik\.conda\envs\QCdev\python.exe"
+
+        # independant off machinene
+        com = r"i2nca_version"
+
+
+        # prepare the command
+        command = [executable, com]
+
+        # run in shell
+        subprocess.run(command)
