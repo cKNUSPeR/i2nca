@@ -7,7 +7,7 @@ setup(
     entry_points={
         'console_scripts': [
             'i2nca_version = i2nca.main:get_version',
-            'i2nca_agnostic_qc = i2nca.workflows.CLI.agnostic_qc_cli',
+            'i2nca_agnostic_qc = i2nca.workflows.CLI.agnostic_qc_cli:i2nca_angostic_qc',
         ]
     },
     install_requires=[
