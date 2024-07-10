@@ -474,5 +474,4 @@ class test_CLI_cutter(unittest.TestCase):
             os.remove(result2)
 
 
-class test_CLI_version(unittest.TestCase):
-    # add the cli test, but somehow manage is inside the conda env
+# add the cli test, but somehow manage is inside the conda env
