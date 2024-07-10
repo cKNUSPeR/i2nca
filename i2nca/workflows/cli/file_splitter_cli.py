@@ -3,9 +3,9 @@ import subprocess
 
 from i2nca.qctools.dependencies import *
 
-from i2nca import report_regions_qc
+from i2nca import split_dataset_imzml
 
-def i2nca_region_qc():
+def i2nca_file_splitter():
     # instance the parser
     parser = argparse.ArgumentParser()
 
@@ -17,17 +17,8 @@ def i2nca_region_qc():
     # parse arguments from cli
     args = parser.parse_args()
 
-    # parse dataset
-    I = m2.ImzMLReader(args.input_path)
-    # check if "None" is the annotation file
-    if args.region_path == "None":
-        # report QC
-        report_regions_qc(I, args.output)
-    else:
-        # report QC
-        report_regions_qc(I, args.output, args.region_path)
+    # cut the file into different regions
+    split_dataset_imzml(args.input_path, args.region_path, args.output)
 
 if __name__ == "__main__":
-    i2nca_region_qc()
-# cli command
-# [python instance] [file.py]  [input_path] [output] [region_path]
+    i2nca_file_splitter()

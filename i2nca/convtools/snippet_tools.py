@@ -5,10 +5,10 @@ from i2nca.qctools.utils import evaluate_formats, get_polarity, evaluate_polarit
 
 # tools sample file generation
 
-def cut_dataset_imzml(file_path,
-                     roi_path: str,
-                     output_path: Optional[str] = None
-                     ) -> str:
+def split_dataset_imzml(file_path,
+                        roi_path: str,
+                        output_path: Optional[str] = None
+                        ) -> str:
     """
     Top-level sample file producer.
     A small imzML file with a predefined numer of pixels is generated.

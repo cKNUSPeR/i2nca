@@ -3,7 +3,7 @@ import unittest
 
 from m2aia import ImzMLReader
 
-from i2nca import cut_dataset_imzml, combine_datasets_imzml
+from i2nca import split_dataset_imzml, join_datasets_imzml
 
 
 def get_wdir(rel_path: str):
@@ -24,7 +24,7 @@ class TestCutToolCentroid(unittest.TestCase):
         output = get_wdir(r"tempfiles\ROI_")
 
         # convert data
-        cut_dataset_imzml(input_data, input_roi, output)
+        split_dataset_imzml(input_data, input_roi, output)
 
         # expected result
         result1 = output + "A.imzML"
@@ -50,7 +50,7 @@ class TestCutToolCentroid(unittest.TestCase):
         output = get_wdir(r"tempfiles\ROI_")
 
         # convert data
-        cut_dataset_imzml(input_data, input_roi, output)
+        split_dataset_imzml(input_data, input_roi, output)
 
         # expected result
         result1 = output + "1.imzML"

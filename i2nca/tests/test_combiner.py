@@ -3,7 +3,7 @@ import unittest
 
 from m2aia import ImzMLReader
 
-from i2nca import combine_datasets_imzml
+from i2nca import join_datasets_imzml
 
 
 def get_wdir(rel_path: str):
@@ -24,7 +24,7 @@ class TestCombineToolProfile(unittest.TestCase):
         output = get_wdir(r"tempfiles\pp")
 
         # convert data
-        combine_datasets_imzml([input_data, input_data2], output)
+        join_datasets_imzml([input_data, input_data2], output)
 
         # expected result
         result = output + "_combined.imzML"
@@ -46,7 +46,7 @@ class TestCombineToolProfile(unittest.TestCase):
         output = get_wdir(r"tempfiles\pp")
 
         # convert data
-        combine_datasets_imzml([input_data, input_data2], output, norm_method="TIC", padding= 5)
+        join_datasets_imzml([input_data, input_data2], output, norm_method="TIC", padding= 5)
 
         # expected result
         result = output + "_combined.imzML"
@@ -69,7 +69,7 @@ class TestCombineToolProfile(unittest.TestCase):
         output = get_wdir(r"tempfiles\pp")
 
         # convert data
-        combine_datasets_imzml([input_data, input_data2, input_data3], output)
+        join_datasets_imzml([input_data, input_data2, input_data3], output)
 
         # expected result
         result = output + "_combined.imzML"
@@ -91,7 +91,7 @@ class TestCombineToolProfile(unittest.TestCase):
         output = get_wdir(r"tempfiles\pp")
 
         # convert data
-        combine_datasets_imzml([input_data, input_data2], output)
+        join_datasets_imzml([input_data, input_data2], output)
 
         # expected result
         result = output + "_combined.imzML"
@@ -115,7 +115,7 @@ class TestCombineToolCentroid(unittest.TestCase):
         output = get_wdir(r"tempfiles\pc")
 
         # convert data
-        combine_datasets_imzml([input_data, input_data2], output)
+        join_datasets_imzml([input_data, input_data2], output)
 
         # expected result
         result = output + "_combined.imzML"
@@ -137,7 +137,7 @@ class TestCombineToolCentroid(unittest.TestCase):
         output = get_wdir(r"tempfiles\pc")
 
         # convert data
-        combine_datasets_imzml([input_data, input_data2], output, norm_method="TIC", padding= 5)
+        join_datasets_imzml([input_data, input_data2], output, norm_method="TIC", padding= 5)
 
         # expected result
         result = output + "_combined.imzML"
@@ -159,7 +159,7 @@ class TestCombineToolCentroid(unittest.TestCase):
         output = get_wdir(r"tempfiles\pc")
 
         # convert data
-        combine_datasets_imzml([input_data, input_data2], output, norm_method="TIC", padding=5, overwrite_polarity="negative")
+        join_datasets_imzml([input_data, input_data2], output, norm_method="TIC", padding=5, overwrite_polarity="negative")
 
         # expected result
         result = output + "_combined.imzML"
@@ -184,11 +184,11 @@ class TestCombineToolCentroid(unittest.TestCase):
         output = get_wdir(r"tempfiles\pc")
 
         # convert data
-        combine_datasets_imzml([input_data,
-                                input_data2,
-                                input_data3,
-                                input_data4,
-                                input_data5], output, norm_method="TIC", padding=5, x_cols=3)
+        join_datasets_imzml([input_data,
+                             input_data2,
+                             input_data3,
+                             input_data4,
+                             input_data5], output, norm_method="TIC", padding=5, x_cols=3)
 
         # expected result
         result = output + "_combined.imzML"
@@ -214,7 +214,7 @@ class TestCombineToolCentroid(unittest.TestCase):
         output = get_wdir(r"tempfiles\pc")
 
         # convert data
-        combine_datasets_imzml([input_data, input_data2], output)
+        join_datasets_imzml([input_data, input_data2], output)
 
         # expected result
         result = output + "_combined.imzML"

@@ -5,12 +5,12 @@ from i2nca.qctools.dependencies import *
 from i2nca.qctools.utils import evaluate_formats, evaluate_image_corners, evaluate_polarity, get_polarity, get_pixsize
 
 
-def combine_datasets_imzml(path_list: list[str],
-                           output_path: Optional[str] = None,
-                           norm_method: str = "RMS",
-                           padding: int = 20,
-                           x_cols:int = 1,
-                           overwrite_polarity = "None") -> str:
+def join_datasets_imzml(path_list: list[str],
+                        output_path: Optional[str] = None,
+                        norm_method: str = "RMS",
+                        padding: int = 20,
+                        x_cols:int = 1,
+                        overwrite_polarity = "None") -> str:
     """
     Top-level joiner of different imzML files.
     Only files with the same spectral type can be joined.

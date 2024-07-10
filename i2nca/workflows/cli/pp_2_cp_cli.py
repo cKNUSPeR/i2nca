@@ -1,25 +1,24 @@
 
 import subprocess
-from typing import Optional
 
 from i2nca.qctools.dependencies import *
 
-from i2nca import write_pc_to_cc_imzml, create_bins
+from i2nca import make_profile_axis, write_pp_to_cp_imzml
 
-def i2nca_convert_to_cc():
-
+def i2nca_convert_to_cp():
     # instance the parser
     parser = argparse.ArgumentParser()
 
     # register the positional arguments
     parser.add_argument("input_path", help="Path to imzML file.")
     parser.add_argument("output", help="Path to output file.")
-    parser.add_argument("method", help="Method of Spectral Covnersion. Currently 'fixed' or 'unique'", choices=['fixed', 'unique'], type=str)
+    parser.add_argument("method", help="Method of Spectral Covnersion. Currently 'fixed_bins' or 'fixed_alignment'", type=str)
 
     #register optional arguments:
+    parser.add_argument("--cov", help="Subsample coverage size to calculate alignment reference mz axis .", default=0.05, type=float)
     parser.add_argument("--acc", help="Accuracy in ppm for mz axis binning.", default=200 ,type=int)
 
-    #register m2aia preprocessing options
+    # register prepr options
     parser.add_argument("--bsl", help="m2aia Baseline Correction", default="None")
     parser.add_argument("--bsl_hws", help="m2aia Baseline Correction Half Window Size", default= 50, type=int)
     parser.add_argument("--nor", help="m2aia Normalization", default="None")
@@ -38,23 +37,23 @@ def i2nca_convert_to_cc():
                        args.itr)
 
     """
-    Presets for m2aia preprocessing:
-    
     baseline_correction: m2BaselineCorrection = "None",
-    baseline_correction_half_window_size: int = 50,
-    normalization: m2Normalization = "None",
-    smoothing: m2Smoothing = "None",
-    smoothing_half_window_size: int = 2,
-    intensity_transformation: m2IntensityTransformation = "None",
+                     baseline_correction_half_window_size: int = 50,
+                     normalization: m2Normalization = "None",
+                     smoothing: m2Smoothing = "None",
+                     smoothing_half_window_size: int = 2,
+                     intensity_transformation: m2IntensityTransformation = "None",
     """
 
-    ref_mz = create_bins(Image, method=args.method, accuracy=args.acc)
+
+    # get the refernce mz value
+    ref_mz = make_profile_axis(Image, args.method, args.cov, args.acc)
 
     # write the continous file
-    write_pc_to_cc_imzml(Image, ref_mz, args.output)
+    write_pp_to_cp_imzml(Image, ref_mz, args.output)
 
 if __name__ == "__main__":
-    i2nca_convert_to_cc()
+    i2nca_convert_to_cp()
 
 # cli command
 # [python instance] [file.py] --accuracy[20] --cov [0.0.5] --bsl [Median] --bsl_hws [20] --nor [RMS] --smo [Gaussian]  --smo_hws [3] --itr [Log2] [input_path] [output] [method]
