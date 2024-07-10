@@ -8,8 +8,8 @@ setup(
         'console_scripts': [
             'i2nca_version = i2nca.main:get_version',
             'i2nca_agnostic_qc = i2nca.workflows.cli.agnostic_qc_cli:i2nca_angostic_qc',
-            'i2nca_agnostic_qc = i2nca.workflows.cli.calibrant_qc_cli:i2nca_calibrant_qc',
-            'i2nca_agnostic_qc = i2nca.workflows.cli.region_qc_cli:i2nca_region_qc',
+            'i2nca_calibrant_qc = i2nca.workflows.cli.calibrant_qc_cli:i2nca_calibrant_qc',
+            'i2nca_region_qc = i2nca.workflows.cli.region_qc_cli:i2nca_region_qc',
         ]
     },
     install_requires=[
