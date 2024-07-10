@@ -19,7 +19,7 @@ parser.add_argument("--pad", help="Padding distance", default=10, type=int)
 parser.add_argument("--col", help="Nr of Columns in joined file", default=2, type=int)
 parser.add_argument("--pol", help="Polarity overwriting", default="None", type=str)
 
-# parse arguments from CLI
+# parse arguments from cli
 args = parser.parse_args()
 
 # cut the file into different regions

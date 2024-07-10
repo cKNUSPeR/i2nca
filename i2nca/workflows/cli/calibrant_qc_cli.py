@@ -18,7 +18,7 @@ parser.add_argument("calibrants_path", help="Path to csv file containing annotat
 parser.add_argument("--ppm", help="The allowed accuracy cutoff. Given in ppm.")
 parser.add_argument("--sample_size", help="Percentage of sample that is plotted in the raw data overview.")
 
-# parse arguments from CLI
+# parse arguments from cli
 args = parser.parse_args()
 
 # parse dataset
@@ -26,6 +26,6 @@ I = m2.ImzMLReader(args.input_path)
 # report QC
 report_calibrant_qc(I, args.output, args.calibrants_path, float(args.ppm), float(args.sample_size))
 
-# CLI command
+# cli command
 # [python instance] [file.py]  --ppm [50] --sample_size [0.5] [input_path] [output] [calfile_path]
-# C:\Users\Jannik\.conda\envs\QCdev\python.exe C:\Users\Jannik\Documents\Uni\Master_Biochem\4_Semester\QCdev\src\i2nca\i2nca\workflows\CLI\calibrant_qc_cli.py --ppm 50 --sample_size 1  C:\Users\Jannik\Documents\Uni\Master_Biochem\4_Semester\QCdev\src\i2nca\i2nca\tests\testdata\cc.imzML C:\Users\Jannik\Documents\Uni\Master_Biochem\4_Semester\QCdev\src\i2nca\i2nca\tests\tempfiles\empty C:\Users\Jannik\Documents\Uni\Master_Biochem\4_Semester\QCdev\src\i2nca\i2nca\tests\testdata\calibrant.csv
+# C:\Users\Jannik\.conda\envs\QCdev\python.exe C:\Users\Jannik\Documents\Uni\Master_Biochem\4_Semester\QCdev\src\i2nca\i2nca\workflows\cli\calibrant_qc_cli.py --ppm 50 --sample_size 1  C:\Users\Jannik\Documents\Uni\Master_Biochem\4_Semester\QCdev\src\i2nca\i2nca\tests\testdata\cc.imzML C:\Users\Jannik\Documents\Uni\Master_Biochem\4_Semester\QCdev\src\i2nca\i2nca\tests\tempfiles\empty C:\Users\Jannik\Documents\Uni\Master_Biochem\4_Semester\QCdev\src\i2nca\i2nca\tests\testdata\calibrant.csv

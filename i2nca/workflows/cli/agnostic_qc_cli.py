@@ -15,7 +15,7 @@ def i2nca_angostic_qc():
     #register optional arguments
     parser.add_argument("output", help="Path to output file.")
 
-    # parse arguments from CLI
+    # parse arguments from cli
     args = parser.parse_args()
 
     # parse dataset
@@ -26,6 +26,6 @@ def i2nca_angostic_qc():
 if __name__ == "__main__":
     i2nca_angostic_qc()
 
-# CLI command
+# cli command
 # [python instance] [file.py]  [input_path] [output]
-# C:\Users\Jannik\.conda\envs\QCdev\python.exe C:\Users\Jannik\Documents\Uni\Master_Biochem\4_Semester\QCdev\src\i2nca\i2nca\workflows\CLI\agnostic_qc_cli.py C:\Users\Jannik\Documents\Uni\Master_Biochem\4_Semester\QCdev\src\i2nca\i2nca\tests\testdata\cc.imzML C:\Users\Jannik\Documents\Uni\Master_Biochem\4_Semester\QCdev\src\i2nca\i2nca\tests\tempfiles\empty
+# C:\Users\Jannik\.conda\envs\QCdev\python.exe C:\Users\Jannik\Documents\Uni\Master_Biochem\4_Semester\QCdev\src\i2nca\i2nca\workflows\cli\agnostic_qc_cli.py C:\Users\Jannik\Documents\Uni\Master_Biochem\4_Semester\QCdev\src\i2nca\i2nca\tests\testdata\cc.imzML C:\Users\Jannik\Documents\Uni\Master_Biochem\4_Semester\QCdev\src\i2nca\i2nca\tests\tempfiles\empty

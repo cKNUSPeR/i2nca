@@ -27,7 +27,7 @@ from scipy.signal import argrelextrema, find_peaks, find_peaks_cwt
 # imports for type linting
 from typing import Optional, Union, Callable
 
-# argparse for CLI tools
+# argparse for cli tools
 import argparse as argparse
 
 # namespace availabiliy of modifed ImzMLWriter

@@ -13,7 +13,7 @@ parser.add_argument("input_path", help="Path to imzML file.")
 parser.add_argument("output", help="Path to output file.")
 parser.add_argument("region_path", help="Path to csv file containing annotations of signals to monitor.")
 
-# parse arguments from CLI
+# parse arguments from cli
 args = parser.parse_args()
 
 # parse dataset
@@ -26,5 +26,5 @@ else:
     # report QC
     report_regions_qc(I, args.output, args.region_path)
 
-# CLI command
+# cli command
 # [python instance] [file.py]  [input_path] [output] [region_path]
