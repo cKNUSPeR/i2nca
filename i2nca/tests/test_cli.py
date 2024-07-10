@@ -475,17 +475,4 @@ class test_CLI_cutter(unittest.TestCase):
 
 
 class test_CLI_version(unittest.TestCase):
-
-    def test_get_version(self):
-        # dependant on machine and env
-        executable = r"C:\Users\Jannik\.conda\envs\QCdev\python.exe"
-
-        # independant off machinene
-        com = r"i2nca_version"
-
-
-        # prepare the command
-        command = [executable, com]
-
-        # run in shell
-        subprocess.run(command)
+    # add the cli test, but somehow manage is inside the conda env
