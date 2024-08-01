@@ -20,6 +20,8 @@ setup(
     install_requires=[
         'numpy<1.25',
         'matplotlib<3.8',
+        'pandas',
+        'scipy',
         'm2aia',
         'pyimzml',
     ]    
