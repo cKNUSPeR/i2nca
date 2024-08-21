@@ -31,7 +31,7 @@ from typing import Optional, Union, Callable
 import argparse as argparse
 
 # namespace availabiliy of modifed ImzMLWriter
-from pyimzml.ImzMLWriter import ImzMLWriter
+from i2nca.dependencies.pyimzml import ImzMLWriter
 
 
 
