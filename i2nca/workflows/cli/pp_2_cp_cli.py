@@ -1,7 +1,7 @@
 
 import subprocess
 
-from i2nca.qctools.dependencies import *
+from i2nca.dependencies.dependencies import *
 
 from i2nca import make_profile_axis, write_pp_to_cp_imzml
 

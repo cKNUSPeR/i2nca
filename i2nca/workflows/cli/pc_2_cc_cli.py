@@ -2,7 +2,7 @@
 import subprocess
 from typing import Optional
 
-from i2nca.qctools.dependencies import *
+from i2nca.dependencies.dependencies import *
 
 from i2nca import write_pc_to_cc_imzml, create_bins
 

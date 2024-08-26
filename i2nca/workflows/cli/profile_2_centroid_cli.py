@@ -2,7 +2,7 @@
 import subprocess
 from typing import Optional
 
-from i2nca.qctools.dependencies import *
+from i2nca.dependencies.dependencies import *
 
 from i2nca import set_find_peaks, write_profile_to_pc_imzml, loc_max_preset
 

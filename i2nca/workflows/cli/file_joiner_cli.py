@@ -1,7 +1,7 @@
 
 import subprocess
 
-from i2nca.qctools.dependencies import *
+from i2nca.dependencies.dependencies import *
 
 from i2nca import join_datasets_imzml
 

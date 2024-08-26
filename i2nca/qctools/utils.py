@@ -1,4 +1,4 @@
-from .dependencies import *
+from i2nca.dependencies.dependencies import *
 
 
 # M2aia-independent tools

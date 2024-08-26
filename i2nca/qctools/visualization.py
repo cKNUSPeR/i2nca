@@ -1,4 +1,4 @@
-from .dependencies import *
+from i2nca.dependencies.dependencies import *
 from .utils import mask_bad_image, average_cont_spectra, average_processed_spectra, calculate_spectral_coverage, \
     make_index_image, collect_noise
 

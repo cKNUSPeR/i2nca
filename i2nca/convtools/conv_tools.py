@@ -6,7 +6,7 @@
 # from pyimzml.ImzMLWriter import ImzMLWriter
 # from scipy.signal import find_peaks, find_peaks_cwt
 
-from i2nca.qctools.dependencies import *
+from i2nca.dependencies.dependencies import *
 
 
 from i2nca.qctools.utils import make_subsample, evaluate_formats, collect_image_stats, evaluate_image_corners, \

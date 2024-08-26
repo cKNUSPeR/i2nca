@@ -1,6 +1,6 @@
 import numpy as np
 
-from i2nca.qctools.dependencies import *
+from i2nca.dependencies.dependencies import *
 
 from i2nca.qctools.utils import evaluate_formats, evaluate_image_corners, evaluate_polarity, get_polarity, get_pixsize
 

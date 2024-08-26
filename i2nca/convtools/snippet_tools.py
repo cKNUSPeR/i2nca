@@ -1,4 +1,4 @@
-from i2nca.qctools.dependencies import *
+from i2nca.dependencies.dependencies import *
 
 from i2nca.qctools.utils import evaluate_formats, get_polarity, evaluate_polarity, get_pixsize, parse_regionfile
 
