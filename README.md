@@ -1,31 +1,43 @@
 # i2nca
- Mass Spectrometry <ins>I</ins>maging <ins>IN</ins>teractive  <ins>C</ins>onversion and Quality <ins>A</ins>ssesment tool bundle
+
+i2nca is a Mass Spectrometry <ins>I</ins>maging <ins>IN</ins>teractive  <ins>C</ins>onversion and Quality <ins>A</ins>ssesment tool bundle. It is desinged to utilize the powerful file reading capabilities of [m2aia](https://m2aia.de/) and provide a workflow package. The current workflows allow for MSI data preprocessing in the .imzml data format. 
 
 # Installation:
-Download the conda recipe provided in the repository and use it to create a new conda env with:
+i2nca is distributed through a number of channels. The builds of i2nca are plattform-independent and testes on Linux and Windows.
+
+Install it with pip  via:
+```
+pip install i2nca
+```
+or via the bioconda channel
+```
+currently on the way
+```
+or for dev use, install the provided conda recipe and use the pip+github install
 ```
 conda env create -n env_name -f path\to\file\...\conda_recipe.yml
-```
-
-Conda will setup the environment, including the pacakges installable from GitHub.
-Activate the enviroment with:
-
-```
 conda activate env_name
+pip install i2nca@git+https://github.com/cKNUSPeR/i2nca.git
 ```
-
-# Updating 
-
-Update the full  conda env with the  conda recipe via:
-
-```
-conda env update --name env_name --file path\to\file\...\conda_recipe.yml --prune
-```
-
-To only update the i2nca package, use:
-
+Update from github via:
 ```
 pip uninstall i2nca
 pip install i2nca@git+https://github.com/cKNUSPeR/i2nca.git
 ```
+
+
+# Brukertools 
+
+i2nca features tools that access the Bruker propietary formats for MSI data (.tsf and .tdf). These need the additional TDF-SKD distributed by Bruker.
+To install these tools, follow these steps:
+1) Get the TDF-SKD from Bruker (distributed for free at [Bruker](https://www.bruker.com/en/services/software-downloads.html))
+2) Install i2nca into a virtual env (like a conda env)
+3) Copy the files timsdata.dll and timsdata.lib from the TDF-SDK and place them at the level of the python executable of the env.
+4) Reinstall i2nca into the env with the following command
+```
+pip uninstall i2nca
+pip install i2nca@git+https://github.com/cKNUSPeR/i2nca.git@brukertools
+```
+
+
 
