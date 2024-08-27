@@ -1,6 +1,6 @@
 import i2nca.brukertools.tsfdata as tsfdata
 import numpy as np
-from pyimzml.ImzMLWriter import ImzMLWriter
+from i2nca.dependencies.ImzMLWriter import ImzMLWriter
 from scipy.signal import find_peaks
 from typing import Optional
 from datetime import datetime

@@ -1,6 +1,6 @@
 import i2nca.brukertools.timsdata as timsdata
 import numpy as np
-from pyimzml.ImzMLWriter import ImzMLWriter
+from i2nca.dependencies.ImzMLWriter import ImzMLWriter
 import matplotlib.pyplot as plt
 
 

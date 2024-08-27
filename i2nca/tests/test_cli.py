@@ -42,6 +42,23 @@ class TestCLI_QC(unittest.TestCase):
         if delete_output() == True:
             os.remove(result)
 
+
+    def test_reg_version_cli(self):
+
+        # denendant on machinene and built
+        cli = "i2nca_version"
+
+        #input_dir = get_wdir(r"testdata\cc.imzML")
+        #output_dir = get_wdir(r"tempfiles\cc")
+        #input_dir = r"C:\Users\Jannik\Documents\Uni\Master_Biochem\4_Semester\QCdev\src\i2nca\i2nca\tests\testdata\cc.imzML"
+        #output_dir = r"C:\Users\Jannik\Documents\Uni\Master_Biochem\4_Semester\QCdev\src\i2nca\i2nca\tests\tempfiles\empty"
+
+        # prepare the command
+        command = [cli]
+        # run in shell
+        subprocess.run(command)
+
+
     def test_calibrant_qc_cli(self):
         # dependant on machine and env
         executable = r"C:\Users\Jannik\.conda\envs\QCdev\python.exe"
