@@ -602,7 +602,7 @@ def write_profile_to_pc_imzml(Image,
             if len(intensities) != 0:
                 w.addSpectrum(mz, intensities, pos)
             else:
-                w.addSpectrum(mz, np.zeores(len(intensities)), pos)
+                w.addSpectrum(mz, np.zeros(len(intensities)), pos)
 
             # progress print statement
             # if (id % 100) == 0:
