@@ -1,10 +1,11 @@
 from i2nca.dependencies.dependencies import *
 from .utils import mask_bad_image, average_cont_spectra, average_processed_spectra, calculate_spectral_coverage, \
-    make_index_image, collect_noise
+    make_index_image, collect_noise, sanizite_image
 
 # custom colormaps with white backgrounds (via out-of-lower-bound)
 my_vir = cm.get_cmap('viridis').copy()
 my_vir.set_under('white')  # Color for values less than vmin
+my_vir.set_bad(color='white', alpha=1.0)
 
 my_rbw = cm.get_cmap('gist_rainbow').copy()
 my_rbw.set_under('white')  # Color for values less than vmin
@@ -57,7 +58,7 @@ def image_full_binary(Image, pdf):
     ax.set_ylabel('y axis')
     ax.set_title('Full view of binary image from origin')
     ax.imshow(Image,
-              cmap=my_vir, vmin=0.1,
+              cmap=my_vir, vmin=-0.5,
               interpolation='none',  # attention, large images tend to get a smoohing under the hood by plt
               origin='lower')
     pdf.savefig(fig)
@@ -78,7 +79,7 @@ def image_cropped_binary(Image, pdf, x_limits, y_limits):
     ax.set_ylim(y_limits[0], y_limits[1])
     ax.set_title('Cropped view of binary image within pixel limits')
     ax.imshow(Image,
-              cmap=my_vir, vmin=0.1,
+              cmap=my_vir, vmin=-0.5,
               interpolation='none',
               origin='lower')
     pdf.savefig(fig)
@@ -859,7 +860,7 @@ def plot_accu_barplot(names, values, metric_name, color, pdf):
 def plot_accuracy_images(Image, accuracy_images, calibrants_df, ppm, index_nr, x_limits, y_limits, pdf):
 
     for i, mass in enumerate(calibrants_df["mz"]):
-        img = mask_bad_image(index_nr, accuracy_images[i], make_index_image(Image))
+        img = mask_bad_image(index_nr, accuracy_images[i], make_index_image(Image), use_nan=True)
         if calibrants_df.loc[i, "found"]:
             # plot the calibrant spectra panel
             plot_accuracy_image_distribution(Image, img, calibrants_df, ppm, i, x_limits, y_limits, pdf)
@@ -907,7 +908,7 @@ def plot_intensity_image_distribution(Image, calibrants_df, ppm, calibrant_index
 
     ax.set_xlim(x_limits[0], x_limits[1])
     ax.set_ylim(y_limits[0], y_limits[1])
-    im = ax.imshow(Image.GetArray(calibrants_df.loc[calibrant_index, "mz"], tol=ppm)[0],
+    im = ax.imshow(sanizite_image(Image, Image.GetArray(calibrants_df.loc[calibrant_index, "mz"], tol=ppm)[0], use_nan=True),
                    cmap=my_vir)
 
     divider = make_axes_locatable(ax)
