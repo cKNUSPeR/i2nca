@@ -2,7 +2,7 @@
 
 __author__ = "Jannik Witte"
 
-__version__ = "0.3.11"
+__version__ = "0.3.12"
 
 def get_version():
     return __version__
