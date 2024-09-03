@@ -320,6 +320,46 @@ class test_CLI_conv_prof(unittest.TestCase):
             os.remove(result)
 
     # add the find_peaks_cwt method
+    def test_pc_conv_cli_set_find_peaks_cwt_full_param(self):
+        # dependant on machine and env
+        executable = r"C:\Users\Jannik\.conda\envs\QCdev\python.exe"
+
+        # denendant on machinene and built
+        cli = r"C:\Users\Jannik\Documents\Uni\Master_Biochem\4_Semester\QCdev\src\i2nca\i2nca\workflows\CLI\profile_2_centroid_cli.py"
+
+        input_dir = get_wdir(r"testdata\pp.imzML")
+        output_dir = get_wdir(r"tempfiles\test_cwt")
+        method = "set_find_peaks_cwt"
+
+
+        # optinal parameters
+        cwt_wid = "8"
+        cwt_gap = "2"
+        cwt_snr = "1"
+        cwt_nper = "10"
+        cwt_win = "1"
+
+        # prepare the command
+        command = [executable, cli,
+                   "--cwt_wid", cwt_wid,
+                   "--cwt_gap", cwt_gap,
+                   "--cwt_snr", cwt_snr,
+                   "--cwt_nper", cwt_nper,
+                   "--cwt_win", cwt_win,
+                   input_dir, output_dir,
+                   method]
+        # run in shell
+        subprocess.run(command)
+
+        # check expected result
+        result = output_dir + "_conv_output_proc_centroid.imzML"
+
+        # assert file building
+        self.assertTrue(os.path.isfile(result))
+
+        # cleanup temp files
+        if delete_output() == True:
+            os.remove(result)
 
 
 class test_CLI_conv_proc_cent(unittest.TestCase):

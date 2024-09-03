@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='i2nca',
-    version='0.3.11',
+    version='0.3.12',
     packages=find_packages(include=['i2nca', 'i2nca.qctools', 'i2nca.convtools', 'i2nca.dependencies', 'i2nca.workflows', 'i2nca.workflows.cli', 'i2nca.tests']),
     entry_points={
         'console_scripts': [

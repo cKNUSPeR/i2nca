@@ -46,6 +46,30 @@ def evaluate_image_corners(ndarray):
 
     return (x_min, x_max), (y_min, y_max)
 
+def make_binary_image(Image):
+    """handler to  create binary images where invalid pixels are set to -1 for better visualization"""
+
+    binary_array = Image.GetMaskArray()[0]
+    binary_array[binary_array == 0] = -1
+
+    return binary_array
+
+def sanizite_image(Image,
+                   img_array,
+                   use_nan=False):
+    """saniziter to get any m2aia 2d image array to have either nan or -1 as empty pixel value"""
+
+    # get a mask from Image for invalid pixels
+    binary_mask= Image.GetMaskArray()[0]
+
+    if use_nan:
+        converted_img = np.array(img_array,dtype=float)
+        converted_img[binary_mask == 0] = np.nan
+        return converted_img
+    else:
+        converted_img = np.array(img_array, dtype=float)
+        converted_img[binary_mask == 0] = -1
+        return converted_img
 
 def make_index_image(Image):
     """handler for creating a valid index image in which invalid pixels get set to -1 to allow better display.
@@ -58,19 +82,34 @@ def make_index_image(Image):
 
 def mask_bad_image(key_list,  # an iterable of valid pixel indices,
                    val_list,  # an iterable of projected Intensities, matched to key_list
-                   image  # An array-like object with the given distribution of key variables
-                   ):
-    """make a mask approach to plot any feature based on mapping onto existing image array with a translation apporach.
-    It transfers pixels from 0 (in binary image input ) to NaN, which allows them to be set to bad"""
-    # set up a translational dictionary
+                   image,  # An array-like object with the given distribution of key variables
+                   use_nan = False  # Whether to use np.NaN for greyed-out pixels
+    ):
+    """Make a mask approach to plot any feature based on mapping onto an existing image array with a translation approach.
+    It transfers pixels from 0 (in binary image input) to NaN (if use_nan is True), which allows them to be set to bad."""
+
+
+    # Set up a translational dictionary
     trans_dict = dict(zip(key_list, val_list))
-    # was once Important zero-index conversion, otherwise rounding gives error
-    trans_dict[-1] = np.nan  # changed for now, lets see what new undefined pixels look like
+
+    if use_nan:
+        # Replace greyed-out pixels (originally 0 in binary image input) with np.NaN
+        mask = (image == -1)
+    else:
+        # was once Important zero-index conversion, otherwise rounding gives error
+        trans_dict[-1] = -1  # changed for now, lets see what new undefined pixels look like
 
     # defines the callable function (juhu, we love functional programming
     translate = np.vectorize(lambda ele: trans_dict.get(ele, ele))
 
-    return translate(image)
+    converted_img = translate(image)
+
+    if use_nan:
+        converted_img = np.array(converted_img,dtype=float)
+        converted_img[mask] = np.nan
+        return converted_img
+    else:
+        return converted_img
 
 
 def calc_accuraciues(found_mz, theo_mz, mask):
@@ -924,13 +963,15 @@ def evaluate_polarity(Image):
     }
 
     try:
-        if metadata["[MS:1000129] spectrum1.negative scan"] == "true":
+        # "[MS:1000129] spectrum1.negative scan" is the ascension for negative
+        if any("MS:1000129" in key for key in metadata) == True:
             polarity_dict["negative"] = True
     except:
         pass
 
     try:
-        if metadata["[MS:1000130] spectrum1.positive scan"] == "true":
+        # "[MS:1000130] spectrum1.positive scan" is the full acsension for positive
+        if any("MS:1000130" in key for key in metadata) == True:
             polarity_dict["positive"] = True
     except:
         pass

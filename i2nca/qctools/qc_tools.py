@@ -35,10 +35,10 @@ def report_agnostic_qc(I,  # m2.imzMLReader (passing by ref allows faster comput
     # get the image limits to crop and display only relevant parts
     x_lims, y_lims = evaluate_image_corners(I.GetMaskArray()[0])
 
-    image_full_binary(I.GetMaskArray()[0],
+    image_full_binary(make_binary_image(I),
                       pdf_pages)
 
-    image_cropped_binary(I.GetMaskArray()[0],
+    image_cropped_binary(make_binary_image(I),
                          pdf_pages, x_lims, y_lims)
 
     image_pixel_index(I.GetIndexArray()[0], I.GetMaskArray()[0],
@@ -274,7 +274,7 @@ def report_regions_qc(I,  # m2.imzMLReader (passing by ref allows faster computa
     # additioally, get unique colors to correspond to the regions (neither white nor black)
 
     # plot the whole binary image
-    image_cropped_binary(I.GetMaskArray()[0],
+    image_cropped_binary(sanizite_image(I, I.GetMaskArray()[0],use_nan=False),
                          pdf_pages, x_lims, y_lims)
 
     # Plot the regions as colored blobs

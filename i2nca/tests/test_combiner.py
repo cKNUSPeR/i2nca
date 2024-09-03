@@ -21,7 +21,7 @@ class TestCombineToolProfile(unittest.TestCase):
         input_data = get_wdir(r"testdata\pp.imzML")
         input_data2 = get_wdir(r"testdata\pp.imzML")
 
-        output = get_wdir(r"tempfiles\pp")
+        output = get_wdir(r"tempfiles\comb_output")
 
         # convert data
         join_datasets_imzml([input_data, input_data2], output)
