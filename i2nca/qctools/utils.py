@@ -963,13 +963,15 @@ def evaluate_polarity(Image):
     }
 
     try:
-        if metadata["[MS:1000129] spectrum1.negative scan"] == "true":
+        # "[MS:1000129] spectrum1.negative scan" is the ascension for negative
+        if any("MS:1000129" in key for key in metadata) == True:
             polarity_dict["negative"] = True
     except:
         pass
 
     try:
-        if metadata["[MS:1000130] spectrum1.positive scan"] == "true":
+        # "[MS:1000130] spectrum1.positive scan" is the full acsension for positive
+        if any("MS:1000130" in key for key in metadata) == True:
             polarity_dict["positive"] = True
     except:
         pass
