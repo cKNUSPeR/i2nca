@@ -97,8 +97,8 @@ class TestAgnosticQC(unittest.TestCase):
 
     def test_agnostic_qc_on_joined_imzml(self):
 
-        input = get_wdir(r"testdata\combined_pc.imzML")
-        output = get_wdir(r"tempfiles\combined_pc")
+        input = get_wdir(r"testdata\joined_file.imzML")
+        output = get_wdir(r"tempfiles\joined_file")
 
         # parse dataset
         I = ImzMLReader(input)
@@ -247,7 +247,7 @@ class TestCalibrantQC(unittest.TestCase):
         # parse dataset
         I = ImzMLReader(input)
         # report QC
-        report_calibrant_qc(I, output, calibrants, 50, 0.33)
+        report_calibrant_qc(I, output, calibrants, 50, 1)
 
         # expected result
         result = output + "_calibrant_QC.pdf"
@@ -287,7 +287,7 @@ class TestCalibrantQC(unittest.TestCase):
         # parse dataset
         I = ImzMLReader(input)
         # report QC
-        report_calibrant_qc(I, output, calibrants, 50, 1.0)
+        report_calibrant_qc(I, output, calibrants, 50, 0.33)
 
         # expected result
         result = output + "_calibrant_QC.pdf"
@@ -321,8 +321,8 @@ class TestRegionQC(unittest.TestCase):
             os.remove(result)
 
     def test_region_qc_on_cc_imzml_with_anno(self):
-        input = get_wdir(r"testdata\cc.imzML")
-        output = get_wdir(r"tempfiles\cc_w_anno")
+        input = get_wdir(r"testdata\pp.imzML")
+        output = get_wdir(r"tempfiles\pp_w_anno")
         region_file = get_wdir(r"testdata\regions.tsv")
 
         # parse dataset

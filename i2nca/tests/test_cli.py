@@ -333,17 +333,19 @@ class test_CLI_conv_prof(unittest.TestCase):
 
 
         # optinal parameters
-        cwt_wid = "8"
-        cwt_gap = "2"
-        cwt_snr = "1"
-        cwt_nper = "10"
-        cwt_win = "1"
+        cwt_wid = "8.0"
+        #cwt_gap = "2.0"
+        #cwt_mlen = "3"
+        cwt_snr = "3.5"
+        cwt_nper = "10.0"
+        cwt_win = "20"
 
         # prepare the command
         command = [executable, cli,
                    "--cwt_wid", cwt_wid,
-                   "--cwt_gap", cwt_gap,
+                   #"--cwt_gap", cwt_gap,
                    "--cwt_snr", cwt_snr,
+                   #"--cwt_mlen", cwt_mlen,
                    "--cwt_nper", cwt_nper,
                    "--cwt_win", cwt_win,
                    input_dir, output_dir,
