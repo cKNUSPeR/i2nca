@@ -5,15 +5,23 @@ i2nca is a Mass Spectrometry <ins>I</ins>maging <ins>IN</ins>teractive  <ins>C</
 # Installation:
 i2nca is distributed through a number of channels. The builds of i2nca are plattform-independent and testes on Linux and Windows.
 
-Install it with pip  via:
+### Install for Python envs
+
+Install i2nca with pip from the Pypi repository via:
 ```
 pip install i2nca
 ```
-or via the bioconda channel
+
+
+### Install within a container
+To get a docker container with i2nca installed, use the biocontainer. Pull this docker with
 ```
-currently on the way
+docker pull biocontainers/i2nca
 ```
-or for dev use, install the provided conda recipe and use the pip+github install
+
+
+### Install from github
+For development use, install i2nca from github using the provided conda recipe (and use the pip+github install)
 ```
 conda env create -n env_name -f path\to\file\...\conda_recipe.yml
 conda activate env_name
