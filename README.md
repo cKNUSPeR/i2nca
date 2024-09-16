@@ -7,7 +7,7 @@ i2nca is available for a number of different applications.
 Choose among the following installation depending on what solution suits best.
 The builds of i2nca are plattform-independent and testes on Linux and Windows. 
 
-## Installation into conda env (recomended)
+### Installation into conda env (recommended)
 
 To use i2nca from a Python enviroment, it is recommended to set up a virtual enviroment (like conda or venv).
 
@@ -38,7 +38,7 @@ pip install jupyter
 ```
 
 
-## Simple Installation with pip
+### Simple Installation with pip
 
 I2nca is pip-installable with:
 ```
@@ -47,8 +47,8 @@ pip install i2nca
 However, installation into a virtual env is recommended.
 
 
-## Install within a container
-To get a docker container with i2nca installed, use the biocontainer. Pull this docker with
+### Installation with docker
+Biocontainers offers a docker container for i2nca. Pull this docker with
 ```
 docker pull biocontainers/i2nca
 ```
