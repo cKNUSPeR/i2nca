@@ -54,7 +54,7 @@ docker pull biocontainers/i2nca
 ```
 
 
-## Install from github
+### Install from github
 For development use, install i2nca from github using the provided conda recipe (and use the pip+github install)
 ```
 conda env create -n env_name -f path\to\file\...\conda_recipe.yml
@@ -83,6 +83,24 @@ To install these tools, follow these steps:
 conda install git
 pip uninstall i2nca
 pip install git+https://github.com/cKNUSPeR/i2nca.git@brukertools
+```
+
+# First steps
+
+
+Checkout the jupyter notebooks on this page for a gentle introduction into the capabilities of i2nca.
+Find them in the [GitHub repo](https://github.com/cKNUSPeR/i2nca) 
+
+# Command line interface
+
+Run within a terminal that has access to i2nca the following comamnd to test the registration of the CLI:
+```
+i2nca_version
+```
+
+
+
+
 ```
 
 
