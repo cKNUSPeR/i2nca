@@ -72,18 +72,29 @@ pip install i2nca@git+https://github.com/cKNUSPeR/i2nca.git
 
 i2nca features tools that access the Bruker propietary formats for MSI data (.tsf and .tdf). These need the additional TDF-SKD distributed by Bruker.
 To install these tools, follow these steps:
-1) Get the TDF-SKD from Bruker (distributed for free at [Bruker](https://www.bruker.com/en/services/software-downloads.html))
-2) Install i2nca into a virtual env (like a conda env)
-3) Copy the files timsdata.dll and timsdata.lib from the TDF-SDK and place them at the level of the python executable of the env.
-4) Install git into the env
-5) Uninstall i2nca
-6) Reinstall into the env
 
-```
-conda install git
-pip uninstall i2nca
-pip install git+https://github.com/cKNUSPeR/i2nca.git@brukertools
-```
+1) Install i2nca into a virtual env (like a conda env)
+2) Get the TDF-SKD from Bruker (distributed for free at [Bruker](https://www.bruker.com/en/services/software-downloads.html))
+3) Copy the files timsdata.dll and timsdata.lib from the TDF-SDK and place them at the level of the python executable of the env.
+    To find out where the python executable is located, run this command in the conda env:
+     ```
+     where python
+     ```
+4) Uninstall i2nca
+   Uninstall i2nca with pip via:
+     ```
+     pip uninstall i2nca
+     ```
+6) Install git into the env
+   Install git with conda or pip via:
+     ```
+     conda install git
+     ```
+
+9) Reinstall into the env
+    ```
+    pip install git+https://github.com/cKNUSPeR/i2nca.git@brukertools
+    ```
 
 # First steps
 
